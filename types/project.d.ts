@@ -1,15 +1,5 @@
-interface Category {
-  id: string;
-  name: string;
-  project: Project[];
-}
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  projects: Project[];
-}
+import { Category } from "./category.d";
+import { Skill } from "./skill.d";
 
 export interface Project {
   id: string;
@@ -21,7 +11,7 @@ export interface Project {
   zipCode: number;
   state: string;
   principal: string;
-  compensation: string;
+  compensation?: string;
   isActive: boolean;
   skills: Skill[];
   startingAt: Date;
