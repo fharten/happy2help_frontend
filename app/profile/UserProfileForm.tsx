@@ -166,7 +166,7 @@ const UserProfileForm = ({ userId }: { userId: string }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 mb-80'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
         {/* FIRST NAME */}
         <FormField
           control={form.control}
