@@ -22,19 +22,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-interface Ngo {
+interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   image: string;
-  isNonProfit: boolean;
-  industry: string[];
-  streetAndNumber: string;
+  contactEmail?: string;
+  phone?: string;
+  skills: string[];
+  ngoMemberships: string[];
+  yearOfBirth?: number;
   zipCode: number;
   city: string;
   state: string;
-  principal: string;
-  contactEmail?: string;
-  phone?: string;
   isActivated: boolean;
   isDisabled: boolean;
   createdAt: Date;
@@ -42,28 +42,23 @@ interface Ngo {
 }
 
 const formSchema = z.object({
-  name: z
+  firstName: z
     .string()
-    .min(2, { message: 'Vereinsname muss mindestens 2 Zeichen lang sein.' }),
+    .min(2, { message: 'Vorname muss mindestens 2 Zeichen lang sein.' }),
+  lastName: z
+    .string()
+    .min(2, { message: 'Vorname muss mindestens 2 Zeichen lang sein.' }),
   image: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  principal: z
-    .string()
-    .min(2, {
-      message: 'Name des Vorstands muss mindestens 2 Zeichen lang sein.',
-    })
-    .includes(' ', { message: 'Bitte Vor- und Nachnamen angeben.' }),
   contactEmail: z
     .email({ message: 'Ungültige E-Mail-Adresse.' })
     .optional()
     .or(z.literal('')),
-
   phone: z.string().optional(),
-  industry: z
+  skills: z
     .array(z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }))
-    .min(1, { message: 'Mindestens ein Tätigkeitsfeld angeben.' }),
-  streetAndNumber: z
-    .string()
-    .min(1, { message: 'Dieses Feld ist verpflichtend.' }),
+    .min(1, { message: 'Mindestens einen Skill angeben.' }),
+  ngoMemberships: z.array(z.string()).optional(),
+  yearOfBirth: z.number().optional(),
   zipCode: z.number().int().gte(10000).lte(99999).optional(),
   city: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
   state: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
@@ -89,24 +84,25 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
+const UserProfileForm = ({ userId }: { userId: string }) => {
   const router = useRouter();
 
-  const { data, isLoading, isValidating, error } = useSWR<{ data: Ngo }>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}`,
+  const { data, isLoading, isValidating, error } = useSWR<{ data: User }>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}`,
     fetcher,
   );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       image: '',
-      principal: '',
       contactEmail: '',
       phone: '',
-      industry: [],
-      streetAndNumber: '',
+      yearOfBirth: undefined,
+      skills: [],
+      ngoMemberships: [],
       zipCode: undefined,
       city: '',
       state: '',
@@ -117,24 +113,28 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
 
   useEffect(() => {
     if (!data?.data) return;
-    const ngo = data.data;
+    const user = data.data;
 
     form.reset({
-      name: ngo.name ?? '',
-      image: ngo.image ?? '',
-      principal: ngo.principal ?? '',
-      contactEmail: ngo.contactEmail ?? '',
-      phone: ngo.phone ?? '',
-      industry: Array.isArray(ngo.industry) ? ngo.industry : [],
-      streetAndNumber: ngo.streetAndNumber ?? '',
-      zipCode: typeof ngo.zipCode === 'number' ? ngo.zipCode : undefined,
-      city: ngo.city ?? '',
-      state: ngo.state ?? '',
-      isDisabled: !!ngo.isDisabled,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      image: user.image ?? '',
+      contactEmail: user.contactEmail ?? '',
+      phone: user.phone ?? '',
+      yearOfBirth: user.yearOfBirth ?? undefined,
+      skills: Array.isArray(user.skills) ? user.skills : [],
+      ngoMemberships: Array.isArray(user.ngoMemberships)
+        ? user.ngoMemberships
+        : [],
+      zipCode: typeof user.zipCode === 'number' ? user.zipCode : undefined,
+      city: user.city ?? '',
+      state: user.state ?? '',
+      isDisabled: !!user.isDisabled,
     });
   }, [data, form]);
 
   const onSubmit = async (values: FormValues) => {
+    console.log('first');
     try {
       const submitData = {
         ...values,
@@ -143,7 +143,7 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
       };
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -151,9 +151,11 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
         },
       );
 
+      console.log(res);
+
       if (!res.ok) throw new Error(`Update failed with status ${res.status}`);
 
-      router.push(`/ngos/${ngoId}`);
+      router.push(`/users/${userId}`);
     } catch (err) {
       console.error('An error occurred:', err);
     }
@@ -164,14 +166,29 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-        {/* NAME */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 mb-80'>
+        {/* FIRST NAME */}
         <FormField
           control={form.control}
-          name='name'
+          name='firstName'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Vereinsname</FormLabel>
+              <FormLabel>Vorname</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* LAST NAME */}
+        <FormField
+          control={form.control}
+          name='lastName'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nachname</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -191,21 +208,6 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
                 <Input {...field} />
               </FormControl>
               <FormDescription>Link zum Vereinslogo.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* PRINCIPALE */}
-        <FormField
-          control={form.control}
-          name='principal'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Vorstand</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -246,16 +248,32 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
           )}
         />
 
-        {/* INDUSTRY */}
+        {/* YEAR OF BIRTH */}
         <FormField
           control={form.control}
-          name='industry'
+          name='yearOfBirth'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tätigkeitsfelder</FormLabel>
+              <FormLabel>Geburtsjahr</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ''} />
+              </FormControl>
+              <FormDescription>Optional.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* SKILLS */}
+        <FormField
+          control={form.control}
+          name='skills'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fähigkeiten</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='Energie, Sport, Kinder, Diversität,...'
+                  placeholder='Kamera, Bühnenbau, Gitarre,...'
                   value={field.value?.join(', ') ?? ''}
                   onChange={(e) => {
                     const raw = e.target.value;
@@ -268,24 +286,36 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
                 />
               </FormControl>
               <FormDescription>
-                Bitte Tätigkeitsfelder getrennt von Kommata eingeben.
+                Bitte Skills getrennt von Kommata eingeben.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* ADDRESS*/}
+        {/* NGO MEMBERSHIPS */}
         <FormField
           control={form.control}
-          name='streetAndNumber'
+          name='ngoMemberships'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Anschrift</FormLabel>
+              <FormLabel>Mitgliedschaften bei Vereinen</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  value={field.value?.join(', ') ?? ''}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const arr = raw
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0);
+                    field.onChange(arr);
+                  }}
+                />
               </FormControl>
-              <FormDescription>Straße und Hausnummer</FormDescription>
+              <FormDescription>
+                Optional. Bitte Vereine getrennt von Kommata eingeben.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -315,7 +345,7 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
                     }
                   }}
                   onKeyDown={(e) => {
-                    // Allow: navigation and editing keys
+                    // ALLOW: navigation and editing keys
                     const allowedKeys = [
                       'Backspace',
                       'Delete',
@@ -330,7 +360,7 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
                       'ArrowUp',
                     ];
 
-                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    // ALLOW: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
                     if (
                       (e.ctrlKey || e.metaKey) &&
                       ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())
@@ -338,12 +368,12 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
                       return;
                     }
 
-                    // Allow navigation and editing keys
+                    // ALLOW navigation and editing keys
                     if (allowedKeys.includes(e.key)) {
                       return;
                     }
 
-                    // Allow only numbers (0-9)
+                    // ALLOW only numbers (0-9)
                     if (!/^[0-9]$/.test(e.key)) {
                       e.preventDefault();
                     }
@@ -391,15 +421,17 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
           name='isDisabled'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Verein vorübergehend deaktivieren?</FormLabel>
+              <FormLabel>Konto vorübergehend deaktivieren?</FormLabel>
               <FormControl>
                 <Switch
-                  id='disable-ngo'
+                  id='disable-user'
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <Label htmlFor='disable-ngo'>{field.value ? 'Ja' : 'Nein'}</Label>
+              <Label htmlFor='disable-user'>
+                {field.value ? 'Ja' : 'Nein'}
+              </Label>
               <FormMessage />
             </FormItem>
           )}
@@ -415,4 +447,4 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
   );
 };
 
-export default NgoProfileForm;
+export default UserProfileForm;
