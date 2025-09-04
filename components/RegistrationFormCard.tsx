@@ -47,9 +47,6 @@ const RegistrationFormCard = ({ entity }: { entity: "user" | "ngo" }) => {
       };
     }
 
-    console.log("Sending to:", url);
-    console.log("Body:", JSON.stringify(body, null, 2)); // Debug log
-
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
