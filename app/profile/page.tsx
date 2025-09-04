@@ -1,7 +1,12 @@
-import React from "react";
+import React from 'react';
+import NgoProfileForm from './NgoProfileForm';
 
 const ProfilePage = () => {
-  return <div>ProfilePage</div>;
+  return (
+    <>
+      <NgoProfileForm />
+    </>
+  );
 };
 
 export default ProfilePage;
