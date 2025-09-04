@@ -14,12 +14,10 @@ interface ProjectProps {
 }
 
 export default function ProjectCard({ project }: ProjectProps) {
-  let image = project.images[0];
-  let categoryName = "";
-  if (project.categories) {
-    categoryName = project.categories[0].name;
-  }
-  let item = project.categories[0];
+  let image = project.images.length > 0 ? project.images[0] : "";
+  let categoryName =
+    project.categories.length > 0 ? project.categories[0].name : "";
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
