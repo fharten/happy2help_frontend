@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Category {
   id: string;
@@ -162,21 +163,14 @@ const ProjectDetailPage = () => {
           </div>
         </div>
 
-        {/* Zurück-Link */}
-        <Link
-          href={parentUrl}
-          className="mt-6 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 inline-block"
-        >
-          Zurück zur Übersicht
-        </Link>
-
-        {/* Bewerben-Button */}
-        <button
-          className="ml-4 mt-6 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 inline-block"
-          onClick={() => alert("Bewerbung abgeschickt!")}
-        >
-          Bewerben
-        </button>
+        <div className="flex gap-4 mt-6">
+          <Link href={parentUrl}>
+            <Button variant="secondary">Zurück zur Übersicht</Button>
+          </Link>
+          <Button className="" onClick={() => alert("Bewerbung abgeschickt!")}>
+            Bewerben
+          </Button>
+        </div>
 
         {isValidating && (
           <span className="ml-4 text-gray-400">Lädt neu...</span>
