@@ -1,7 +1,12 @@
 import React from "react";
+import Projects from "./Projects";
 
 const ListingPage = () => {
-  return <div>ListingPage</div>;
+  return (
+    <div>
+      <Projects />
+    </div>
+  );
 };
 
 export default ListingPage;
