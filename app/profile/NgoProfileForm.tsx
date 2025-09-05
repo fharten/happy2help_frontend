@@ -196,7 +196,7 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
           )}
         />
 
-        {/* PRINCIPALE */}
+        {/* PRINCIPAL */}
         <FormField
           control={form.control}
           name='principal'
