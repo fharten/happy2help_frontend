@@ -4,5 +4,4 @@ interface Skill {
   id: string;
   name: string;
   description: string;
-  projects: Project[];
 }
