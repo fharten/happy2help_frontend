@@ -27,7 +27,7 @@ export default function ProjectCard({ project }: ProjectProps) {
       <CardContent>
         <Image
           src={`/images/projects/${image}`}
-          alt="Projektbild"
+          alt={`Bild vom Projekt ${project.name}`}
           width="500"
           height="300"
           sizes="(max-width: 640px) 100vw, 900px"

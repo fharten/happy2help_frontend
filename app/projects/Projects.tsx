@@ -19,6 +19,8 @@ export default function Projects() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load projects</div>;
 
+  if (!data?.data) return <></>;
+
   const projects = data.data;
 
   return (
