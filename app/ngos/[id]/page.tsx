@@ -1,7 +1,12 @@
 import React from "react";
+import NgoInfo from "./NgoInfo";
 
 const NgosDetailPage = () => {
-  return <div>NgosDetailPage</div>;
+  return (
+    <div>
+      <NgoInfo />
+    </div>
+  );
 };
 
 export default NgosDetailPage;
