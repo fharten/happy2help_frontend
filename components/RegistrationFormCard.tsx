@@ -9,7 +9,6 @@ import { Toaster } from "./ui/sonner";
 import { toast } from "sonner";
 
 interface UserRegistrationBody {
-  name: string;
   email: string;
   password: string;
 }
@@ -31,14 +30,15 @@ const RegistrationFormCard = ({ entity }: { entity: "user" | "ngo" }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     let url = "";
     let body: RegistrationBody;
 
     if (entity === "user") {
-      url = `http://localhost:3333/api/auth/users/register`;
-      body = { name, email, password };
+      url = `${baseUrl}/api/auth/users/register`;
+      body = { email, password };
     } else {
-      url = `http://localhost:3333/api/auth/ngos/register`;
+      url = `${baseUrl}/api/auth/ngos/register`;
       body = {
         name,
         email,
@@ -70,19 +70,6 @@ const RegistrationFormCard = ({ entity }: { entity: "user" | "ngo" }) => {
       <CardContent>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
-            {entity === "user" && (
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Max Mustermann"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
             {entity === "ngo" && (
               <>
                 <div className="grid gap-2">
