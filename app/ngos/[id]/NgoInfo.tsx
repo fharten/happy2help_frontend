@@ -13,7 +13,7 @@ import {
 import Image from "next/image";
 import AddressCard from "./AddressCard";
 import ContactCard from "./ContactCard";
-import IndustryCard from "../IndustryCard";
+import IndustryCard from "./IndustryCard";
 
 // Fetcher function
 const fetcher = async (url: string) =>
