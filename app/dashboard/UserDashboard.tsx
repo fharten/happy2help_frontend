@@ -2,7 +2,6 @@
 
 import useSWR from 'swr';
 import DashboardBar from './DasboardBar';
-import { Projects } from '@/types/project';
 import UserProjectsApplicationsTable from './UserProjectsApplicationsTable';
 import { Applications } from '@/types/application';
 
