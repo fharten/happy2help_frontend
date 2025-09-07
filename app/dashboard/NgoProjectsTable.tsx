@@ -17,6 +17,7 @@ import {
 import { Projects } from '@/types/project';
 import { EllipsisVertical } from 'lucide-react';
 import { DateTime } from 'luxon';
+import Link from 'next/link';
 
 const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
   return (
@@ -58,7 +59,7 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
                   .toFormat('dd.LL.yyyy')}
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
-                {project.name}
+                <Link href={`/projects/${project.id}`}>{project.name}</Link>
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
                 {project.skills.map((s) => s.name).join(', ')}

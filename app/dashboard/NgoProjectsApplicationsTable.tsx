@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Applications } from '@/types/application';
 import { CircleCheck, CircleX, EllipsisVertical, Loader } from 'lucide-react';
+import Link from 'next/link';
 
 const NgoProjectsApplicationsTable = ({
   applications,
@@ -47,13 +48,17 @@ const NgoProjectsApplicationsTable = ({
           {applications.map((application) => (
             <TableRow key={application.id}>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
-                {application.user.firstName} {application.user.lastName}
+                <Link href={`/users/${application.userId}`}>
+                  {application.user.firstName} {application.user.lastName}
+                </Link>
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
                 {application.skills.map((s) => s.name).join(', ')}
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
-                {application.project.name}
+                <Link href={`/projects/${application.projectId}`}>
+                  {application.project.name}
+                </Link>
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
                 <Badge
