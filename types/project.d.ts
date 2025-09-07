@@ -1,9 +1,11 @@
-import { Category } from "./category.d";
-import { Skill } from "./skill.d";
+import { Category } from './category.d';
+import { Ngo } from './ngo';
+import { Skill } from './skill.d';
 
 export interface Project {
   id: string;
   name: string;
+  ngo: Ngo;
   description: string;
   images: string[];
   categories: Category[];
@@ -17,3 +19,5 @@ export interface Project {
   startingAt: Date;
   endingAt: Date;
 }
+
+export type Projects = Project[];

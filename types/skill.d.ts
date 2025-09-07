@@ -1,7 +1,7 @@
-import { Project } from "./project.d";
-
-interface Skill {
+export interface Skill {
   id: string;
   name: string;
   description: string;
 }
+
+export type Skills = Skill[];
