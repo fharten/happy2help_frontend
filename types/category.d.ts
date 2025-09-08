@@ -1,6 +1,6 @@
-import { Project } from "./project.d";
-
-interface Category {
+export interface Category {
   id: string;
   name: string;
 }
+
+export type Categories = Category[];

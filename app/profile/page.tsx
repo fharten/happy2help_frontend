@@ -2,13 +2,13 @@ import React from 'react';
 import NgoProfileForm from './NgoProfileForm';
 import UserProfileForm from './UserProfileForm';
 
-const ProfilePage = ({ entity = 'user' }) => {
+const ProfilePage = ({ entity = 'ngo' }) => {
   return (
     <>
       {entity === 'user' ? (
-        <UserProfileForm userId='eacf848a-d5bc-48c7-864d-a43688404938' />
+        <UserProfileForm userId='80feec7c-dc9f-498d-ab93-4d8a434f6e33' />
       ) : (
-        <NgoProfileForm ngoId='9f8f3507-ab92-4511-b3e4-48a838b12965' />
+        <NgoProfileForm ngoId='8604ce87-0656-4284-9200-3f1732a33cc2' />
       )}
     </>
   );
