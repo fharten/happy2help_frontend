@@ -29,9 +29,7 @@ export default function Projects() {
         {projects &&
           projects.map((project: Project) => (
             <li key={project.id}>
-              <Link href={`/projects/${project.id}`}>
-                <ProjectCard project={project} />
-              </Link>
+              <ProjectCard project={project} />
             </li>
           ))}
       </ul>
