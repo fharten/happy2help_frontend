@@ -2,7 +2,6 @@
 
 import React from "react";
 import useSWR from "swr";
-import Link from "next/link";
 import ProjectCard from "./ProjectCard";
 import { Project } from "@/types/project.d";
 
