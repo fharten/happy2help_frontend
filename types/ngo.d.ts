@@ -16,3 +16,5 @@ export interface Ngo {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type Ngos = Ngo[];
