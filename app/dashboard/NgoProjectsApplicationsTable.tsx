@@ -14,12 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DateTime } from 'luxon';
 import { Applications } from '@/types/application';
 import { CircleCheck, CircleX, EllipsisVertical, Loader } from 'lucide-react';
 import Link from 'next/link';
 
-const UserProjectsApplicationsTable = ({
+const NgoProjectsApplicationsTable = ({
   applications,
 }: {
   applications: Applications;
@@ -31,10 +30,7 @@ const UserProjectsApplicationsTable = ({
         <TableHeader>
           <TableRow>
             <TableHead className='px-4 py-2 text-left whitespace-nowrap'>
-              Start
-            </TableHead>
-            <TableHead className='px-4 py-2 text-left whitespace-nowrap'>
-              Verein
+              Nutzer
             </TableHead>
             <TableHead className='px-4 py-2 text-left whitespace-nowrap'>
               Skills
@@ -51,23 +47,9 @@ const UserProjectsApplicationsTable = ({
         <TableBody>
           {applications.map((application) => (
             <TableRow key={application.id}>
-              <TableCell className='px-4 py-2 whitespace-nowrap hidden md:block'>
-                {DateTime.fromISO(String(application.project.startingAt), {
-                  zone: 'utc',
-                })
-                  .setZone('Europe/Berlin')
-                  .toFormat('dd.LL.yyyy')}
-              </TableCell>
-              <TableCell className='px-4 py-2 whitespace-nowrap md:hidden'>
-                {DateTime.fromISO(String(application.project.startingAt), {
-                  zone: 'utc',
-                })
-                  .setZone('Europe/Berlin')
-                  .toFormat('dd.LL.')}
-              </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
-                <Link href={`/ngos/${application.ngo.id}`}>
-                  {application.ngo.name}
+                <Link href={`/users/${application.userId}`}>
+                  {application.user.firstName} {application.user.lastName}
                 </Link>
               </TableCell>
               <TableCell className='px-4 py-2 whitespace-nowrap'>
@@ -99,22 +81,23 @@ const UserProjectsApplicationsTable = ({
                   )}
                 </Badge>
               </TableCell>
-              {application.status !== 'rejected' && (
-                <TableCell className='px-4 py-2 whitespace-nowrap'>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Badge variant='outline' className='py-1.5'>
-                        <EllipsisVertical />
-                      </Badge>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem className='text-red-500 dark:text-red-400 focus:bg-red-200 focus:text-red-500'>
-                        Anfrage zurückziehen
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              )}
+              <TableCell className='px-4 py-2 whitespace-nowrap'>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Badge variant='outline' className='py-1.5'>
+                      <EllipsisVertical />
+                    </Badge>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {/* <DropdownMenuLabel>Bearbeiten</DropdownMenuLabel>
+                    <DropdownMenuSeparator /> */}
+                    <DropdownMenuItem>Akzeptieren</DropdownMenuItem>
+                    <DropdownMenuItem className='text-red-500 dark:text-red-400 focus:bg-red-200 focus:text-red-500'>
+                      Ablehnen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -123,4 +106,4 @@ const UserProjectsApplicationsTable = ({
   );
 };
 
-export default UserProjectsApplicationsTable;
+export default NgoProjectsApplicationsTable;
