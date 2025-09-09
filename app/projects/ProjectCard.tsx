@@ -14,8 +14,8 @@ interface ProjectProps {
 }
 
 export default function ProjectCard({ project }: ProjectProps) {
-  let image = project.images.length > 0 ? project.images[0] : "";
-  let categoryName =
+  const image = project.images.length > 0 ? project.images[0] : "";
+  const categoryName =
     project.categories.length > 0 ? project.categories[0].name : "";
 
   return (
