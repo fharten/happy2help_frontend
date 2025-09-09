@@ -11,9 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-import AddressCard from "./AddressCard";
-import ContactCard from "./ContactCard";
-import IndustryCard from "./IndustryCard";
+import { Projects } from "@/types/project";
+import Link from "next/link";
 
 // Fetcher function
 const fetcher = async (url: string) =>
@@ -21,19 +20,35 @@ const fetcher = async (url: string) =>
 
 export default function NgoInfo() {
   const { id } = useParams();
-
-  const { data, error, isLoading } = useSWR(
+  // get NGO information
+  const {
+    data: ngoData,
+    isLoading: isNgoLoading,
+    error: errorNgo,
+  } = useSWR(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
     fetcher
   );
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Failed to load projects</div>;
+  // get projects of the NGO
+  const {
+    data: projectsData,
+    isLoading: isLoadingProjects,
+    error: errorProjects,
+  } = useSWR<{
+    data: { projects: Projects };
+  }>(`${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects`, fetcher);
 
-  if (!data?.data) return <>NGO Seite nicht gefunden</>;
+  // Loading ...
+  if (isNgoLoading || isLoadingProjects || !ngoData || !projectsData)
+    return <div>Loading...</div>;
 
-  const ngo = data.data;
+  // Error
+  if (errorNgo || errorProjects) return <div>Failed to load NGO data</div>;
 
+  // Success
+  const ngo = ngoData.data;
+  const projects = projectsData.data.projects;
   const image = ngo.image ? ngo.image : "logo_happy2help.jpg";
 
   const npoString = ngo.isNonProfit
@@ -60,10 +75,41 @@ export default function NgoInfo() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <IndustryCard industry={ngo.industry} />
-        <AddressCard ngo={ngo} />
-        <ContactCard ngo={ngo} />
-        <div>{registeredString}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div>
+            <h2 className="font-semibold">Projects:</h2>
+            <ul>
+              {projects &&
+                projects.map((project) => (
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    {project.name}
+                  </Link>
+                ))}
+            </ul>
+          </div>
+          <div>
+            <h2 className="font-semibold">Bereiche:</h2>
+            <ul>
+              {ngo.industry &&
+                ngo.industry.map((area: string) => <li key={area}>{area}</li>)}
+            </ul>
+          </div>
+          <div>
+            <h2 className="font-semibold">Adresse:</h2>
+            <div>{ngo.name}</div>
+            <div>{ngo.streetAndNumber}</div>
+            <div>
+              {ngo.zipCode} {ngo.city}
+            </div>
+          </div>
+          <div>
+            <h2 className="font-semibold">Kontakt:</h2>
+            <div>{ngo.principal} (Vorstand)</div>
+            {ngo.contactEmail && <div>{ngo.contactEmail}</div>}
+            {ngo.phone && <div>{ngo.phone}</div>}
+          </div>
+          <div>{registeredString}</div>
+        </div>
       </CardContent>
     </Card>
   );
