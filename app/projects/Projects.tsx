@@ -2,7 +2,6 @@
 
 import React from "react";
 import useSWR from "swr";
-import Link from "next/link";
 import ProjectCard from "./ProjectCard";
 import { Project } from "@/types/project.d";
 
@@ -29,9 +28,7 @@ export default function Projects() {
         {projects &&
           projects.map((project: Project) => (
             <li key={project.id}>
-              <Link href={`/projects/${project.id}`}>
-                <ProjectCard project={project} />
-              </Link>
+              <ProjectCard project={project} />
             </li>
           ))}
       </ul>
