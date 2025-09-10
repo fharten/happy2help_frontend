@@ -37,7 +37,10 @@ export default function NgoInfo() {
     error: errorProjects,
   } = useSWR<{
     data: { projects: Projects };
-  }>(`${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects`, fetcher);
+  }>(
+    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
+    fetcher
+  );
 
   // Loading ...
   if (isNgoLoading || isLoadingProjects || !ngoData || !projectsData)
@@ -77,7 +80,7 @@ export default function NgoInfo() {
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div>
-            <h2 className="font-semibold">Projects:</h2>
+            <h2 className="font-semibold">Projekte:</h2>
             <ul>
               {projects &&
                 projects.map((project) => (
