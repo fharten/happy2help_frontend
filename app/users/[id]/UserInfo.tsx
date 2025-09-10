@@ -38,7 +38,10 @@ export default function UserInfo() {
     error: errorProjects,
   } = useSWR<{
     data: { projects: Projects };
-  }>(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}/projects`, fetcher);
+  }>(
+    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}/projects` : null,
+    fetcher
+  );
 
   // Loading ...
   if (isUserLoading || isLoadingProjects || !userData || !projectsData)
