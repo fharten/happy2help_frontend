@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, LayoutDashboard, Pencil, Scroll } from "lucide-react";
+import { House, LayoutDashboard, Pencil, Scroll, Bell } from "lucide-react";
 
 const LogoRight = "/images/h2h_logo_mint.png";
 
@@ -13,98 +13,80 @@ const Header = () => {
   return (
     <>
       {/* DESKTOP & MOBILE TOP BAR */}
-      <header className="bg-white pt-8 pb-4 lg:pb-4">
-        <nav aria-label="Main navigation" className="px-8">
+      <header className="bg-white pt-4 pb-3 lg:pt-6 lg:pb-4">
+        <nav aria-label="Main navigation" className="px-4 lg:px-8">
           <div className="flex justify-between items-center">
             {/* LOGO TEXT */}
-            <div className="flex items-center gap-6">
-              <span className="text-4xl font-extrabold text-black select-none tracking-tight drop-shadow-sm">
+            <div className="flex items-center gap-3 lg:gap-6">
+              <span className="text-xl lg:text-3xl font-bold text-black select-none tracking-tight">
                 Happy<span className="text-mint">2Help</span>
               </span>
             </div>
 
-            {/* DESKTOP NAVIGATION PILL - versteckt auf mobil */}
-            <div className="hidden lg:flex items-center bg-light-mint/80 rounded-full px-16 py-2 shadow-md">
+            {/* DESKTOP NAVIGATION PILL */}
+            <div className="hidden xl:flex items-center bg-light-mint/90 backdrop-blur-xl rounded-full px-2 py-2 shadow-xl gap-6">
               <Link
                 href={"/"}
-                className={`flex items-center gap-2 px-8 py-1 text-base hover:bg-white/40 transition-colors ${
+                className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
                   pathname === "/"
-                    ? "text-prussian font-bold"
-                    : "text-prussian/60 font-normal"
+                    ? "bg-white/60 text-prussian font-semibold shadow-lg"
+                    : "text-prussian/70 hover:text-prussian hover:bg-white/30"
                 }`}
               >
-                <House size={18} />
+                <House size={18} strokeWidth={2.5} />
                 Homepage
               </Link>
               <Link
                 href={"/dashboard"}
-                className={`flex items-center gap-2 px-8 py-1 text-base hover:bg-white/40 transition-colors ${
+                className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
                   pathname === "/dashboard"
-                    ? "text-prussian font-bold"
-                    : "text-prussian/60 font-normal"
+                    ? "bg-white/60 text-prussian font-semibold shadow-lg"
+                    : "text-prussian/70 hover:text-prussian hover:bg-white/30"
                 }`}
               >
-                <LayoutDashboard size={18} />
+                <LayoutDashboard size={18} strokeWidth={2.5} />
                 Dashboard
               </Link>
               <Link
                 href={"/projects/edit"}
-                className={`flex items-center gap-2 px-8 py-1 text-base hover:bg-white/40 transition-colors ${
+                className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
                   pathname.startsWith("/projects/edit")
-                    ? "text-prussian font-bold"
-                    : "text-prussian/60 font-normal"
+                    ? "bg-white/60 text-prussian font-semibold shadow-lg"
+                    : "text-prussian/70 hover:text-prussian hover:bg-white/30"
                 }`}
               >
-                <Pencil size={18} />
+                <Pencil size={18} strokeWidth={2.5} />
                 Edit Project
               </Link>
               <Link
                 href={"/projects"}
-                className={`flex items-center gap-2 px-8 py-1 text-base hover:bg-white/40 transition-colors ${
+                className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
                   pathname === "/projects"
-                    ? "text-prussian font-bold"
-                    : "text-prussian/60 font-normal"
+                    ? "bg-white/60 text-prussian font-semibold shadow-lg"
+                    : "text-prussian/70 hover:text-prussian hover:bg-white/30"
                 }`}
               >
-                <Scroll size={18} />
+                <Scroll size={18} strokeWidth={2.5} />
                 Projects
               </Link>
             </div>
 
             {/* NOTIFICATION ICON & LOGO */}
-            <div className="flex items-center gap-4">
-              <button className="p-3 rounded-full hover:bg-seasalt transition-colors">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="text-prussian"
-                >
-                  <path
-                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M13.73 21a2 2 0 0 1-3.46 0"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+            <div className="flex items-center gap-2 lg:gap-3">
+              <button className="p-2 lg:p-2.5 rounded-full hover:bg-gray-100/60 transition-all duration-200">
+                <Bell size={20} strokeWidth={2} className="text-prussian/70" />
               </button>
 
               {/* LOGO RECHTS */}
-              <Link href={"/"}>
+              <Link
+                href={"/"}
+                className="rounded-lg hover:bg-gray-100/60 transition-all duration-200 p-1"
+              >
                 <Image
                   src={LogoRight}
-                  height={40}
-                  width={40}
-                  className="h-10 w-10 rounded-full object-cover"
+                  height={32}
+                  width={32}
+                  className="h-7 w-7 lg:h-8 lg:w-8 rounded-md object-cover"
                   alt="happy2help logo"
                 />
               </Link>
@@ -113,55 +95,49 @@ const Header = () => {
         </nav>
       </header>
 
-      {/* MOBILE BOTTOM NAVIGATION - nur auf mobil sichtbar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="flex items-center justify-center px-4 py-2">
-          <div className="flex items-center bg-light-mint/80 rounded-full px-6 py-3 shadow-lg">
-            <Link
-              href={"/"}
-              className={`flex flex-col items-center gap-1 px-4 py-2 text-xs hover:bg-white/40 transition-colors rounded-full ${
-                pathname === "/"
-                  ? "text-prussian font-bold"
-                  : "text-prussian/60 font-normal"
-              }`}
-            >
-              <House size={20} />
-              Home
-            </Link>
-            <Link
-              href={"/dashboard"}
-              className={`flex flex-col items-center gap-1 px-4 py-2 text-xs hover:bg-white/40 transition-colors rounded-full ${
-                pathname === "/dashboard"
-                  ? "text-prussian font-bold"
-                  : "text-prussian/60 font-normal"
-              }`}
-            >
-              <LayoutDashboard size={20} />
-              Dashboard
-            </Link>
-            <Link
-              href={"/projects/edit"}
-              className={`flex flex-col items-center gap-1 px-4 py-2 text-xs hover:bg-white/40 transition-colors rounded-full ${
-                pathname.startsWith("/projects/edit")
-                  ? "text-prussian font-bold"
-                  : "text-prussian/60 font-normal"
-              }`}
-            >
-              <Pencil size={20} />
-              Edit
-            </Link>
-            <Link
-              href={"/projects"}
-              className={`flex flex-col items-center gap-1 px-4 py-2 text-xs hover:bg-white/40 transition-colors rounded-full ${
-                pathname === "/projects"
-                  ? "text-prussian font-bold"
-                  : "text-prussian/60 font-normal"
-              }`}
-            >
-              <Scroll size={20} />
-              Projects
-            </Link>
-          </div>
+      {/* MOBILE BOTTOM NAVIGATION */}
+      <div className="xl:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="flex items-center bg-light-mint/90 backdrop-blur-xl rounded-full px-2 py-2 shadow-xl gap-3">
+          <Link
+            href={"/"}
+            className={`p-2.5 rounded-full transition-all duration-200 ${
+              pathname === "/"
+                ? "bg-white/60 text-prussian shadow-lg"
+                : "text-prussian/70 hover:text-prussian hover:bg-white/30"
+            }`}
+          >
+            <House size={18} strokeWidth={2.5} />
+          </Link>
+          <Link
+            href={"/dashboard"}
+            className={`p-2.5 rounded-full transition-all duration-200 ${
+              pathname === "/dashboard"
+                ? "bg-white/60 text-prussian shadow-lg"
+                : "text-prussian/70 hover:text-prussian hover:bg-white/30"
+            }`}
+          >
+            <LayoutDashboard size={18} strokeWidth={2.5} />
+          </Link>
+          <Link
+            href={"/projects/edit"}
+            className={`p-2.5 rounded-full transition-all duration-200 ${
+              pathname.startsWith("/projects/edit")
+                ? "bg-white/60 text-prussian shadow-lg"
+                : "text-prussian/70 hover:text-prussian hover:bg-white/30"
+            }`}
+          >
+            <Pencil size={18} strokeWidth={2.5} />
+          </Link>
+          <Link
+            href={"/projects"}
+            className={`p-2.5 rounded-full transition-all duration-200 ${
+              pathname === "/projects"
+                ? "bg-white/60 text-prussian shadow-lg"
+                : "text-prussian/70 hover:text-prussian hover:bg-white/30"
+            }`}
+          >
+            <Scroll size={18} strokeWidth={2.5} />
+          </Link>
         </div>
       </div>
     </>
