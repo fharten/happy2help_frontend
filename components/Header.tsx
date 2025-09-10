@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, LayoutDashboard, Pencil, Scroll, Bell } from "lucide-react";
+import { House, LayoutDashboard, Pencil, Scroll } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 const LogoRight = "/images/h2h_logo_mint.png";
 
@@ -73,9 +74,7 @@ const Header = () => {
 
             {/* NOTIFICATION ICON & LOGO */}
             <div className="flex items-center gap-2 lg:gap-3">
-              <button className="p-2 lg:p-2.5 rounded-full hover:bg-gray-100/60 transition-all duration-200">
-                <Bell size={20} strokeWidth={2} className="text-prussian/70" />
-              </button>
+              <NotificationBell userId="19398e16-283e-408e-8c1b-460979cd6856" />
 
               {/* LOGO RECHTS */}
               <Link
