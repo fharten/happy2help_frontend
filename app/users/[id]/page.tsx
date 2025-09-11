@@ -1,7 +1,12 @@
 import React from "react";
+import UserInfo from "./UserInfo";
 
 const UsersDetailPage = () => {
-  return <div>UsersDetailPage</div>;
+  return (
+    <div>
+      <UserInfo />
+    </div>
+  );
 };
 
 export default UsersDetailPage;
