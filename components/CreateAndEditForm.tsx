@@ -14,7 +14,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import useSWR from "swr";;
+import useSWR from "swr";
+import { toast } from "sonner"
 
 import {
   Form,
@@ -36,10 +37,23 @@ interface Skill {
   description: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+}
+
 interface SkillResponse {
   success: boolean;
   message: string;
   data: Skill[] | undefined;
+  count: number;
+}
+
+interface CategoryResponse {
+  success: boolean;
+  message: string;
+  data: Category[] | undefined;
   count: number;
 }
 
@@ -51,7 +65,7 @@ interface Project {
   state: string;
   principal: string;
   compensation?: string;
-  images: string[],
+  images?: string[],
   skills: string[],
   categories: string[],
   isActive: boolean;
@@ -87,6 +101,27 @@ function useSkills() {
   };
 }
 
+function useCategories() {
+  const { data, error, isLoading, mutate } = useSWR<CategoryResponse>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
+    fetcher,
+  );
+
+  let categoryData: Category[] | undefined = [];
+
+  if (data && data.hasOwnProperty("data")) {
+    categoryData = data.data;
+  }
+
+  return {
+    categories: categoryData,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+}
+
+
 
 
 
@@ -99,8 +134,9 @@ export async function createProject(project: Project) {
 
   console.log("Response from server: ", res);
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || "Failed to create project");
+    const error = await res.json();
+    throw new Error(error.message || "Failed to create project");
+    
   }
 
   const newProject = await res.json();
@@ -113,13 +149,11 @@ const formSchema = z.object({
   name: z.string().min(2, { message: 'Projektname muss mindestens 2 Zeichen lang sein.' }),
   description: z.string().min(50, { message: 'Die Beschreibung muss mindestens 50 Zeichen lang sein.' }),
   city: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  zipCode: z.number().max(5, { message: 'Bitte eine gültige Postleitzahl angeben.'}),
+  zipCode: z.number( { message: 'Bitte eine gültige Postleitzahl angeben.'}),
   state: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
   principal: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
   compensation: z.string().optional(),
-  images: z
-  .array(z.string().min(1))
-  .min(1, { message: 'Mindestens ein Bild angeben.' }),
+  images: z.array(z.string().min(1)).optional().default([]),
   skills: z.array(z.string().min(1)).min(1, { message: "Mindestens eine gesuchte Fähigkeit muss angegeben werden." }),
   categories: z.array(z.string().min(1)).min(1, { message: 'Mindestens eine Kategorie muss ausgewählt werden.' }),
   startingAt: z.iso.date({ message: 'Bitte das Startdatum des Projekts angeben.' }),
@@ -128,10 +162,15 @@ const formSchema = z.object({
 });
 
 export function ProjectForm() {
-    const { skills, isLoading, isError } = useSkills();
+    const { skills } = useSkills();
+    const { categories } = useCategories();
     const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
   value: skill.id,
   label: skill.name,
+}));
+const categoryOptions: SelectOption[] = (categories ?? []).map((category) => ({
+  value: category.id,
+  label: category.name,
 }));
 
 const form = useForm<Project, undefined, Project>({
@@ -174,15 +213,27 @@ const form = useForm<Project, undefined, Project>({
   
       console.log(data)
 
-      // try {
-      //   const created = await createProject(submittedProject as Project);
-      //   console.log("Created project:", created);
-      // } catch (error) {
-      //   console.error(error);
-      // }
+      try {
+        const created = await createProject(submittedProject);
+        console.log("Created project:", created);
+      } catch (error) {
+        console.error(error);
+      }
   
       console.log("Submit project:", submittedProject);
+
+        await toast.promise(
+    createProject(submittedProject),
+    {
+      loading: "Projekt wird angelegt…",
+      success: "Projekt wurde angelegt. Leite zurück zum Dashboard.",
+      error: "Fehler: Das Projekt konnte nicht angelegt werden.",
+    }
+  );
+
+  // setTimeout(() => router.push("/dashboard"), 100);
     };
+
 
   return (
     <Form {...form}>
@@ -227,8 +278,8 @@ const form = useForm<Project, undefined, Project>({
           type="number"
           inputMode="numeric"
           value={field.value ?? ""}
-          onChange={(e) => {
-            const value = e.target.valueAsNumber;
+          onChange={(event) => {
+            const value = event.target.valueAsNumber;
             field.onChange(!value ? undefined : Number(value));
           }}
           onBlur={field.onBlur}
@@ -308,9 +359,9 @@ const form = useForm<Project, undefined, Project>({
   control={form.control}
   name="startingAt"
   render={({ field }) => {
-    const toDate = (v?: string) => {
-      if (!v) return undefined;
-      const candidates = [() => parseISO(v), () => parse(v, "yyyy-MM-dd", new Date()), () => new Date(v)];
+    const toDate = (value?: string) => {
+      if (!value) return undefined;
+      const candidates = [() => parseISO(value), () => parse(value, "yyyy-MM-dd", new Date()), () => new Date(value)];
       for (const mk of candidates) {
         const date = mk();
         if (isValid(date)) return date;
@@ -413,7 +464,7 @@ const form = useForm<Project, undefined, Project>({
           name="skills"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gesuchte Fähigkeiten</FormLabel>
+              <FormLabel>Gesuchte Fähigkeiten*</FormLabel>
               <FormControl>
                 <MultiSelect
                   options={skillOptions}
@@ -428,6 +479,25 @@ const form = useForm<Project, undefined, Project>({
           )}
         />
 
+<FormField
+          control={form.control}
+          name="categories"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Projektkategorie</FormLabel>
+              <FormControl>
+                <MultiSelect
+                  options={categoryOptions}
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  placeholder="Kategorien auswählen"
+                  searchPlaceholder="Suchen…"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button type="submit">Submit</Button>
       </form>
