@@ -45,3 +45,13 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+
+export interface JWTPayload {
+  id: string;
+  email: string;
+  role: string;
+  entityType: 'user' | 'ngo';
+  jti: string;
+  exp: number;
+  iat: number;
+}
