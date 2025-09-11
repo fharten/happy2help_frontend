@@ -1,4 +1,5 @@
 "use client"
+import { useRouter } from 'next/navigation'
 import { format, parse, parseISO, isValid } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react"
 import { de } from 'date-fns/locale';
@@ -27,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input"
 import { Textarea } from "./ui/textarea";
+
 
 // hardcoded NGO id for testing
 const ngo: string = "666";
@@ -71,6 +73,7 @@ interface Project {
   isActive: boolean;
   startingAt: string;
   endingAt: string;
+  ngoId: string;
 }
 
 const fetcher = async (url: string): Promise<SkillResponse> => {
@@ -159,11 +162,13 @@ const formSchema = z.object({
   startingAt: z.iso.date({ message: 'Bitte das Startdatum des Projekts angeben.' }),
   endingAt: z.iso.date({ message: 'Bitte das Enddatum des Projekts angeben.' }),
   isActive: z.boolean(),
+  ngoId: z.string(),
 });
 
 export function ProjectForm() {
     const { skills } = useSkills();
     const { categories } = useCategories();
+    const router = useRouter();
     const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
   value: skill.id,
   label: skill.name,
@@ -189,6 +194,7 @@ const form = useForm<Project, undefined, Project>({
       startingAt: "",
       endingAt: "",
       isActive: true,
+      ngoId: ngo,
     },
     mode: 'onSubmit',
   });
@@ -208,31 +214,33 @@ const form = useForm<Project, undefined, Project>({
       isActive: data.isActive,
       startingAt: new Date(data.startingAt).toISOString(),
       endingAt: new Date(data.endingAt).toISOString(),
-      ngo: ngo,
+      ngoId: ngo,
       };
   
-      console.log(data)
-
       try {
-        const created = await createProject(submittedProject);
-        console.log("Created project:", created);
-      } catch (error) {
-        console.error(error);
-      }
-  
-      console.log("Submit project:", submittedProject);
 
-        await toast.promise(
-    createProject(submittedProject),
-    {
+    const req = createProject(submittedProject);
+
+
+    toast.promise(req, {
       loading: "Projekt wird angelegt…",
       success: "Projekt wurde angelegt. Leite zurück zum Dashboard.",
-      error: "Fehler: Das Projekt konnte nicht angelegt werden.",
-    }
-  );
 
-  // setTimeout(() => router.push("/dashboard"), 100);
-    };
+      error: (err) =>
+        err instanceof Error && err.message
+          ? `Fehler: ${err.message}`
+          : "Fehler: Das Projekt konnte nicht angelegt werden.",
+    });
+
+    const created = await req;
+    console.log("Created project:", created);
+
+    router.push("/dashboard");
+  } catch (error) {
+
+    console.error(error);
+  }
+};
 
 
   return (
