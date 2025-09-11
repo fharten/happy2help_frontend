@@ -23,16 +23,15 @@ export default function ProjectCard({ project }: ProjectProps) {
     <Card className="w-full max-w-sm">
       <Link href={`/projects/${project.id}`}>
         <CardHeader>
+          <Image
+            src={`/images/projects/${image}`}
+            alt={`Bild vom Projekt ${project.name}`}
+            width="500"
+            height="300"
+            sizes="(max-width: 640px) 100vw, 900px"
+          />
           <CardTitle>{project.name}</CardTitle>
-          <CardDescription>
-            <Image
-              src={`/images/projects/${image}`}
-              alt={`Bild vom Projekt ${project.name}`}
-              width="500"
-              height="300"
-              sizes="(max-width: 640px) 100vw, 900px"
-            />
-          </CardDescription>
+          <CardDescription></CardDescription>
         </CardHeader>
       </Link>
       <CardContent>
