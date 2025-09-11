@@ -1,8 +1,41 @@
-import React from 'react';
+'use client';
+import jwt from 'jsonwebtoken';
+import Cookies from 'js-cookie';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import NgoProfileForm from './NgoProfileForm';
 import UserProfileForm from './UserProfileForm';
 
 const ProfilePage = ({ entity = 'ngo' }) => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+
+    if (!token) {
+      router.replace('/login'); // If no token is found, redirect to login page
+      return;
+    }
+
+    // Validate the token by making an API call
+    const validateToken = async () => {
+      try {
+        const res = await fetch('/api/protected', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error('Token validation failed');
+      } catch (error) {
+        console.error(error);
+        router.replace('/'); // Redirect to login if token validation fails
+      }
+    };
+
+    validateToken();
+  }, [router]);
+
   return (
     <>
       {entity === 'user' ? (

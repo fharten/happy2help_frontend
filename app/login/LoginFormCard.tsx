@@ -28,7 +28,9 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
     );
 
     if (!res.ok) return toast.error('Email oder Passwort falsch');
-    router.push('/projects');
+    const { token } = await res.json();
+    document.cookie = `token=${token}; entity=${entity}`;
+    router.push(entity === 'ngos' ? '/dasboard' : '/projects');
   };
 
   return (
