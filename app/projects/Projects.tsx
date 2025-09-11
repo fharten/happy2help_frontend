@@ -24,14 +24,16 @@ export default function Projects() {
 
   return (
     <>
-      <ul>
-        {projects &&
-          projects.map((project: Project) => (
-            <li key={project.id}>
-              <ProjectCard project={project} />
-            </li>
-          ))}
-      </ul>
+      <div className="container-site">
+        <ul className="flex flex-col gap-5">
+          {projects &&
+            projects.map((project: Project) => (
+              <li key={project.id}>
+                <ProjectCard project={project} />
+              </li>
+            ))}
+        </ul>
+      </div>
     </>
   );
 }
