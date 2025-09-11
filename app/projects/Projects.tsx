@@ -18,22 +18,23 @@ export default function Projects() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Failed to load projects</div>;
 
-  if (!data?.data) return <>Keine Projekte vorhanden</>;
-
-  const projects = data.data;
+  const projects = data?.data;
 
   return (
-    <>
-      <div className="container-site">
+    <div className="container-site">
+      {!projects || projects.length === 0 ? (
+        <div className="text-center text-mint-700 py-10 text-lg font-medium opacity-80">
+          Keine Projekte vorhanden
+        </div>
+      ) : (
         <ul className="flex flex-col gap-5">
-          {projects &&
-            projects.map((project: Project) => (
-              <li key={project.id}>
-                <ProjectCard project={project} />
-              </li>
-            ))}
+          {projects.map((project: Project) => (
+            <li key={project.id}>
+              <ProjectCard project={project} />
+            </li>
+          ))}
         </ul>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
