@@ -4,32 +4,39 @@ import useSWR from 'swr';
 import DashboardBar from './DasboardBar';
 import UserProjectsApplicationsTable from './UserProjectsApplicationsTable';
 import { Applications } from '@/types/application';
+import { authenticatedFetcher, getUserId, isAuthenticated } from '@/lib/auth';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-type FetchError = Error & { info?: unknown; status?: number };
+const UserDashboard = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const router = useRouter();
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const error: FetchError = new Error(
-      'An error occurred while fetching the data.',
-    );
-    try {
-      error.info = await res.json();
-    } catch {}
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/login');
+      return;
+    }
 
-const NgoDashboard = ({ userId }: { userId: string }) => {
+    const id = getUserId();
+    if (!id) {
+      router.push('/login');
+      return;
+    }
+
+    setUserId(id);
+  }, [router]);
+
   const { data, isLoading, isValidating, error } = useSWR<{
     data: { applications: Applications };
   }>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}/applications`,
-    fetcher,
+    userId
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}/applications`
+      : null,
+    authenticatedFetcher
   );
 
+  if (!userId) return <div>Lade...</div>;
   if (isLoading || !data) return <div>Lade...</div>;
   if (error) return <div>Fehler: {error.message}</div>;
 
@@ -43,4 +50,4 @@ const NgoDashboard = ({ userId }: { userId: string }) => {
   );
 };
 
-export default NgoDashboard;
+export default UserDashboard;
