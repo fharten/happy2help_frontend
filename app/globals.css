@@ -1,3 +1,10 @@
+/* Responsive Headline Sizes */
+.headline-main {
+  @apply text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light leading-tight tracking-tight;
+}
+.headline-card {
+  @apply text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-semibold leading-tight tracking-tight;
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -129,7 +136,7 @@
   --color-flax: #fef08a;
   --color-seasalt: #f9fafb;
   --color-prussian: #1e293b;
-  --color-black: #22223b;
+  --color-black: #000000;
 
   /* Layout */
   --max-width: 1200px;
