@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
+import { Link as LucideLink } from "lucide-react";
 
 interface ProjectProps {
   project: Project;
@@ -19,13 +20,13 @@ export default function ProjectCard({ project }: ProjectProps) {
   const categoryNames = project.categories.slice(0, 3).map((cat) => cat.name);
 
   return (
-    <Card className="w-full max-w-auto bg-[var(--color-light-mint)]/50 border-0 py-2 px-2 shadow-2xl rounded-[2rem] transition-transform duration-200 hover:scale-[1.01] hover:shadow-3xl">
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+    <Card className="w-full max-w-auto bg-[var(--color-light-mint)]/50 border-0 py-0 px-0 shadow-2xl rounded-[2rem] transition-transform duration-200 hover:scale-[1.01] hover:shadow-3xl">
+      <div className="flex flex-col md:grid md:grid-cols-2 lg:gap-6 md:gap-10 items-stretch">
         {/* Bild */}
         <div className="flex justify-center w-full md:order-2 order-1">
           <div className="w-full aspect-[4/3]">
             <Image
-              className="w-full h-full object-cover rounded-[1.5rem] shadow-2xl border-0"
+              className="w-full h-full object-cover rounded-t-[1.5rem] lg:rounded-r-[1.5rem] shadow-2xl border-0"
               src={`/images/projects/${image}`}
               alt={`Bild vom Projekt ${project.name}`}
               width={500}
@@ -42,22 +43,53 @@ export default function ProjectCard({ project }: ProjectProps) {
           {/* Titel und Basisinfos */}
           <div>
             <Link href={`/projects/${project.id}`}>
-              <CardHeader className="p-0 mb-6">
+              <CardHeader className="p-0 lg:mb-6">
                 <CardTitle className="headline-card text-mint-900 hover:brightness-110 transition-all duration-150 cursor-pointer drop-shadow-sm">
                   {project.name}
                 </CardTitle>
-                <div className="flex items-center gap-2 text-lg mt-2">
-                  <span className="font-medium opacity-50">{project.city}</span>
+                <div className="flex flex-row justify-between">
+                  <div className="flex items-center gap-2 text-lg mt-2">
+                    <span className="font-medium opacity-50">
+                      {project.city}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium opacity-50">
+                      {project.startingAt
+                        ? new Date(project.startingAt).toLocaleString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : ""}
+                    </span>
+                  </div>
                 </div>
-                <CardDescription className="text-lg text-mint-700 mt-3 font-normal">
-                  {project.description}
-                </CardDescription>
+
+                <div className="hidden md:block">
+                  <CardDescription className="text-lg text-mint-700 mt-3 font-normal">
+                    {project.description.length > 160
+                      ? project.description.substring(0, 157) + "..."
+                      : project.description}
+                  </CardDescription>
+                </div>
               </CardHeader>
             </Link>
             <CardContent className="p-0">
               <div className="flex flex-col gap-3 text-mint-900">
                 <div className="text-base font-medium text-mint-800">
-                  von {project.ngo.name}
+                  <Link
+                    href={`/ngos/${project.ngo.id}`}
+                    className="inline-flex items-center gap-1 text-mint-900 hover:text-mint-700 transition-colors group"
+                  >
+                    <span className="group-hover:text-mint-700 transition-colors">
+                      {project.ngo.name}
+                    </span>
+                    <LucideLink
+                      size={16}
+                      className="ml-1 opacity-60 group-hover:opacity-100 group-hover:text-mint-700 transition-all"
+                    />
+                  </Link>
                 </div>
               </div>
             </CardContent>
