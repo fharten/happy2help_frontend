@@ -1,7 +1,7 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { format, parse, parseISO, isValid } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react"
 import { de } from 'date-fns/locale';
@@ -167,17 +167,10 @@ const formSchema = z.object({
   ngoId: z.string(),
 });
 
-export function ProjectForm({
-  isUpdate = false,
-}: {
-  isUpdate?: boolean;
-}) {
+export function ProjectForm() {
     const { skills } = useSkills();
     const { categories } = useCategories();
     const router = useRouter();
-    const routeParams = useParams();
-
-    const [projectId, setProjectId] = useState<string | undefined>(undefined);
 
     const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
   value: skill.id,
