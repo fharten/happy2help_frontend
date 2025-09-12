@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
+import { ProjectForm } from "@/components/CreateAndEditForm";
 
-const ProjectAddPage = () => {
-  return <div>ProjectAddPage</div>;
-};
 
-export default ProjectAddPage;
+export default function AddNewProject() {
+
+  return (
+    <ProjectForm/>
+  );
+}
