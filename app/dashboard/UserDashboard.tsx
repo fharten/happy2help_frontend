@@ -1,7 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
-import DashboardBar from './DasboardBar';
+import DashboardBar from './DashboardBar';
 import UserProjectsApplicationsTable from './UserProjectsApplicationsTable';
 import { Applications } from '@/types/application';
 import { authenticatedFetcher, getUserId, isAuthenticated } from '@/lib/auth';
@@ -43,7 +43,14 @@ const UserDashboard = () => {
   return (
     <>
       <DashboardBar />
-      <UserProjectsApplicationsTable applications={data.data.applications} />
+
+      <div className='container-site rounded-2xl'>
+        <div className='py-4 px-4 flex flex-col gap-4'>
+          <UserProjectsApplicationsTable
+            applications={data.data.applications}
+          />
+        </div>
+      </div>
 
       {isValidating && <span className='ml-4 text-gray-400'>Lädt neu...</span>}
     </>

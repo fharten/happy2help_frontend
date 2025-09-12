@@ -76,10 +76,15 @@ const NgoDashboard = () => {
   return (
     <>
       <DashboardBar />
-      <NgoProjectsTable projects={projectsData.data.projects} />
-      <NgoProjectsApplicationsTable
-        applications={applicationsData.data.applications}
-      />
+      <div className='container-site rounded-2xl'>
+        <div className='py-4 flex flex-col gap-4'>
+          <NgoProjectsTable projects={projectsData.data.projects} />
+          <NgoProjectsApplicationsTable
+            applications={applicationsData.data.applications}
+          />
+        </div>
+      </div>
+
       {isValidatingProjects ||
         (isValidatingApplications && (
           <span className='ml-4 text-gray-400'>Lädt neu...</span>
