@@ -121,7 +121,7 @@ export class AuthService {
   // REFRESH TOKEN
   static async refreshTokenFunction(refreshToken: string): Promise<AuthTokens> {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/logout`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/refresh`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
