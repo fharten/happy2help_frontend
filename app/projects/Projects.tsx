@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import useSWR from "swr";
-import ProjectCard from "./ProjectCard";
-import { Project } from "@/types/project.d";
+import React from 'react';
+import useSWR from 'swr';
+import ProjectCard from './ProjectCard';
+import { Project } from '@/types/project.d';
 
 // Fetcher function
 const fetcher = async (url: string) =>
@@ -15,23 +15,57 @@ export default function Projects() {
     fetcher
   );
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Failed to load projects</div>;
+  if (isLoading)
+    return (
+      <div className='container-site'>
+        <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
+          <div className='text-prussian font-medium'>Lade Projekte...</div>
+        </div>
+      </div>
+    );
 
-  if (!data?.data) return <>Keine Projekte vorhanden</>;
+  if (error)
+    return (
+      <div className='container-site'>
+        <div className='bg-red-50/80 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center border border-red-200'>
+          <div className='text-red-700 font-medium'>
+            Fehler beim Laden der Projekte
+          </div>
+        </div>
+      </div>
+    );
 
-  const projects = data.data;
+  const projects = data?.data;
 
   return (
-    <>
-      <ul>
-        {projects &&
-          projects.map((project: Project) => (
+    <div className='container-site'>
+      <div className='mb-8'>
+        <h1 className='text-2xl lg:text-3xl font-bold text-prussian mb-3 tracking-tight'>
+          Alle Projekte
+        </h1>
+        <p className='text-prussian/70 text-sm lg:text-base font-medium'>
+          Entdecke spannende Projekte und finde dein nächstes Engagement.
+        </p>
+      </div>
+
+      {!projects || projects.length === 0 ? (
+        <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
+          <div className='text-prussian/70 text-lg font-medium opacity-80'>
+            Keine Projekte vorhanden
+          </div>
+          <div className='text-prussian/60 text-sm mt-2'>
+            Es wurden noch keine Projekte veröffentlicht.
+          </div>
+        </div>
+      ) : (
+        <ul className='flex flex-col gap-6'>
+          {projects.map((project: Project) => (
             <li key={project.id}>
               <ProjectCard project={project} />
             </li>
           ))}
-      </ul>
-    </>
+        </ul>
+      )}
+    </div>
   );
 }

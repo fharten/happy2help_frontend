@@ -1,11 +1,20 @@
 'use client';
+<<<<<<< HEAD
 import jwt from 'jsonwebtoken';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+=======
+
+import React from 'react';
+>>>>>>> 484c6b3fed525376ef713c3c969fccaafade65bd
 import NgoProfileForm from './NgoProfileForm';
 import UserProfileForm from './UserProfileForm';
+import { useEffect, useState } from 'react';
+import { getUserType, isAuthenticated } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 
+<<<<<<< HEAD
 const ProfilePage = ({ entity = 'ngo' }) => {
   const router = useRouter();
 
@@ -45,6 +54,25 @@ const ProfilePage = ({ entity = 'ngo' }) => {
       )}
     </>
   );
+=======
+const ProfilePage = () => {
+  const [userType, setUserType] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/login');
+      return;
+    }
+
+    const type = getUserType();
+    setUserType(type);
+  }, [router]);
+
+  if (!userType) return <div>Lade...</div>;
+
+  return <>{userType === 'users' ? <UserProfileForm /> : <NgoProfileForm />}</>;
+>>>>>>> 484c6b3fed525376ef713c3c969fccaafade65bd
 };
 
 export default ProfilePage;

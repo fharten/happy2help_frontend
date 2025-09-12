@@ -1,8 +1,20 @@
+<<<<<<< HEAD
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import './globals.css';
+=======
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner"
+import "./globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import UserDetailPage from "@/components/UserDetailPage";
+import RegistrationForm from "@/app/register/RegistrationForm";
+import Projects from "./projects/Projects";
+>>>>>>> 484c6b3fed525376ef713c3c969fccaafade65bd
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
