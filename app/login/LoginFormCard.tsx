@@ -24,11 +24,25 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-      },
+      }
     );
 
     if (!res.ok) return toast.error('Email oder Passwort falsch');
-    router.push('/projects');
+    const data = await res.json();
+
+    if (data.data?.accessToken) {
+      localStorage.setItem('authToken', data.data.accessToken);
+      localStorage.setItem('userType', entity); // check user entity type for frontend tasks
+      if (data.data.user) {
+        localStorage.setItem('userId', data.data.user.id);
+      }
+    }
+
+    if (entity === 'users') {
+      router.push('/projects');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   return (
@@ -39,7 +53,7 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
       <CardContent>
         <form
           onSubmit={async (e) => {
-            e.preventDefault(); // prevent full page reload
+            e.preventDefault();
             await handleSubmit();
           }}
         >
