@@ -10,13 +10,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, User, Zap, ArrowLeft } from 'lucide-react';
 import { Project } from '@/types/project.d';
 import { Skill } from '@/types/skill.d';
+import ButtonComponent from '@/components/ButtonComponent';
+import BadgeComponent from '@/components/BadgeComponent';
 
 type FetchError = Error & { info?: unknown; status?: number };
 
@@ -80,24 +80,27 @@ const ProjectDetailPage = () => {
       {/* Back Button */}
       <div className='mb-6'>
         <Link href={parentUrl}>
-          <Button
-            variant='ghost'
+          <ButtonComponent
+            variant='secondary'
             size='sm'
             className='flex items-center gap-2 bg-light-mint/20 border border-light-mint/30 text-prussian hover:bg-light-mint/30 hover:border-light-mint/40 transition-all duration-200 rounded-full px-4 py-2 shadow-sm hover:shadow-md'
           >
             <ArrowLeft size={16} />
             <span className='font-medium'>Zurück zur Übersicht</span>
-          </Button>
+          </ButtonComponent>
         </Link>
       </div>
 
       {/* Image Carousel */}
       <div className='mb-8'>
-        <Carousel className='w-full rounded-2xl overflow-hidden aspect-[16/10] lg:aspect-[21/9] shadow-xl bg-gray-100'>
+        <Carousel className='w-full rounded-2xl overflow-hidden max-h-[400px] lg:max-h-[500px] shadow-xl bg-gray-100 flex items-center justify-center'>
           <CarouselContent className='h-full'>
             {project.images && project.images.length > 0 ? (
               project.images.map((image: string, index: number) => (
-                <CarouselItem key={index} className='h-full'>
+                <CarouselItem
+                  key={index}
+                  className='h-full flex items-center justify-center'
+                >
                   <Image
                     src={getImageSrc(image)}
                     alt={`Projektbild ${index + 1}`}
@@ -147,12 +150,10 @@ const ProjectDetailPage = () => {
               <h1 className='text-2xl lg:text-4xl font-bold text-prussian tracking-tight leading-tight'>
                 {project.name}
               </h1>
-              <Badge
-                className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full self-start ${
-                  project.isActive
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : 'bg-amber-100 text-amber-800 border-amber-200'
-                }`}
+              <BadgeComponent
+                variant={project.isActive ? 'success' : 'warning'}
+                size='md'
+                className='inline-flex items-center gap-2 px-4 py-2 text-sm font-medium self-start'
               >
                 <div
                   className={`w-2 h-2 rounded-full ${
@@ -160,24 +161,25 @@ const ProjectDetailPage = () => {
                   }`}
                 />
                 {project.isActive ? 'Aktiv' : 'Abgeschlossen'}
-              </Badge>
+              </BadgeComponent>
             </div>
           </div>
 
           {/* Action Button */}
           <div className='lg:mt-0 mt-4'>
-            <Button
+            <ButtonComponent
+              variant='primary'
               size='lg'
               onClick={() => alert('Bewerbung wird implementiert!')}
-              className='w-full lg:w-auto bg-light-mint hover:bg-light-mint/80 text-prussian font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl'
+              className='w-full lg:w-auto'
             >
               Jetzt bewerben
-            </Button>
+            </ButtonComponent>
           </div>
         </div>
 
         {/* Description */}
-        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-light-mint/20'>
+        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-6 border border-light-mint/20'>
           <p className='text-base lg:text-lg text-prussian/80 leading-relaxed font-medium'>
             {project.description}
           </p>
@@ -187,7 +189,7 @@ const ProjectDetailPage = () => {
       {/* Project Details Grid */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
         {/* Left Column */}
-        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 border border-light-mint/20'>
+        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-light-mint/20'>
           <h3 className='text-lg font-bold text-prussian mb-4 flex items-center gap-2'>
             <Calendar size={20} className='text-light-mint' />
             Zeitraum & Ort
@@ -228,7 +230,7 @@ const ProjectDetailPage = () => {
         </div>
 
         {/* Right Column */}
-        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 border border-light-mint/20'>
+        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-light-mint/20'>
           <h3 className='text-lg font-bold text-prussian mb-4 flex items-center gap-2'>
             <User size={20} className='text-light-mint' />
             Ansprechpartner & Details
@@ -258,12 +260,13 @@ const ProjectDetailPage = () => {
               </span>
               <div className='flex flex-wrap gap-2'>
                 {project.categories.map((category) => (
-                  <Badge
+                  <BadgeComponent
                     key={category.id}
-                    className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30 px-3 py-1 text-xs font-medium rounded-full'
+                    variant='category'
+                    size='sm'
                   >
                     {category.name}
-                  </Badge>
+                  </BadgeComponent>
                 ))}
               </div>
             </div>
@@ -273,19 +276,16 @@ const ProjectDetailPage = () => {
 
       {/* Skills Section */}
       {project.skills && project.skills.length > 0 && (
-        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 border border-light-mint/20 mb-8'>
+        <div className='bg-light-mint/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-light-mint/20 mb-8'>
           <h3 className='text-lg font-bold text-prussian mb-4 flex items-center gap-2'>
             <Zap size={20} className='text-light-mint' />
             Gesuchte Fähigkeiten
           </h3>
           <div className='flex flex-wrap gap-2'>
             {project.skills.map((skill: Skill) => (
-              <Badge
-                key={skill.id}
-                className='bg-prussian/10 text-prussian border-prussian/20 hover:bg-prussian/15 px-3 py-1 text-xs font-medium rounded-full'
-              >
+              <BadgeComponent key={skill.id} variant='skill' size='sm'>
                 {skill.name}
-              </Badge>
+              </BadgeComponent>
             ))}
           </div>
         </div>
