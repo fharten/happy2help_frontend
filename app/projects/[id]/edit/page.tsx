@@ -1,7 +1,7 @@
-import { ProjectForm } from "@/components/CreateAndEditForm";
+import { ProjectForm } from '@/components/CreateAndEditForm';
 
 const ProjectEditPage = () => {
-  return <ProjectForm isUpdate={true} />
+  return <ProjectForm />;
 };
 
 export default ProjectEditPage;

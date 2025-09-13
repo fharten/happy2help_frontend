@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className='mt-32 pb-8'>
       <div className='px-4 lg:px-8'>
-        <div className='bg-light-mint/90 backdrop-blur-xl rounded-3xl shadow-xl px-8 lg:px-12 py-12 lg:py-16'>
+        <div className='bg-light-mint/90 backdrop-blur-xl rounded-3xl shadow-xl p-6 md:p-8'>
           {/* CONTENT */}
           <div className='flex flex-col lg:flex-row gap-12 lg:gap-16'>
             {/* INFO */}

@@ -155,9 +155,12 @@ const Header = () => {
           <div className='flex justify-between items-center'>
             {/* LOGO TEXT */}
             <div className='flex items-center gap-3 lg:gap-6'>
-              <span className='text-xl lg:text-3xl font-bold text-black select-none tracking-tight'>
+              <Link
+                href='/'
+                className='text-xl lg:text-3xl font-bold text-black select-none tracking-tight'
+              >
                 Happy<span className='text-light-mint'>2Help</span>
-              </span>
+              </Link>
             </div>
 
             {/* DESKTOP NAVIGATION PILL */}
