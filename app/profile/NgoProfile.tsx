@@ -2,12 +2,14 @@
 
 import React from 'react';
 import useSWR from 'swr';
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import ButtonComponent from '@/components/ButtonComponent';
 import Image from 'next/image';
-import { authenticatedFetcher } from '@/lib/auth';
+import { authenticatedFetcher, getUserId } from '@/lib/auth';
 import {
+  Edit,
   MapPin,
   Calendar,
   Mail,
@@ -15,6 +17,7 @@ import {
   Building,
   User as UserIcon,
   AlertCircle,
+  Eye,
 } from 'lucide-react';
 
 interface NgoProfile {
@@ -41,11 +44,12 @@ interface NgoProfile {
   industry?: string[];
 }
 
-export default function NgoInfo() {
-  const { id } = useParams();
+const NgoProfile = () => {
+  const router = useRouter();
+  const ngoId = getUserId();
 
   const { data, isLoading, error } = useSWR<{ data: NgoProfile }>(
-    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
+    ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
     authenticatedFetcher
   );
 
@@ -278,8 +282,34 @@ export default function NgoInfo() {
               )}
             </div>
           </div>
+
+          {/* Action Buttons */}
+          <div className='pt-6 border-t border-light-mint/20'>
+            <div className='flex flex-col sm:flex-row gap-4'>
+              <ButtonComponent
+                variant='primary'
+                size='lg'
+                onClick={() => router.push('/profile/edit')}
+                className='flex-1'
+              >
+                <Edit size={18} className='mr-2' />
+                Vereinsprofil bearbeiten
+              </ButtonComponent>
+              <ButtonComponent
+                variant='secondary'
+                size='lg'
+                onClick={() => router.push(`/ngos/${ngoId}`)}
+                className='flex-1'
+              >
+                <Eye size={18} className='mr-2' />
+                Öffentliches Profil ansehen
+              </ButtonComponent>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default NgoProfile;
