@@ -2,41 +2,44 @@
 
 import React from 'react';
 import useSWR from 'swr';
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import ButtonComponent from '@/components/ButtonComponent';
 import Image from 'next/image';
-import { authenticatedFetcher } from '@/lib/auth';
-import { MapPin, Calendar, Mail, Phone, User as UserIcon } from 'lucide-react';
+import { authenticatedFetcher, getUserId } from '@/lib/auth';
+import {
+  Edit,
+  MapPin,
+  Calendar,
+  Mail,
+  Phone,
+  User as UserIcon,
+  Eye,
+} from 'lucide-react';
 
-interface UserProfileInfo {
+interface UserProfile {
   id: string;
-  firstname: string;
-  lastname: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
-  phone?: string;
-  description?: string;
-  city?: string;
-  country?: string;
-  skills?: Array<{ id: string; name: string }>;
-  projects?: Array<{ id: string; name: string }>;
-  createdAt: string;
-  updatedAt: string;
-  image?: string;
-  zipCode?: string;
-  state?: string;
-  yearOfBirth?: string;
+  firstName: string;
+  lastName: string;
+  image: string;
+  skills: string[];
+  ngoMemberships: string[];
+  city: string;
+  state: string;
+  zipCode?: number;
+  yearOfBirth?: number;
   contactEmail?: string;
-  ngoMemberships?: Array<{ id: string; name: string }>;
+  phone?: string;
+  createdAt: string;
 }
 
-export default function UserInfo() {
-  const { id } = useParams();
+const UserProfile = () => {
+  const router = useRouter();
+  const userId = getUserId();
 
-  const { data, isLoading, error } = useSWR<{ data: UserProfileInfo }>(
-    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}` : null,
+  const { data, isLoading, error } = useSWR<{ data: UserProfile }>(
+    userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
     authenticatedFetcher
   );
 
@@ -189,13 +192,13 @@ export default function UserInfo() {
             </h3>
             <div className='flex flex-wrap gap-2'>
               {user.skills && user.skills.length > 0 ? (
-                user.skills.map((skill: { id: string; name: string }) => (
+                user.skills.map((skill: string) => (
                   <Badge
-                    key={skill.id}
+                    key={skill}
                     variant='secondary'
                     className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
                   >
-                    {skill.name}
+                    {skill}
                   </Badge>
                 ))
               ) : (
@@ -214,21 +217,47 @@ export default function UserInfo() {
               </h3>
               <div className='flex flex-wrap gap-2'>
                 {user.ngoMemberships.map(
-                  (membership: { id: string; name: string }) => (
+                  (membership: string, index: number) => (
                     <Badge
-                      key={membership.id}
+                      key={index}
                       variant='outline'
                       className='border-light-mint/40 text-prussian hover:bg-light-mint/10'
                     >
-                      {membership.name}
+                      {membership}
                     </Badge>
                   )
                 )}
               </div>
             </div>
           )}
+
+          {/* Action Buttons */}
+          <div className='pt-6 border-t border-light-mint/20'>
+            <div className='flex flex-col sm:flex-row gap-4'>
+              <ButtonComponent
+                variant='primary'
+                size='lg'
+                onClick={() => router.push('/profile/edit')}
+                className='flex-1'
+              >
+                <Edit size={18} className='mr-2' />
+                Profil bearbeiten
+              </ButtonComponent>
+              <ButtonComponent
+                variant='secondary'
+                size='lg'
+                onClick={() => router.push(`/users/${userId}`)}
+                className='flex-1'
+              >
+                <Eye size={18} className='mr-2' />
+                Öffentliches Profil ansehen
+              </ButtonComponent>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default UserProfile;

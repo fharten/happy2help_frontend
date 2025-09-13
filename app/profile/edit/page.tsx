@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import NgoProfile from './NgoProfile';
-import UserProfile from './UserProfile';
+import NgoProfileForm from './NgoProfileForm';
+import UserProfileForm from './UserProfileForm';
 import MainHeadline from '@/components/MainHeadline';
 import { useEffect, useState } from 'react';
 import { getUserType, isAuthenticated } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 
-const ProfilePage = () => {
+const ProfileEditPage = () => {
   const [userType, setUserType] = useState<string | null>(null);
   const router = useRouter();
 
@@ -32,14 +32,16 @@ const ProfilePage = () => {
   return (
     <div className='min-h-screen bg-white'>
       <MainHeadline>
-        {userType === 'users' ? 'Mein Profil' : 'Vereinsprofil'}
+        {userType === 'users'
+          ? 'Profil bearbeiten'
+          : 'Vereinsprofil bearbeiten'}
       </MainHeadline>
 
       <div className='pb-16'>
-        {userType === 'users' ? <UserProfile /> : <NgoProfile />}
+        {userType === 'users' ? <UserProfileForm /> : <NgoProfileForm />}
       </div>
     </div>
   );
 };
 
-export default ProfilePage;
+export default ProfileEditPage;

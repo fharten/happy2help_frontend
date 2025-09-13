@@ -38,7 +38,7 @@ export default function Projects() {
   const projects = data?.data;
 
   return (
-    <div className='container-site'>
+    <div>
       <div className='mb-8'>
         <h1 className='text-2xl lg:text-3xl font-bold text-prussian mb-3 tracking-tight'>
           Alle Projekte

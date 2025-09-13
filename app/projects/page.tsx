@@ -1,9 +1,9 @@
-import React from "react";
-import Projects from "./Projects";
+import React from 'react';
+import Projects from './Projects';
 
 const ListingPage = () => {
   return (
-    <div>
+    <div className='container-site'>
       <Projects />
     </div>
   );
