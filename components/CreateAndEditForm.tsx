@@ -197,7 +197,7 @@ const formSchema = z.object({
   ngoId: z.string(),
 });
 
-export function ProjectForm({ isUpdate = false }: { isUpdate?: boolean }) {
+export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
     const { skills } = useSkills();
     const { categories } = useCategories();
     const router = useRouter();
