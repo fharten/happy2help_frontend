@@ -1,7 +1,7 @@
-import React from "react";
+import { ProjectForm } from "@/components/CreateAndEditForm";
 
 const ProjectEditPage = () => {
-  return <div>ProjectEditPage</div>;
+  return <ProjectForm isUpdate/>;
 };
 
 export default ProjectEditPage;

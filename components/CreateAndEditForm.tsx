@@ -1,5 +1,7 @@
 "use client"
-import { useRouter } from 'next/navigation'
+import { useEffect } from "react";
+import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation'
 import { format, parse, parseISO, isValid } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react"
 import { de } from 'date-fns/locale';
@@ -31,7 +33,7 @@ import { Textarea } from "./ui/textarea";
 
 
 // hardcoded NGO id for testing
-const ngo: string = "666";
+const ngo: string = "294a4429-8b0d-4132-a723-fe6d872dd6d8";
 
 interface Skill {
   id: string;
@@ -75,6 +77,12 @@ interface Project {
   endingAt: string;
   ngoId: string;
 }
+
+type ProjectDetailResponse = Partial<Project> & {
+  id?: string;
+  skills?: Array<string | { id: string }>;
+  categories?: Array<string | { id: string }>;
+};
 
 const fetcher = async (url: string): Promise<SkillResponse> => {
   const res = await fetch(url);
@@ -124,10 +132,15 @@ function useCategories() {
   };
 }
 
+interface ProjectGetResponse {
+  success: boolean;
+  message: string;
+  data: Project;
+}
 
 
 
-
+// Create new project
 export async function createProject(project: Project) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/`, {
     method: "POST",
@@ -145,6 +158,24 @@ export async function createProject(project: Project) {
   const newProject = await res.json();
 
   return newProject;
+}
+
+// Update project
+export async function updateProject(id: string, project: Project) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(project),
+  });
+
+  console.log("Response from server (update): ", res);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Failed to update project");
+  }
+
+  const updatedProject = await res.json();
+  return updatedProject;
 }
 
 
@@ -165,10 +196,13 @@ const formSchema = z.object({
   ngoId: z.string(),
 });
 
-export function ProjectForm() {
+export function ProjectForm({ isUpdate = false }: { isUpdate?: boolean }) {
     const { skills } = useSkills();
     const { categories } = useCategories();
     const router = useRouter();
+    const params = useParams<{ id: string }>();
+    const projectId = params?.id;
+
     const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
   value: skill.id,
   label: skill.name,
@@ -199,6 +233,66 @@ const form = useForm<Project, undefined, Project>({
     mode: 'onSubmit',
   });
 
+
+  const { data: projectDetailResponse } = useSWR<ProjectGetResponse>(
+    isUpdate && projectId
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${projectId}`
+      : null,
+    (url: string) => fetch(url).then((r) => r.json())
+  );
+
+
+  const projectDetailData = projectDetailResponse?.data as ProjectDetailResponse | undefined;
+useEffect(() => {
+  if (!isUpdate || !projectDetailData) return;
+
+  const data = projectDetailData;
+
+  // Server-Datum → "yyyy-MM-dd" normalisieren
+  const toYmd = (value?: string) => {
+    if (!value) return "";
+    if (value.includes("T") && value.length >= 10) return value.slice(0, 10);
+    const parsedDate = parseISO(value);
+    return isValid(parsedDate) ? format(parsedDate, "yyyy-MM-dd") : "";
+
+  };
+
+  // Skills und Categories von Array auf id-Strings mappen
+  const skillIds: string[] =
+  Array.isArray(data.skills)
+    ? ((data.skills as Array<{ id: string }>)
+        .map((entry) => entry.id)
+        .filter(Boolean) as string[])
+    : [];
+
+  const categoryIds: string[] =
+  Array.isArray(data.categories)
+    ? ((data.categories as Array<{ id: string }>)
+        .map((entry) => entry.id)
+        .filter(Boolean) as string[])
+    : [];
+
+  form.reset(
+    {
+      name: data.name ?? "",
+      description: data.description ?? "",
+      city: data.city ?? "",
+      zipCode: (data.zipCode as number | undefined) ?? undefined,
+      state: data.state ?? "",
+      principal: (data.principal as string | undefined) ?? "",
+      compensation: (data.compensation as string | undefined) ?? "",
+      images: (data.images as string[] | undefined) ?? [],
+      skills: skillIds as string[],
+      categories: categoryIds as string[],
+      startingAt: toYmd(data.startingAt as string | undefined),
+      endingAt: toYmd(data.endingAt as string | undefined),
+      isActive: typeof data.isActive === "boolean" ? data.isActive : true,
+      ngoId: (data.ngoId as string | undefined) ?? ngo,
+    },
+    { keepDirty: false, keepTouched: true }
+  );
+}, [isUpdate, projectDetailData, form]);
+
   const onSubmit: SubmitHandler<Project> = async (data) => {
       const submittedProject = {
         name: data.name,
@@ -219,27 +313,35 @@ const form = useForm<Project, undefined, Project>({
   
       try {
 
-    const req = createProject(submittedProject);
+    const req = isUpdate && projectId
+        ? updateProject(projectId, submittedProject)
+        : createProject(submittedProject);
 
 
-    toast.promise(req, {
-      loading: "Projekt wird angelegt…",
-      success: "Projekt wurde angelegt. Leite zurück zum Dashboard.",
+     toast.promise(req, {
+        loading: isUpdate ? "Projekt wird aktualisiert…" : "Projekt wird angelegt…",
+        success: isUpdate
+          ? "Projekt wurde aktualisiert. Leite zur Projektseite weiter."
+          : "Projekt wurde angelegt. Leite zurück zum Dashboard.",
+        error: (error) =>
+          error instanceof Error && error.message
+            ? `Fehler: ${error.message}`
+            : isUpdate
+            ? "Fehler: Das Projekt konnte nicht aktualisiert werden."
+            : "Fehler: Das Projekt konnte nicht angelegt werden.",
+      });
 
-      error: (err) =>
-        err instanceof Error && err.message
-          ? `Fehler: ${err.message}`
-          : "Fehler: Das Projekt konnte nicht angelegt werden.",
-    });
+    const createdOrUpdated = await req;
+      console.log(isUpdate ? "Updated project:" : "Created project:", createdOrUpdated);
 
-    const created = await req;
-    console.log("Created project:", created);
-
-    router.push("/dashboard");
-  } catch (error) {
-
-    console.error(error);
-  }
+      if (isUpdate && projectId) {
+        router.push(`/projects/${projectId}`);
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+    }
 };
 
 
@@ -507,7 +609,8 @@ const form = useForm<Project, undefined, Project>({
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Speichern</Button>
+        <Button asChild><Link href="./../dashboard">Abbrechen</Link></Button>
       </form>
     </Form>
   )
