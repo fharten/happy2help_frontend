@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import BadgeComponent from '@/components/BadgeComponent';
 import LoginFormCard from './LoginFormCard';
 import ButtonComponent from '@/components/ButtonComponent';
 
