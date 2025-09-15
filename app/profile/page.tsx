@@ -1,16 +1,44 @@
-import React from 'react';
-import NgoProfileForm from './NgoProfileForm';
-import UserProfileForm from './UserProfileForm';
+'use client';
 
-const ProfilePage = ({ entity = 'ngo' }) => {
+import React from 'react';
+import NgoProfile from './NgoProfile';
+import UserProfile from './UserProfile';
+import MainHeadline from '@/components/MainHeadline';
+import { useEffect, useState } from 'react';
+import { getUserType, isAuthenticated } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+
+const ProfilePage = () => {
+  const [userType, setUserType] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push('/login');
+      return;
+    }
+
+    const type = getUserType();
+    setUserType(type);
+  }, [router]);
+
+  if (!userType)
+    return (
+      <div className='flex justify-center items-center min-h-screen'>
+        <div>Lade...</div>
+      </div>
+    );
+
   return (
-    <>
-      {entity === 'user' ? (
-        <UserProfileForm userId='80feec7c-dc9f-498d-ab93-4d8a434f6e33' />
-      ) : (
-        <NgoProfileForm ngoId='8604ce87-0656-4284-9200-3f1732a33cc2' />
-      )}
-    </>
+    <div className='min-h-screen bg-white'>
+      <MainHeadline>
+        {userType === 'users' ? 'Mein Profil' : 'Vereinsprofil'}
+      </MainHeadline>
+
+      <div className='pb-16'>
+        {userType === 'users' ? <UserProfile /> : <NgoProfile />}
+      </div>
+    </div>
   );
 };
 

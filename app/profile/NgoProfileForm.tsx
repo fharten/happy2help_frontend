@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { authenticatedFetcher, getUserId, getAuthToken } from '@/lib/auth';
 
 interface Ngo {
   id: string;
@@ -72,29 +73,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type FetchError = Error & { info?: unknown; status?: number };
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const error: FetchError = new Error(
-      'An error occurred while fetching the data.',
-    );
-    try {
-      error.info = await res.json();
-    } catch {}
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
-
-const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
+const NgoProfileForm = () => {
   const router = useRouter();
+  const ngoId = getUserId();
 
   const { data, isLoading, isValidating, error } = useSWR<{ data: Ngo }>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}`,
-    fetcher,
+    ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
+    authenticatedFetcher
   );
 
   const form = useForm<FormValues>({
@@ -135,6 +120,8 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
   }, [data, form]);
 
   const onSubmit = async (values: FormValues) => {
+    if (!ngoId) return;
+
     try {
       const submitData = {
         ...values,
@@ -142,13 +129,17 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
           values.contactEmail === '' ? undefined : values.contactEmail,
       };
 
+      const token = getAuthToken();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
           body: JSON.stringify(submitData),
-        },
+        }
       );
 
       if (!res.ok) throw new Error(`Update failed with status ${res.status}`);
@@ -159,6 +150,7 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
     }
   };
 
+  if (!ngoId) return <div>Lade...</div>;
   if (isLoading || !data) return <div>Lade...</div>;
   if (error) return <div>Fehler: {error.message}</div>;
 
@@ -409,7 +401,9 @@ const NgoProfileForm = ({ ngoId }: { ngoId: string }) => {
           <span className='ml-4 text-gray-400'>Lädt neu...</span>
         )}
 
-        <Button type='submit'>Änderungen speichern</Button>
+        <ButtonComponent variant='primary' size='md' type='submit'>
+          Änderungen speichern
+        </ButtonComponent>
       </form>
     </Form>
   );

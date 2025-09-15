@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,21 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
     );
 
     if (!res.ok) return toast.error('Email oder Passwort falsch');
-    router.push('/projects');
+    const data = await res.json();
+
+    if (data.data?.accessToken) {
+      localStorage.setItem('authToken', data.data.accessToken);
+      localStorage.setItem('userType', entity); // check user entity type for frontend tasks
+      if (data.data.user) {
+        localStorage.setItem('userId', data.data.user.id);
+      }
+    }
+
+    if (entity === 'users') {
+      router.push('/projects');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   return (
@@ -39,7 +53,7 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
       <CardContent>
         <form
           onSubmit={async (e) => {
-            e.preventDefault(); // prevent full page reload
+            e.preventDefault();
             await handleSubmit();
           }}
         >
@@ -75,12 +89,17 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
               />
             </div>
             <div className='flex flex-col gap-3'>
-              <Button type='submit' className='w-full'>
+              <ButtonComponent
+                variant='primary'
+                size='md'
+                type='submit'
+                className='w-full'
+              >
                 Login
-              </Button>
-              <Button variant='outline' className='w-full'>
+              </ButtonComponent>
+              <ButtonComponent variant='secondary' size='md' className='w-full'>
                 Login mit Google
-              </Button>
+              </ButtonComponent>
             </div>
           </div>
           <div className='mt-4 text-center text-sm'>

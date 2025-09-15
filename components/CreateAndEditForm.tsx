@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation'
+
 import { format, parse, parseISO, isValid } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react"
 import { de } from 'date-fns/locale';
@@ -15,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import ButtonComponent from "@/components/ButtonComponent";
 import { Calendar } from "@/components/ui/calendar";
 import useSWR from "swr";
 import { toast } from "sonner"
@@ -200,8 +201,10 @@ export function ProjectForm({ isUpdate = false }: { isUpdate?: boolean }) {
     const { skills } = useSkills();
     const { categories } = useCategories();
     const router = useRouter();
+
     const params = useParams<{ id: string }>();
     const projectId = params?.id;
+
 
     const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
   value: skill.id,
@@ -487,13 +490,14 @@ useEffect(() => {
         <Popover>
           <PopoverTrigger asChild>
             <FormControl>
-              <Button
-                variant="outline"
+              <ButtonComponent
+                variant="secondary"
+                size="md"
                 className={cn("w-[240px] pl-3 text-left font-normal", !selectedDate && "text-muted-foreground")}
               >
                 {selectedDate && isValid(selectedDate) ? format(selectedDate, "PPP", { locale: de }) : <span>Datum wählen</span>}
                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-              </Button>
+              </ButtonComponent>
             </FormControl>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -544,13 +548,14 @@ useEffect(() => {
         <Popover>
           <PopoverTrigger asChild>
             <FormControl>
-              <Button
-                variant="outline"
+              <ButtonComponent
+                variant="secondary"
+                size="md"
                 className={cn("w-[240px] pl-3 text-left font-normal", !selectedDate && "text-muted-foreground")}
               >
                 {selectedDate && isValid(selectedDate) ? format(selectedDate, "PPP", { locale: de }) : <span>Datum wählen</span>}
                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-              </Button>
+              </ButtonComponent>
             </FormControl>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -609,8 +614,14 @@ useEffect(() => {
           )}
         />
 
-        <Button type="submit">Speichern</Button>
-        <Button asChild><Link href="./../dashboard">Abbrechen</Link></Button>
+        <ButtonComponent variant="primary" size="md" type="submit">
+          Speichern
+        </ButtonComponent>
+        <Link href="./../dashboard">
+          <ButtonComponent variant="secondary" size="md">
+            Abbrechen
+          </ButtonComponent>
+        </Link>
       </form>
     </Form>
   )

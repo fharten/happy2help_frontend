@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { authenticatedFetcher, getUserId, getAuthToken } from '@/lib/auth';
 
 interface User {
   id: string;
@@ -67,29 +68,20 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type FetchError = Error & { info?: unknown; status?: number };
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const error: FetchError = new Error(
-      'An error occurred while fetching the data.',
-    );
-    try {
-      error.info = await res.json();
-    } catch {}
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
-
-const UserProfileForm = ({ userId }: { userId: string }) => {
+const UserProfileForm = () => {
   const router = useRouter();
+  const userId = getUserId();
+
+  // redirect to login if not authenticated
+  useEffect(() => {
+    if (!userId) {
+      router.push('/login');
+    }
+  }, [userId, router]);
 
   const { data, isLoading, isValidating, error } = useSWR<{ data: User }>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}`,
-    fetcher,
+    userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
+    authenticatedFetcher
   );
 
   const form = useForm<FormValues>({
@@ -134,6 +126,8 @@ const UserProfileForm = ({ userId }: { userId: string }) => {
   }, [data, form]);
 
   const onSubmit = async (values: FormValues) => {
+    if (!userId) return;
+
     console.log('first');
     try {
       const submitData = {
@@ -142,13 +136,17 @@ const UserProfileForm = ({ userId }: { userId: string }) => {
           values.contactEmail === '' ? undefined : values.contactEmail,
       };
 
+      const token = getAuthToken();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
           body: JSON.stringify(submitData),
-        },
+        }
       );
 
       console.log(res);
@@ -441,7 +439,9 @@ const UserProfileForm = ({ userId }: { userId: string }) => {
           <span className='ml-4 text-gray-400'>Lädt neu...</span>
         )}
 
-        <Button type='submit'>Änderungen speichern</Button>
+        <ButtonComponent variant='primary' size='md' type='submit'>
+          Änderungen speichern
+        </ButtonComponent>
       </form>
     </Form>
   );
