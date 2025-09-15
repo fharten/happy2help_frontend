@@ -1,12 +1,64 @@
 import { AuthUser } from '@/types/auth';
 import { User } from '@/types/user';
+import { decodeToken } from '@/lib/jwt-utils';
 
 export function isUser(user: AuthUser): boolean {
   return user.hasOwnProperty('role');
 }
 
 export function isNgo(user: AuthUser): boolean {
-  return user.hasOwnProperty('name') && user.hasOwnProperty('principal');
+  console.log('isNgo check - user object:', user);
+
+  // METHOD 1: CHECK IF USER OBJECT HAS NGO-SPECIFIC PROPERTIES
+  if (user.hasOwnProperty('name') && user.hasOwnProperty('principal')) {
+    console.log('NGO detected via name/principal properties');
+    return true;
+  }
+
+  // METHOD 2: CHECK IF THERE'S AN EXPLICIT ENTITYTYPE FIELD IN USER OBJECT
+  if ('entityType' in user && user.entityType === 'ngo') {
+    console.log('NGO detected via user entityType field');
+    return true;
+  }
+
+  // METHOD 3: CHECK JWT TOKEN FOR ENTITY INFORMATION
+  if (typeof window !== 'undefined') {
+    try {
+      const tokens = localStorage.getItem('auth_tokens');
+      if (tokens) {
+        const { accessToken } = JSON.parse(tokens);
+        const decoded = decodeToken(accessToken);
+
+        if (
+          decoded &&
+          (decoded.entityType === 'ngo' || decoded.role === 'ngo')
+        ) {
+          console.log('NGO detected via JWT token');
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to decode token for NGO check:', error);
+    }
+  }
+
+  // METHOD 4: CHECK LOCALSTORAGE USERTYPE (FALLBACK)
+  if (typeof window !== 'undefined') {
+    const userType = localStorage.getItem('userType');
+    if (userType === 'ngo' || userType === 'ngos') {
+      console.log('NGO detected via localStorage userType');
+      return true;
+    }
+  }
+
+  // METHOD 5: CHECK IF USER HAS ROLE 'NGO' (IF ROLE IS IN USER OBJECT)
+  if ('role' in user && user.role === 'ngo') {
+    console.log('NGO detected via user role field');
+    return true;
+  }
+
+  console.log('Not detected as NGO');
+  return false;
 }
 
 export function getUserEntityType(user: AuthUser): 'user' | 'ngo' {
@@ -18,12 +70,33 @@ export function getUserEntityType(user: AuthUser): 'user' | 'ngo' {
 }
 
 export function getUserRole(user: AuthUser): string {
+  // FIRST TRY TO GET ROLE FROM JWT TOKEN
+  if (typeof window !== 'undefined') {
+    try {
+      const tokens = localStorage.getItem('auth_tokens');
+      if (tokens) {
+        const { accessToken } = JSON.parse(tokens);
+        const decoded = decodeToken(accessToken);
+
+        if (decoded && decoded.role) {
+          console.log('Role from JWT:', decoded.role);
+          return decoded.role;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to decode token for role check:', error);
+    }
+  }
+
+  // FALLBACK TO USER OBJECT
   if (isUser(user)) {
     const userObj = user as User;
-    return userObj.role; // ADMIN OR USER
-  } else {
-    return 'ngo'; // NGOS ARE ALWAYS OF ROLE NGO
+    return userObj.role;
+  } else if (isNgo(user)) {
+    return 'ngo';
   }
+
+  return 'user'; // DEFAULT FALLBACK
 }
 
 // CHECK FOR SPECIFIC ROLE
@@ -34,7 +107,7 @@ export function hasRole(user: AuthUser, requiredRole: string): boolean {
 
 export function hasEntityType(
   user: AuthUser,
-  requiredType: 'user' | 'ngo'
+  requiredType: 'user' | 'ngo',
 ): boolean {
   const entityType = getUserEntityType(user);
   return entityType === requiredType;
@@ -44,7 +117,7 @@ export function hasEntityType(
 export function canAccessResource(
   user: AuthUser,
   resourceOwnerId?: string,
-  requiredRole?: string
+  requiredRole?: string,
 ): boolean {
   if (resourceOwnerId && resourceOwnerId === user.id) return true;
 
@@ -59,7 +132,7 @@ export function isAdmin(user: AuthUser): boolean {
 
 // Interface für die Parameter der getUserDisplayName Funktion
 export interface GetUserDisplayNameParams {
-  user?: AuthUser;
+  user?: AuthUser | null;
   userId?: string | null;
   userType?: string | null;
   authToken?: string | null;
@@ -67,7 +140,7 @@ export interface GetUserDisplayNameParams {
 
 // Lädt den Anzeigenamen für einen Benutzer basierend auf verfügbaren Daten
 export async function getUserDisplayName(
-  params: GetUserDisplayNameParams
+  params: GetUserDisplayNameParams,
 ): Promise<string> {
   const { user, userId, userType, authToken } = params;
 
