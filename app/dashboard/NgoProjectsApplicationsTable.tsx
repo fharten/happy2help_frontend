@@ -25,7 +25,7 @@ const NgoProjectsApplicationsTable = ({
 }) => {
   return (
     <div className='w-full'>
-      <div className='lg:bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-6 lg:p-10'>
+      <div className='lg:bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-6 md:p-8'>
         <h3 className='text-xl lg:text-2xl font-bold text-prussian mb-2 tracking-tight'>
           Bewerbungen
         </h3>
