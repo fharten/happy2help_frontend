@@ -30,10 +30,12 @@ const Header = () => {
   // UPDATE DISPLAY NAME WHEN USER CHANGES
   useEffect(() => {
     const loadUserName = async () => {
-      if (!isAuthenticated || !user) {
+      if (isHydrated && (!isAuthenticated || !user)) {
         setDisplayName('Account');
         return;
       }
+
+      console.log(user);
 
       try {
         const displayName = await getUserDisplayName({
@@ -47,7 +49,7 @@ const Header = () => {
     };
 
     loadUserName();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, isHydrated, user]);
 
   const handleAuthToggle = () => {
     if (isAuthenticated) {

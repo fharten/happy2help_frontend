@@ -204,6 +204,25 @@ export function AdminOrEntityNgoRoute({
   );
 }
 
+// 10. ADMIN OR OWNER OR ENTITY NGO
+export function AdminOrOwnerOrEntityNgoRoute({
+  children,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'>) {
+  return (
+    <ProtectedRoute
+      customCheck={(user) =>
+        hasRole(user, 'admin') ||
+        hasRole(user, 'owner') ||
+        hasEntityType(user, 'ngo')
+      }
+      {...props}
+    >
+      {children}
+    </ProtectedRoute>
+  );
+}
+
 // GENERIC MULTI-CONDITION ROUTE FOR COMPLEX SCENARIOS
 export function MultiConditionRoute({
   children,

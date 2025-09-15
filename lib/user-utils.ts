@@ -132,7 +132,7 @@ export function isAdmin(user: AuthUser): boolean {
 
 // Interface für die Parameter der getUserDisplayName Funktion
 export interface GetUserDisplayNameParams {
-  user?: AuthUser;
+  user?: AuthUser | null;
   userId?: string | null;
   userType?: string | null;
   authToken?: string | null;
