@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,15 +24,10 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-      }
+      },
     );
 
     if (!res.ok) return toast.error('Email oder Passwort falsch');
-<<<<<<< HEAD
-    const { token } = await res.json();
-    document.cookie = `token=${token}; entity=${entity}`;
-    router.push(entity === 'ngos' ? '/dasboard' : '/projects');
-=======
     const data = await res.json();
 
     if (data.data?.accessToken) {
@@ -48,7 +43,6 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
     } else {
       router.push('/dashboard');
     }
->>>>>>> 484c6b3fed525376ef713c3c969fccaafade65bd
   };
 
   return (
@@ -95,12 +89,17 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
               />
             </div>
             <div className='flex flex-col gap-3'>
-              <Button type='submit' className='w-full'>
+              <ButtonComponent
+                variant='primary'
+                size='md'
+                type='submit'
+                className='w-full'
+              >
                 Login
-              </Button>
-              <Button variant='outline' className='w-full'>
+              </ButtonComponent>
+              <ButtonComponent variant='secondary' size='md' className='w-full'>
                 Login mit Google
-              </Button>
+              </ButtonComponent>
             </div>
           </div>
           <div className='mt-4 text-center text-sm'>

@@ -5,11 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Link as LucideLink } from 'lucide-react';
 import { Calendar, Building2 } from 'lucide-react';
+import BadgeComponent from '@/components/BadgeComponent';
+import ButtonComponent from '@/components/ButtonComponent';
 
 interface ProjectProps {
   project: Project;
@@ -31,8 +32,8 @@ export default function ProjectCard({ project }: ProjectProps) {
   const categoryNames = project.categories.slice(0, 3).map((cat) => cat.name);
 
   return (
-    <Card className='w-full bg-light-mint/10 backdrop-blur-xl border-0 shadow-2xl rounded-[2rem] transition-all duration-200 hover:scale-[1.01] hover:shadow-3xl hover:bg-light-mint/15 py-0'>
-      <div className='flex flex-col md:grid md:grid-cols-2 lg:gap-6 md:gap-8 items-stretch'>
+    <Card className='w-full bg-light-mint/10 backdrop-blur-xl border-0 shadow-2xl rounded-[2rem] transition-all duration-200 hover:scale-[1.01] hover:shadow-3xl py-0'>
+      <div className='flex flex-col md:grid md:grid-cols-2 items-stretch'>
         {/* Bild */}
         <div className='flex justify-center w-full md:order-2 order-1'>
           <div className='w-full aspect-[4/3]'>
@@ -63,15 +64,14 @@ export default function ProjectCard({ project }: ProjectProps) {
                 </Link>
                 <Link
                   href={`/ngos/${project.ngo.id}`}
-                  className='inline-flex items-center gap-1.5 text-prussian/70 hover:text-prussian group transition-colors text-sm font-medium whitespace-nowrap bg-white/60 px-3 py-1.5 rounded-full'
+                  className='inline-flex items-center gap-1.5 text-prussian/70 hover:text-prussian group transition-colors text-sm font-medium whitespace-nowrap'
                 >
-                  <LucideLink
-                    size={12}
-                    className='group-hover:opacity-100 transition-opacity duration-200'
-                  />
-                  <span className='group-hover:opacity-100 transition-opacity duration-200 truncate max-w-[120px]'>
-                    {project.ngo.name}
-                  </span>
+                  <ButtonComponent variant='secondary' size='sm'>
+                    <LucideLink size={12} className='mr-1' />
+                    <span className='truncate max-w-[120px]'>
+                      {project.ngo.name}
+                    </span>
+                  </ButtonComponent>
                 </Link>
               </div>
 
@@ -108,17 +108,23 @@ export default function ProjectCard({ project }: ProjectProps) {
           <div className='flex flex-wrap gap-2 mt-auto'>
             {categoryNames.length > 0 ? (
               categoryNames.map((name, index) => (
-                <Badge
+                <BadgeComponent
                   key={name + index}
-                  className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30 px-3 py-1 text-xs font-medium rounded-full'
+                  variant='category'
+                  size='sm'
+                  className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
                 >
                   {name}
-                </Badge>
+                </BadgeComponent>
               ))
             ) : (
-              <Badge className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30 px-3 py-1 text-xs font-medium rounded-full'>
+              <BadgeComponent
+                variant='category'
+                size='sm'
+                className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
+              >
                 Keine Kategorie
-              </Badge>
+              </BadgeComponent>
             )}
           </div>
         </div>

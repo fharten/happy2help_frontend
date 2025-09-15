@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -401,7 +401,9 @@ const NgoProfileForm = () => {
           <span className='ml-4 text-gray-400'>Lädt neu...</span>
         )}
 
-        <Button type='submit'>Änderungen speichern</Button>
+        <ButtonComponent variant='primary' size='md' type='submit'>
+          Änderungen speichern
+        </ButtonComponent>
       </form>
     </Form>
   );
