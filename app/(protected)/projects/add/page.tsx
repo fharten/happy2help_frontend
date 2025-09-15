@@ -5,7 +5,7 @@ import { ProjectForm } from '@/components/CreateAndEditForm';
 export default function AddNewProject() {
   return (
     <EntityNgoRoute>
-      <ProjectForm />
+      <ProjectForm isUpdate={false} />
     </EntityNgoRoute>
   );
 }
