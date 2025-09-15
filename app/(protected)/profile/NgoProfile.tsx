@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ButtonComponent from '@/components/ButtonComponent';
 import Image from 'next/image';
-import { authenticatedFetcher, getUserId } from '@/lib/auth';
 import {
   Edit,
   MapPin,
@@ -19,6 +18,7 @@ import {
   AlertCircle,
   Eye,
 } from 'lucide-react';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 interface NgoProfile {
   id: string;
@@ -45,15 +45,21 @@ interface NgoProfile {
 }
 
 const NgoProfile = () => {
-  const router = useRouter();
-  const ngoId = getUserId();
+  const { user } = useAuth();
+  const ngoId = user?.id;
 
-  const { data, isLoading, error } = useSWR<{ data: NgoProfile }>(
+  const router = useRouter();
+
+  const {
+    data: ngo,
+    isLoading,
+    error,
+  } = useSWR<NgoProfile>(
     ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
-  if (isLoading || !data)
+  if (isLoading || !ngo)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -73,7 +79,6 @@ const NgoProfile = () => {
       </div>
     );
 
-  const ngo = data.data;
   const ngoImage = ngo.image || '/images/projects/logo_happy2help.jpg';
 
   const imageUrl =

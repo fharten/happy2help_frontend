@@ -1,13 +1,11 @@
 'use client';
 
-import React from 'react';
-import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ButtonComponent from '@/components/ButtonComponent';
 import Image from 'next/image';
-import { authenticatedFetcher, getUserId } from '@/lib/auth';
 import {
   Edit,
   MapPin,
@@ -17,6 +15,7 @@ import {
   User as UserIcon,
   Eye,
 } from 'lucide-react';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
   id: string;
@@ -35,15 +34,22 @@ interface UserProfile {
 }
 
 const UserProfile = () => {
+  const { user } = useAuth();
+  const userId = user?.id;
+
   const router = useRouter();
-  const userId = getUserId();
 
-  const { data, isLoading, error } = useSWR<{ data: UserProfile }>(
+  const {
+    data: userData,
+    isLoading,
+    error,
+  } = useSWR<UserProfile>(
     userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
-    authenticatedFetcher
+    swrFetcher,
   );
+  console.log(userData);
 
-  if (isLoading || !data)
+  if (isLoading || !userData)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -63,8 +69,7 @@ const UserProfile = () => {
       </div>
     );
 
-  const user = data.data;
-  const userImage = user.image || '/images/users/default-user.jpg';
+  const userImage = userData?.image || '/images/users/default-user.jpg';
 
   const imageUrl =
     userImage.startsWith('http') || userImage.startsWith('/')
@@ -82,7 +87,7 @@ const UserProfile = () => {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imageUrl}
-                    alt={`Profilbild von ${user.firstName} ${user.lastName}`}
+                    alt={`Profilbild von ${userData.firstName} ${userData.lastName}`}
                     className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     onError={(e) => {
                       e.currentTarget.src = '/images/users/default-user.jpg';
@@ -91,7 +96,7 @@ const UserProfile = () => {
                 ) : (
                   <Image
                     src={imageUrl}
-                    alt={`Profilbild von ${user.firstName} ${user.lastName}`}
+                    alt={`Profilbild von ${userData.firstName} ${userData.lastName}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
@@ -101,13 +106,13 @@ const UserProfile = () => {
             </div>
             <div className='space-y-2'>
               <CardTitle className='text-3xl font-bold text-prussian'>
-                {user.firstName} {user.lastName}
+                {userData.firstName} {userData.lastName}
               </CardTitle>
               <div className='flex items-center gap-2 text-prussian/70'>
                 <MapPin size={16} />
                 <span>
-                  {user.zipCode && `${user.zipCode} `}
-                  {user.city}, {user.state}
+                  {userData.zipCode && `${userData.zipCode} `}
+                  {userData.city}, {userData.state}
                 </span>
               </div>
             </div>
@@ -122,13 +127,13 @@ const UserProfile = () => {
               Persönliche Informationen
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {user.yearOfBirth && (
+              {userData.yearOfBirth && (
                 <div className='flex items-center gap-3'>
                   <Calendar size={16} className='text-prussian/60' />
                   <div>
                     <div className='text-sm text-prussian/60'>Geburtsjahr</div>
                     <div className='font-medium text-prussian'>
-                      {user.yearOfBirth}
+                      {userData.yearOfBirth}
                     </div>
                   </div>
                 </div>
@@ -140,7 +145,7 @@ const UserProfile = () => {
                     Registriert seit
                   </div>
                   <div className='font-medium text-prussian'>
-                    {new Date(user.createdAt).toLocaleDateString('de-DE', {
+                    {new Date(userData.createdAt).toLocaleDateString('de-DE', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -152,31 +157,31 @@ const UserProfile = () => {
           </div>
 
           {/* Kontaktinformationen */}
-          {(user.contactEmail || user.phone) && (
+          {(userData.contactEmail || userData.phone) && (
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2 flex items-center gap-2'>
                 <Mail size={20} />
                 Kontaktinformationen
               </h3>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {user.contactEmail && (
+                {userData.contactEmail && (
                   <div className='flex items-center gap-3'>
                     <Mail size={16} className='text-prussian/60' />
                     <div>
                       <div className='text-sm text-prussian/60'>E-Mail</div>
                       <div className='font-medium text-prussian'>
-                        {user.contactEmail}
+                        {userData.contactEmail}
                       </div>
                     </div>
                   </div>
                 )}
-                {user.phone && (
+                {userData.phone && (
                   <div className='flex items-center gap-3'>
                     <Phone size={16} className='text-prussian/60' />
                     <div>
                       <div className='text-sm text-prussian/60'>Telefon</div>
                       <div className='font-medium text-prussian'>
-                        {user.phone}
+                        {userData.phone}
                       </div>
                     </div>
                   </div>
@@ -191,8 +196,8 @@ const UserProfile = () => {
               Fähigkeiten
             </h3>
             <div className='flex flex-wrap gap-2'>
-              {user.skills && user.skills.length > 0 ? (
-                user.skills.map((skill: string) => (
+              {userData.skills && userData.skills.length > 0 ? (
+                userData.skills.map((skill: string) => (
                   <Badge
                     key={skill}
                     variant='secondary'
@@ -210,13 +215,13 @@ const UserProfile = () => {
           </div>
 
           {/* Vereinsmitgliedschaften */}
-          {user.ngoMemberships && user.ngoMemberships.length > 0 && (
+          {userData.ngoMemberships && userData.ngoMemberships.length > 0 && (
             <div className='space-y-4'>
               <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                 Vereinsmitgliedschaften
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {user.ngoMemberships.map(
+                {userData.ngoMemberships.map(
                   (membership: string, index: number) => (
                     <Badge
                       key={index}
@@ -225,7 +230,7 @@ const UserProfile = () => {
                     >
                       {membership}
                     </Badge>
-                  )
+                  ),
                 )}
               </div>
             </div>

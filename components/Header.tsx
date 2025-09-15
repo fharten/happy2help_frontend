@@ -142,7 +142,7 @@ const Header = () => {
               <button
                 onClick={handleAuthToggle}
                 disabled={showLoadingState}
-                className={`flex items-center px-2 py-2 text-sm lg:text-base font-medium rounded-full bg-light-mint/90 text-prussian hover:bg-light-mint transition-all duration-200 shadow-md hover:shadow-lg ${
+                className={`flex hover:cursor-pointer space-x-2 items-center px-2 py-2 text-sm lg:text-base font-medium rounded-full bg-light-mint/90 text-prussian hover:bg-light-mint transition-all duration-200 shadow-md hover:shadow-lg ${
                   !isAuthenticated ? 'gap-2 px-2 lg:px-4' : ''
                 } ${showLoadingState ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
@@ -153,15 +153,15 @@ const Header = () => {
                     <span className='hidden sm:inline'>Loading...</span>
                   </>
                 ) : isAuthenticated ? (
-                  <button className='hover:cursor-pointer flex items-center space-x-2'>
+                  <>
                     <LogOut size={16} strokeWidth={2.5} />
                     <span className='hidden sm:inline'>Logout</span>
-                  </button>
+                  </>
                 ) : (
-                  <button className='hover:cursor-pointer flex items-center space-x-2'>
+                  <>
                     <LogIn size={16} strokeWidth={2.5} />
                     <span className='hidden sm:inline'>Login</span>
-                  </button>
+                  </>
                 )}
               </button>
             </div>
