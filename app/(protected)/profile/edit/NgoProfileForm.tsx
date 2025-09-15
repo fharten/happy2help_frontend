@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { authenticatedFetcher, getUserId, getAuthToken } from '@/lib/auth';
+import { getAuthToken } from '@/lib/auth';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 interface NgoProfile {
