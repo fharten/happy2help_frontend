@@ -1,10 +1,40 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasRole, hasEntityType } from '@/lib/user-utils';
 import { AuthUser } from '@/types/auth';
+import useSWR from 'swr';
+
+// Define the resource types
+interface ProjectResource {
+  id: string;
+  ngoId: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface ApplicationResource {
+  id: string;
+  userId: string;
+  project?: {
+    ngoId: string;
+  };
+  [key: string]: unknown;
+}
+
+interface NotificationResource {
+  id: string;
+  userId?: string;
+  ngoId?: string;
+  [key: string]: unknown;
+}
+
+type ResourceData =
+  | ProjectResource
+  | ApplicationResource
+  | NotificationResource;
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -29,12 +59,10 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (isLoading) {
-      console.log('Still loading, not checking auth yet');
       return;
     }
 
     if (!user || !isAuthenticated) {
-      console.log('Not authenticated, redirecting to login');
       router.push(
         `${fallbackPath}?redirect=${encodeURIComponent(
           window.location.pathname,
@@ -44,12 +72,9 @@ export function ProtectedRoute({
     }
 
     if (customCheck && !customCheck(user)) {
-      console.log('Custom check failed, redirecting to unauthorized');
-      //router.push('/unauthorized');
+      router.push('/unauthorized');
       return;
     }
-
-    console.log('All checks passed, user can access this route');
   }, [user, isLoading, isAuthenticated, customCheck, router, fallbackPath]);
 
   if (isLoading) {
@@ -67,19 +92,214 @@ export function ProtectedRoute({
   return <>{children}</>;
 }
 
-// 1. OWNER ONLY
-export function OwnerRoute({
+// Helper function to check resource ownership
+function checkResourceOwnership(
+  user: AuthUser,
+  resource: ResourceData,
+  resourceType: string,
+): boolean {
+  if (!resource) return false;
+
+  switch (resourceType) {
+    case 'project': {
+      const projectResource = resource as ProjectResource;
+      const isOwner =
+        hasEntityType(user, 'ngo') && projectResource.ngoId === user.id;
+      return isOwner;
+    }
+
+    case 'application': {
+      const applicationResource = resource as ApplicationResource;
+      // User owns application if application.userId === user.id
+      if (
+        hasEntityType(user, 'user') &&
+        applicationResource.userId === user.id
+      ) {
+        return true;
+      }
+      // NGO owns the project the application is for
+      if (
+        hasEntityType(user, 'ngo') &&
+        applicationResource.project?.ngoId === user.id
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    case 'notification': {
+      const notificationResource = resource as NotificationResource;
+      return (
+        notificationResource.userId === user.id ||
+        notificationResource.ngoId === user.id
+      );
+    }
+
+    default:
+      return false;
+  }
+}
+
+// RESOURCE OWNER ROUTE - Dynamic ownership checking
+export function ResourceOwnerRoute({
+  children,
+  resourceType,
+  allowedRoles = ['admin'],
+  fallbackPath = '/login',
+  loadingComponent = (
+    <div className='flex items-center justify-center min-h-screen'>
+      Loading...
+    </div>
+  ),
+}: ProtectedRouteProps & {
+  resourceType: 'project' | 'application' | 'notification';
+  allowedRoles?: string[];
+}) {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const resourceId = params?.id as string;
+
+  // Check if user has admin role that bypasses ownership
+  const hasAdminRole = user && allowedRoles.some((role) => hasRole(user, role));
+
+  // Construct the API URL
+  const apiUrl =
+    user && resourceId && !hasAdminRole
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/${resourceType}s/${resourceId}`
+      : null;
+
+  // Fetch the resource to check ownership
+  const {
+    data: resourceData,
+    isLoading: isLoadingResource,
+    error,
+  } = useSWR<ResourceData>(apiUrl);
+
+  useEffect(() => {
+    if (!user || !isAuthenticated) {
+      router.push(
+        `${fallbackPath}?redirect=${encodeURIComponent(
+          window.location.pathname,
+        )}`,
+      );
+      return;
+    }
+
+    if (!resourceId) {
+      router.push('/unauthorized');
+      return;
+    }
+
+    if (hasAdminRole) return;
+
+    // Only check ownership if we have resource data
+    if (resourceData) {
+      const isOwner = checkResourceOwnership(user, resourceData, resourceType);
+
+      if (!isOwner) {
+        router.push('/unauthorized');
+        return;
+      }
+    } else if (error) {
+      router.push('/unauthorized');
+      return;
+    }
+    // If resourceData is still null/undefined but no error, keep loading
+  }, [
+    user,
+    isLoading,
+    isAuthenticated,
+    resourceId,
+    hasAdminRole,
+    resourceData,
+    isLoadingResource,
+    error,
+    router,
+    fallbackPath,
+    resourceType,
+  ]);
+
+  if (isLoading || (user && !hasAdminRole && isLoadingResource)) {
+    return <>{loadingComponent}</>;
+  }
+
+  if (!user || !isAuthenticated || !resourceId) {
+    return <>{loadingComponent}</>;
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='text-center'>
+          <h2 className='text-xl font-semibold mb-2'>Error</h2>
+          <p>Failed to load resource data</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If admin role, allow access without ownership check
+  if (hasAdminRole) {
+    return <>{children}</>;
+  }
+
+  // If we have resource data, check ownership
+  if (resourceData) {
+    const isOwner = checkResourceOwnership(user, resourceData, resourceType);
+
+    if (!isOwner) {
+      return (
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h2 className='text-xl font-semibold mb-2'>Access Denied</h2>
+            <p>You don&apos;t have permission to access this resource.</p>
+          </div>
+        </div>
+      );
+    }
+
+    return <>{children}</>;
+  }
+
+  return <>{loadingComponent}</>;
+}
+
+// RESOURCE-SPECIFIC OWNER ROUTES
+export function ProjectOwnerRoute({
   children,
   ...props
 }: Omit<ProtectedRouteProps, 'customCheck'>) {
   return (
-    <ProtectedRoute customCheck={(user) => hasRole(user, 'owner')} {...props}>
+    <ResourceOwnerRoute resourceType='project' {...props}>
       {children}
-    </ProtectedRoute>
+    </ResourceOwnerRoute>
   );
 }
 
-// 2. ENTITY USER (user entity type)
+export function ApplicationOwnerRoute({
+  children,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'>) {
+  return (
+    <ResourceOwnerRoute resourceType='application' {...props}>
+      {children}
+    </ResourceOwnerRoute>
+  );
+}
+
+export function NotificationOwnerRoute({
+  children,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'>) {
+  return (
+    <ResourceOwnerRoute resourceType='notification' {...props}>
+      {children}
+    </ResourceOwnerRoute>
+  );
+}
+
+// ENTITY TYPE ROUTES
 export function EntityUserRoute({
   children,
   ...props
@@ -94,7 +314,6 @@ export function EntityUserRoute({
   );
 }
 
-// 3. ENTITY NGO (ngo entity type)
 export function EntityNgoRoute({
   children,
   ...props
@@ -109,58 +328,7 @@ export function EntityNgoRoute({
   );
 }
 
-// 4. OWNER OR NGO
-export function OwnerOrNgoRoute({
-  children,
-  ...props
-}: Omit<ProtectedRouteProps, 'customCheck'>) {
-  return (
-    <ProtectedRoute
-      customCheck={(user) =>
-        hasRole(user, 'owner') || hasEntityType(user, 'ngo')
-      }
-      {...props}
-    >
-      {children}
-    </ProtectedRoute>
-  );
-}
-
-// 5. OWNER & ENTITY USER (must be both owner role AND user entity)
-export function OwnerAndEntityUserRoute({
-  children,
-  ...props
-}: Omit<ProtectedRouteProps, 'customCheck'>) {
-  return (
-    <ProtectedRoute
-      customCheck={(user) =>
-        hasRole(user, 'owner') && hasEntityType(user, 'user')
-      }
-      {...props}
-    >
-      {children}
-    </ProtectedRoute>
-  );
-}
-
-// 6. OWNER & ENTITY NGO (must be both owner role AND ngo entity)
-export function OwnerAndEntityNgoRoute({
-  children,
-  ...props
-}: Omit<ProtectedRouteProps, 'customCheck'>) {
-  return (
-    <ProtectedRoute
-      customCheck={(user) =>
-        hasRole(user, 'owner') && hasEntityType(user, 'ngo')
-      }
-      {...props}
-    >
-      {children}
-    </ProtectedRoute>
-  );
-}
-
-// 7. ADMIN ONLY
+// ADMIN ROUTES
 export function AdminRoute({
   children,
   ...props
@@ -172,22 +340,6 @@ export function AdminRoute({
   );
 }
 
-// 8. ADMIN OR OWNER
-export function AdminOrOwnerRoute({
-  children,
-  ...props
-}: Omit<ProtectedRouteProps, 'customCheck'>) {
-  return (
-    <ProtectedRoute
-      customCheck={(user) => hasRole(user, 'admin') || hasRole(user, 'owner')}
-      {...props}
-    >
-      {children}
-    </ProtectedRoute>
-  );
-}
-
-// 9. ADMIN OR ENTITY NGO
 export function AdminOrEntityNgoRoute({
   children,
   ...props
@@ -196,25 +348,6 @@ export function AdminOrEntityNgoRoute({
     <ProtectedRoute
       customCheck={(user) =>
         hasRole(user, 'admin') || hasEntityType(user, 'ngo')
-      }
-      {...props}
-    >
-      {children}
-    </ProtectedRoute>
-  );
-}
-
-// 10. ADMIN OR OWNER OR ENTITY NGO
-export function AdminOrOwnerOrEntityNgoRoute({
-  children,
-  ...props
-}: Omit<ProtectedRouteProps, 'customCheck'>) {
-  return (
-    <ProtectedRoute
-      customCheck={(user) =>
-        hasRole(user, 'admin') ||
-        hasRole(user, 'owner') ||
-        hasEntityType(user, 'ngo')
       }
       {...props}
     >
@@ -235,14 +368,13 @@ export function MultiConditionRoute({
 }: Omit<ProtectedRouteProps, 'customCheck'> & {
   requiredRoles?: string[];
   requiredEntityTypes?: ('user' | 'ngo')[];
-  requireAllRoles?: boolean; // true = AND, false = OR
-  requireAllEntityTypes?: boolean; // true = AND, false = OR
+  requireAllRoles?: boolean;
+  requireAllEntityTypes?: boolean;
   customLogic?: (user: AuthUser) => boolean;
 }) {
   return (
     <ProtectedRoute
       customCheck={(user) => {
-        // CUSTOM LOGIC TAKES PRECEDENCE
         if (customLogic) {
           return customLogic(user);
         }
@@ -250,7 +382,6 @@ export function MultiConditionRoute({
         let roleCheck = true;
         let entityCheck = true;
 
-        // CHECK ROLES
         if (requiredRoles.length > 0) {
           if (requireAllRoles) {
             roleCheck = requiredRoles.every((role) => hasRole(user, role));
@@ -259,7 +390,6 @@ export function MultiConditionRoute({
           }
         }
 
-        // CHECK ENTITY TYPES
         if (requiredEntityTypes.length > 0) {
           if (requireAllEntityTypes) {
             entityCheck = requiredEntityTypes.every((entityType) =>

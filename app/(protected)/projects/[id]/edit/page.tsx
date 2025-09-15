@@ -1,8 +1,12 @@
-import { ProjectForm } from "@/components/CreateAndEditForm";
+import { ProjectOwnerRoute } from '@/components/auth/ProtectedRoute';
+import { ProjectForm } from '@/components/CreateAndEditForm';
 
 const ProjectEditPage = () => {
-  return <ProjectForm isUpdate/>;
-
+  return (
+    <ProjectOwnerRoute>
+      <ProjectForm isUpdate />
+    </ProjectOwnerRoute>
+  );
 };
 
 export default ProjectEditPage;
