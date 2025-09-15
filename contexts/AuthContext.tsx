@@ -18,7 +18,7 @@ import {
 } from '@/types/auth';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useRouter } from 'next/navigation';
-import { isTokenExpired } from '@/lib/jwt-utils';
+import { decodeToken, isTokenExpired } from '@/lib/jwt-utils';
 import { SWRConfig } from 'swr';
 
 // INTERFACE
@@ -61,6 +61,7 @@ const swrFetcher = async (url: string) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [tokens, setTokens, removeTokens] = useLocalStorage<AuthTokens | null>(
     'auth_tokens',
     null,
@@ -69,11 +70,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useLocalStorage<AuthUser | null>('auth_user', null);
   const router = useRouter();
 
+  // WAIT FOR HYDRATION FIRST
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Debug logging
+  // useEffect(() => {
+  //    console.log('AuthContext Debug:' {
+  //     user: !!user,
+  //     isLoading,
+  //     isHydrated,
+  //     hasTokens: !!tokens,
+  //     hasAuthUser: !!authUser,
+  //     isAuthenticated: !!user && !!tokens,
+  //   });
+  // }, [user, isLoading, isHydrated, tokens, authUser]);
+
   const loginUser = async (credentials: LoginRequest) => {
     setIsLoading(true);
 
     try {
       const res = await AuthService.loginUser(credentials);
+      // console.log('Login User Response:', res);
+
       setTokens(res.tokens);
       setAuthUser(res.user);
       setUser(res.user);
@@ -84,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         '/projects';
       router.push(redirectUrl);
     } catch (error) {
+      // console.error('Login User Error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -95,9 +116,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await AuthService.loginNgo(credentials);
+      console.log('Login NGO Response:', res);
+
+      // DECODE TOKEN TO GET ADDITIONAL USER INFO
+      const decodedToken = decodeToken(res.tokens.accessToken);
+
+      // MERGE TOKEN INFO WITH USER OBJECT
+      const enrichedUser = {
+        ...res.user,
+        role: decodedToken?.role || 'ngo',
+        entityType: decodedToken?.entityType || 'ngo',
+      };
+
       setTokens(res.tokens);
-      setAuthUser(res.user);
-      setUser(res.user);
+      setAuthUser(enrichedUser); // STORE ENRICHED USER
+      setUser(enrichedUser); // SET ENRICHED USER
 
       // REDIRECT AFTER LOGIN
       const redirectUrl =
@@ -105,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         '/dashboard';
       router.push(redirectUrl);
     } catch (error) {
+      console.error('Login NGO Error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -144,8 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       if (tokens?.refreshToken) await AuthService.logout(tokens.refreshToken);
-    } catch (error) {
-      console.error('Logout error:', error);
+      // } catch (error) {
+      // console.error('Logout error:', error);
     } finally {
       removeTokens();
       removeAuthUser();
@@ -157,41 +191,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      if (authUser) setUser(authUser);
+      if (authUser) {
+        // console.log('Refreshing user from localStorage:', authUser);
+        setUser(authUser);
+      }
     } catch (error) {
-      console.error('Failed to refresh user:', error);
+      // console.error('Failed to refresh user:', error);
       setUser(null);
     }
   };
 
-  // AUTO REFRESH TOKEN
+  // INITIALIZE AUTH STATE AFTER HYDRATION
   useEffect(() => {
-    if (!tokens?.accessToken) {
-      setUser(null);
-      setIsLoading(false);
+    if (!isHydrated) {
+      // console.log('Not hydrated yet, waiting...');
       return;
     }
 
-    // SET USER FROM LOCALSTORAGE IF TOKENS EXIST
-    if (authUser) setUser(authUser);
+    // console.log('Hydrated, initializing auth...', { tokens, authUser });
 
-    const checkAndRefreshToken = async () => {
-      if (isTokenExpired(tokens.accessToken)) {
-        try {
-          const newTokens = await AuthService.refreshTokenFunction(
-            tokens.refreshToken,
-          );
-          setTokens(newTokens);
-        } catch (error) {
-          console.error('Token refresh failed:', error);
-          await logout();
+    const initializeAuth = async () => {
+      try {
+        if (!tokens?.accessToken) {
+          // console.log('No tokens found, user not authenticated');
+          setUser(null);
+          setIsLoading(false);
+          return;
         }
+
+        if (!authUser) {
+          // console.log('Tokens exist but no user data, clearing tokens');
+          removeTokens();
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        // console.log('Found tokens and user, checking token validity...');
+
+        // CHECK IF TOKEN IS EXPIRED
+        if (isTokenExpired(tokens.accessToken)) {
+          // console.log('Token expired, attempting refresh...');
+          try {
+            const newTokens = await AuthService.refreshTokenFunction(
+              tokens.refreshToken,
+            );
+            // console.log('Token refreshed successfully');
+            setTokens(newTokens);
+            setUser(authUser);
+          } catch (error) {
+            // console.error('Token refresh failed, clearing auth:', error);
+            removeTokens();
+            removeAuthUser();
+            setUser(null);
+          }
+        } else {
+          // console.log('Token is valid, setting user');
+          setUser(authUser);
+        }
+      } catch (error) {
+        // console.error('Auth initialization error:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
-    checkAndRefreshToken();
-  }, [tokens, authUser, setTokens, logout]);
+    initializeAuth();
+  }, [isHydrated, tokens, authUser, setTokens, removeTokens, removeAuthUser]);
 
   // SET UP REFRESH TIMER
   useEffect(() => {
@@ -205,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           );
           setTokens(newTokens);
         } catch (error) {
-          console.error('Automatic token refresh failed:', error);
+          // console.error('Automatic token refresh failed:', error);
           await logout();
         }
       }
@@ -217,7 +284,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     user,
     tokens,
-    isLoading,
+    isLoading: isLoading || !isHydrated, // Keep loading until hydrated AND auth is initialized
     loginUser,
     loginNgo,
     registerUser,

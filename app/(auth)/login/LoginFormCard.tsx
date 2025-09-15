@@ -1,47 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import ButtonComponent from '@/components/ButtonComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const LoginFormCard = ({ entity }: { entity: string }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
+  const { loginUser, loginNgo } = useAuth();
 
-  const handleSubmit = async () => {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/${entity}/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      },
-    );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-    if (!res.ok) return toast.error('Email oder Passwort falsch');
-    const data = await res.json();
+    try {
+      const credentials = {
+        email: formData.email,
+        password: formData.password,
+      };
 
-    if (data.data?.accessToken) {
-      localStorage.setItem('authToken', data.data.accessToken);
-      localStorage.setItem('userType', entity); // check user entity type for frontend tasks
-      if (data.data.user) {
-        localStorage.setItem('userId', data.data.user.id);
+      if (entity === 'users') {
+        await loginUser(credentials);
+      } else {
+        await loginNgo(credentials);
       }
-    }
-
-    if (entity === 'users') {
-      router.push('/projects');
-    } else {
-      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,20 +47,17 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
         <CardTitle>{entity === 'users' ? 'Account' : 'Verein'} login</CardTitle>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await handleSubmit();
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <div className='flex flex-col gap-6'>
             <div className='grid gap-3'>
               <Label htmlFor='email'>Email</Label>
               <Input
                 id='email'
                 type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder='m@example.com'
                 required
               />
@@ -83,8 +76,10 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
                 id='password'
                 type='password'
                 placeholder='******'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
               />
             </div>
@@ -93,9 +88,10 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
                 variant='primary'
                 size='md'
                 type='submit'
+                disabled={isLoading}
                 className='w-full'
               >
-                Login
+                {isLoading ? 'Logge Dich ein...' : 'Login'}
               </ButtonComponent>
               <ButtonComponent variant='secondary' size='md' className='w-full'>
                 Login mit Google
