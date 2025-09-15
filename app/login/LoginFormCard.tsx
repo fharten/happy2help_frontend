@@ -24,7 +24,7 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-      }
+      },
     );
 
     if (!res.ok) return toast.error('Email oder Passwort falsch');
