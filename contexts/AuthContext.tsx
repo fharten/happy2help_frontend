@@ -38,7 +38,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // FETCHER
-const swrFetcher = async (url: string) => {
+export const swrFetcher = async (url: string) => {
   const tokens = localStorage.getItem('auth_tokens');
   if (!tokens) throw new Error('No auth tokens');
 
@@ -178,8 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       if (tokens?.refreshToken) await AuthService.logout(tokens.refreshToken);
-      // } catch (error) {
-      // console.error('Logout error:', error);
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
       removeTokens();
       removeAuthUser();
@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser);
       }
     } catch (error) {
-      // console.error('Failed to refresh user:', error);
+      console.error('Failed to refresh user:', error);
       setUser(null);
     }
   };
@@ -240,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTokens(newTokens);
             setUser(authUser);
           } catch (error) {
-            // console.error('Token refresh failed, clearing auth:', error);
+            console.error('Token refresh failed, clearing auth:', error);
             removeTokens();
             removeAuthUser();
             setUser(null);
@@ -250,7 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(authUser);
         }
       } catch (error) {
-        // console.error('Auth initialization error:', error);
+        console.error('Auth initialization error:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -272,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           );
           setTokens(newTokens);
         } catch (error) {
-          // console.error('Automatic token refresh failed:', error);
+          console.error('Automatic token refresh failed:', error);
           await logout();
         }
       }

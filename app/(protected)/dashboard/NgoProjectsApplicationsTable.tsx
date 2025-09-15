@@ -78,7 +78,7 @@ const NgoProjectsApplicationsTable = ({
               <div className='space-y-3'>
                 <div>
                   <div className='text-prussian/60 text-xs font-medium mb-1 uppercase tracking-wide'>
-                    Skills
+                    Fähigkeiten
                   </div>
                   <div className='flex flex-wrap gap-1'>
                     {application.skills.slice(0, 4).map((skill) => (
@@ -88,7 +88,7 @@ const NgoProjectsApplicationsTable = ({
                     ))}
                     {application.skills.length > 4 && (
                       <BadgeComponent variant='count' size='sm'>
-                        +{application.skills.length - 4}
+                        {application.skills.length - 4}
                       </BadgeComponent>
                     )}
                   </div>
@@ -138,7 +138,7 @@ const NgoProjectsApplicationsTable = ({
                   Nutzer
                 </TableHead>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Skills
+                  Fähigkeiten
                 </TableHead>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
                   Projekt

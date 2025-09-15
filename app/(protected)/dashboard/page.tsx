@@ -2,27 +2,23 @@
 
 import NgoDashboard from './NgoDashboard';
 import UserDashboard from './UserDashboard';
-import { useEffect, useState } from 'react';
-import { getUserType, isAuthenticated } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { getUserEntityType } from '@/lib/user-utils';
 
 const DashboardPage = () => {
-  const [userType, setUserType] = useState<string | null>(null);
-  const router = useRouter();
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/login');
-      return;
-    }
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div>Lade...</div>
+      </div>
+    );
+  }
 
-    const type = getUserType();
-    setUserType(type);
-  }, [router]);
+  const entityType = getUserEntityType(user!);
 
-  if (!userType) return <div>Lade...</div>;
-
-  return <>{userType === 'users' ? <UserDashboard /> : <NgoDashboard />}</>;
+  return <>{entityType === 'user' ? <UserDashboard /> : <NgoDashboard />}</>;
 };
 
 export default DashboardPage;
