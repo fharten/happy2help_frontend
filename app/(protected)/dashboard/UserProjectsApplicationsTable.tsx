@@ -56,7 +56,7 @@ const UserProjectsApplicationsTable = ({
                         String(application.project.startingAt),
                         {
                           zone: 'utc',
-                        }
+                        },
                       )
                         .setZone('Europe/Berlin')
                         .toFormat('dd.LL.yyyy')}
@@ -88,7 +88,7 @@ const UserProjectsApplicationsTable = ({
               <div className='space-y-3'>
                 <div>
                   <div className='text-prussian/60 text-xs font-medium mb-1 uppercase tracking-wide'>
-                    Deine Skills
+                    Deine Fähigkeiten
                   </div>
                   <div className='flex flex-wrap gap-1'>
                     {application.skills.slice(0, 4).map((skill) => (
@@ -152,7 +152,7 @@ const UserProjectsApplicationsTable = ({
                   Verein
                 </TableHead>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Skills
+                  Fähigkeiten
                 </TableHead>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
                   Projekt

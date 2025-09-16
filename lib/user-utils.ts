@@ -7,19 +7,12 @@ export function isUser(user: AuthUser): boolean {
 }
 
 export function isNgo(user: AuthUser): boolean {
-  console.log('isNgo check - user object:', user);
-
   // METHOD 1: CHECK IF USER OBJECT HAS NGO-SPECIFIC PROPERTIES
-  if (user.hasOwnProperty('name') && user.hasOwnProperty('principal')) {
-    console.log('NGO detected via name/principal properties');
+  if (user.hasOwnProperty('name') && user.hasOwnProperty('principal'))
     return true;
-  }
 
   // METHOD 2: CHECK IF THERE'S AN EXPLICIT ENTITYTYPE FIELD IN USER OBJECT
-  if ('entityType' in user && user.entityType === 'ngo') {
-    console.log('NGO detected via user entityType field');
-    return true;
-  }
+  if ('entityType' in user && user.entityType === 'ngo') return true;
 
   // METHOD 3: CHECK JWT TOKEN FOR ENTITY INFORMATION
   if (typeof window !== 'undefined') {
@@ -33,7 +26,6 @@ export function isNgo(user: AuthUser): boolean {
           decoded &&
           (decoded.entityType === 'ngo' || decoded.role === 'ngo')
         ) {
-          console.log('NGO detected via JWT token');
           return true;
         }
       }
@@ -45,28 +37,18 @@ export function isNgo(user: AuthUser): boolean {
   // METHOD 4: CHECK LOCALSTORAGE USERTYPE (FALLBACK)
   if (typeof window !== 'undefined') {
     const userType = localStorage.getItem('userType');
-    if (userType === 'ngo' || userType === 'ngos') {
-      console.log('NGO detected via localStorage userType');
-      return true;
-    }
+    if (userType === 'ngo' || userType === 'ngos') return true;
   }
 
   // METHOD 5: CHECK IF USER HAS ROLE 'NGO' (IF ROLE IS IN USER OBJECT)
-  if ('role' in user && user.role === 'ngo') {
-    console.log('NGO detected via user role field');
-    return true;
-  }
+  if ('role' in user && user.role === 'ngo') return true;
 
-  console.log('Not detected as NGO');
   return false;
 }
 
 export function getUserEntityType(user: AuthUser): 'user' | 'ngo' {
-  if (isNgo(user)) {
-    return 'ngo';
-  } else {
-    return 'user';
-  }
+  if (isNgo(user)) return 'ngo';
+  return 'user';
 }
 
 export function getUserRole(user: AuthUser): string {
@@ -78,10 +60,7 @@ export function getUserRole(user: AuthUser): string {
         const { accessToken } = JSON.parse(tokens);
         const decoded = decodeToken(accessToken);
 
-        if (decoded && decoded.role) {
-          console.log('Role from JWT:', decoded.role);
-          return decoded.role;
-        }
+        if (decoded && decoded.role) return decoded.role;
       }
     } catch (error) {
       console.warn('Failed to decode token for role check:', error);
@@ -92,9 +71,7 @@ export function getUserRole(user: AuthUser): string {
   if (isUser(user)) {
     const userObj = user as User;
     return userObj.role;
-  } else if (isNgo(user)) {
-    return 'ngo';
-  }
+  } else if (isNgo(user)) return 'ngo';
 
   return 'user'; // DEFAULT FALLBACK
 }
@@ -158,13 +135,9 @@ export async function getUserDisplayName(
         : user.loginEmail.split('@')[0];
     }
     // NGO: wir prüfen erst ob principal existiert (property und truthy value check)
-    else if ('principal' in user && user.principal) {
-      return user.principal;
-    }
+    else if ('principal' in user && user.principal) return user.principal;
     // NGO: als fallbacken prüfen wir ob name existiert (property und truthy value check)
-    else if ('name' in user && user.name) {
-      return user.name;
-    }
+    else if ('name' in user && user.name) return user.name;
   }
 
   // 2. API call
@@ -191,18 +164,14 @@ export async function getUserDisplayName(
 
           // Für NGOs wird entweder principal ODER name als DisplayName verwendet
           if (userType === 'ngos' || userType === 'ngo') {
-            if (entityData.principal) {
-              return entityData.principal;
-            } else if (entityData.name) {
-              return entityData.name;
-            }
+            if (entityData.principal) return entityData.principal;
+            else if (entityData.name) return entityData.name;
           } else {
             // Für Users: Verwende firstName + lastName
-            if (entityData.firstName && entityData.lastName) {
+            if (entityData.firstName && entityData.lastName)
               return `${entityData.firstName} ${entityData.lastName}`;
-            } else if (entityData.loginEmail) {
+            else if (entityData.loginEmail)
               return entityData.loginEmail.split('@')[0];
-            }
           }
         }
       }
@@ -212,11 +181,9 @@ export async function getUserDisplayName(
   }
 
   // Fallbacks
-  if (userType === 'ngos' || userType === 'ngo') {
+  if (userType === 'ngos' || userType === 'ngo')
     return userId ? `NGO-${userId.substring(0, 8)}` : 'NGO Account';
-  } else if (userType === 'users' || userType === 'user') {
+  else if (userType === 'users' || userType === 'user')
     return userId ? `User-${userId.substring(0, 8)}` : 'User Account';
-  } else {
-    return 'Account';
-  }
+  return 'Account';
 }

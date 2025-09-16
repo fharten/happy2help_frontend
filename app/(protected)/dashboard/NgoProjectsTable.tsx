@@ -74,7 +74,7 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
               <div className='space-y-3'>
                 <div>
                   <div className='text-prussian/60 text-xs font-medium mb-1 uppercase tracking-wide'>
-                    Gesuchte Skills
+                    Gesuchte Fähigkeiten
                   </div>
                   <div className='flex flex-wrap gap-1'>
                     {project.skills.slice(0, 4).map((skill) => (

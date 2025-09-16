@@ -25,7 +25,7 @@ const fetcher = async (url: string) => {
 
   if (!res.ok) {
     const error: FetchError = new Error(
-      'An error occurred while fetching the data.'
+      'An error occurred while fetching the data.',
     );
     error.info = await res.json();
     error.status = res.status;
@@ -42,7 +42,7 @@ const ProjectDetailPage = () => {
 
   const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
     id ? `http://localhost:3333/api/projects/${id}` : null,
-    fetcher
+    fetcher,
   );
 
   if (isLoading || !data)
@@ -111,7 +111,6 @@ const ProjectDetailPage = () => {
                     priority={index === 0} // wichtig für seo
                     onError={(e) => {
                       // wenn fehler, dann fallback image
-                      console.log('Image error:', image);
                       e.currentTarget.src = '/images/fallback.png';
                     }}
                   />

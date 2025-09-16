@@ -23,7 +23,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { authenticatedFetcher, getUserId, getAuthToken } from '@/lib/auth';
+import { getAuthToken } from '@/lib/auth';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 interface UserFormData {
   firstname: string;
@@ -72,21 +73,19 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const UserProfileForm = () => {
+  const { user } = useAuth();
+  const userId = user?.id;
+
   const router = useRouter();
-  const userId = getUserId();
 
-  // redirect to login if not authenticated
-  useEffect(() => {
-    if (!userId) {
-      router.push('/login');
-    }
-  }, [userId, router]);
-
-  const { data, isLoading, isValidating, error } = useSWR<{
-    data: UserFormData;
-  }>(
+  const {
+    data: userData,
+    isLoading,
+    isValidating,
+    error,
+  } = useSWR<UserFormData>(
     userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
   const form = useForm<FormValues>({
@@ -109,39 +108,38 @@ const UserProfileForm = () => {
   });
 
   useEffect(() => {
-    if (!data?.data) return;
-    const user = data.data;
+    if (!userData) return;
 
     form.reset({
-      firstName: user.firstName ?? '',
-      lastName: user.lastName ?? '',
-      image: user.image ?? '',
-      contactEmail: user.contactEmail ?? '',
-      phone: user.phone ?? '',
-      yearOfBirth: user.yearOfBirth
-        ? parseInt(user.yearOfBirth, 10)
+      firstName: userData.firstName ?? '',
+      lastName: userData.lastName ?? '',
+      image: userData.image ?? '',
+      contactEmail: userData.contactEmail ?? '',
+      phone: userData.phone ?? '',
+      yearOfBirth: userData.yearOfBirth
+        ? parseInt(userData.yearOfBirth, 10)
         : undefined,
-      skills: Array.isArray(user.skills)
-        ? user.skills.map((skill) =>
-            typeof skill === 'string' ? skill : skill.name
+      skills: Array.isArray(userData.skills)
+        ? userData.skills.map((skill) =>
+            typeof skill === 'string' ? skill : skill.name,
           )
         : [],
-      ngoMemberships: Array.isArray(user.ngoMemberships)
-        ? user.ngoMemberships.map((membership) =>
-            typeof membership === 'string' ? membership : membership.name
+      ngoMemberships: Array.isArray(userData.ngoMemberships)
+        ? userData.ngoMemberships.map((membership) =>
+            typeof membership === 'string' ? membership : membership.name,
           )
         : [],
-      zipCode: typeof user.zipCode === 'number' ? user.zipCode : undefined,
-      city: user.city ?? '',
-      state: user.state ?? '',
-      isDisabled: !!user.isDisabled,
+      zipCode:
+        typeof userData.zipCode === 'number' ? userData.zipCode : undefined,
+      city: userData.city ?? '',
+      state: userData.state ?? '',
+      isDisabled: !!userData.isDisabled,
     });
-  }, [data, form]);
+  }, [userData, form]);
 
   const onSubmit = async (values: FormValues) => {
     if (!userId) return;
 
-    console.log('first');
     try {
       const submitData = {
         ...values,
@@ -159,10 +157,8 @@ const UserProfileForm = () => {
             ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: JSON.stringify(submitData),
-        }
+        },
       );
-
-      console.log(res);
 
       if (!res.ok) {
         toast.error('Fehler beim Speichern der Änderungen');
@@ -177,7 +173,7 @@ const UserProfileForm = () => {
     }
   };
 
-  if (isLoading || !data)
+  if (isLoading || !userData)
     return (
       <div className='flex justify-center items-center min-h-screen'>
         Lade...
@@ -447,7 +443,7 @@ const UserProfileForm = () => {
                               if (
                                 (e.ctrlKey || e.metaKey) &&
                                 ['a', 'c', 'v', 'x'].includes(
-                                  e.key.toLowerCase()
+                                  e.key.toLowerCase(),
                                 )
                               ) {
                                 return;

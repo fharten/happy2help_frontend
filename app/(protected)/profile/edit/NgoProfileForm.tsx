@@ -23,7 +23,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { authenticatedFetcher, getUserId, getAuthToken } from '@/lib/auth';
+import { getAuthToken } from '@/lib/auth';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 interface NgoProfile {
   id: string;
@@ -81,14 +82,19 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const NgoProfileForm = () => {
-  const router = useRouter();
-  const ngoId = getUserId();
+  const { user } = useAuth();
+  const ngoId = user?.id;
 
-  const { data, isLoading, isValidating, error } = useSWR<{
-    data: NgoProfile;
-  }>(
+  const router = useRouter();
+
+  const {
+    data: ngo,
+    isLoading,
+    isValidating,
+    error,
+  } = useSWR<NgoProfile>(
     ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
   const form = useForm<FormValues>({
@@ -110,8 +116,7 @@ const NgoProfileForm = () => {
   });
 
   useEffect(() => {
-    if (!data?.data) return;
-    const ngo = data.data;
+    if (!ngo) return;
 
     form.reset({
       name: ngo.name ?? '',
@@ -126,7 +131,7 @@ const NgoProfileForm = () => {
       state: ngo.state ?? '',
       isDisabled: !!ngo.isDisabled,
     });
-  }, [data, form]);
+  }, [ngo, form]);
 
   const onSubmit = async (values: FormValues) => {
     if (!ngoId) return;
@@ -148,7 +153,7 @@ const NgoProfileForm = () => {
             ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: JSON.stringify(submitData),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -170,7 +175,7 @@ const NgoProfileForm = () => {
         Lade...
       </div>
     );
-  if (isLoading || !data)
+  if (isLoading || !ngo)
     return (
       <div className='flex justify-center items-center min-h-screen'>
         Lade...
@@ -396,7 +401,7 @@ const NgoProfileForm = () => {
                               if (
                                 (e.ctrlKey || e.metaKey) &&
                                 ['a', 'c', 'v', 'x'].includes(
-                                  e.key.toLowerCase()
+                                  e.key.toLowerCase(),
                                 )
                               ) {
                                 return;

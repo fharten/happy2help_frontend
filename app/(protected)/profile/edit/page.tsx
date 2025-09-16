@@ -4,41 +4,32 @@ import React from 'react';
 import NgoProfileForm from './NgoProfileForm';
 import UserProfileForm from './UserProfileForm';
 import MainHeadline from '@/components/MainHeadline';
-import { useEffect, useState } from 'react';
-import { getUserType, isAuthenticated } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { getUserEntityType } from '@/lib/user-utils';
 
 const ProfileEditPage = () => {
-  const [userType, setUserType] = useState<string | null>(null);
-  const router = useRouter();
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/login');
-      return;
-    }
-
-    const type = getUserType();
-    setUserType(type);
-  }, [router]);
-
-  if (!userType)
+  if (isLoading) {
     return (
-      <div className='flex justify-center items-center min-h-screen'>
+      <div className='flex items-center justify-center min-h-screen'>
         <div>Lade...</div>
       </div>
     );
+  }
+
+  const entityType = getUserEntityType(user!);
 
   return (
     <div className='min-h-screen bg-white'>
       <MainHeadline>
-        {userType === 'users'
+        {entityType === 'user'
           ? 'Profil bearbeiten'
           : 'Vereinsprofil bearbeiten'}
       </MainHeadline>
 
       <div className='pb-16'>
-        {userType === 'users' ? <UserProfileForm /> : <NgoProfileForm />}
+        {entityType === 'user' ? <UserProfileForm /> : <NgoProfileForm />}
       </div>
     </div>
   );

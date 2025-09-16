@@ -11,7 +11,7 @@ import {
   LogIn,
   LogOut,
 } from 'lucide-react';
-import NotificationBell from './NotificationBell';
+// import NotificationBell from './NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserDisplayName } from '@/lib/user-utils';
 
@@ -34,8 +34,6 @@ const Header = () => {
         setDisplayName('Account');
         return;
       }
-
-      console.log(user);
 
       try {
         const displayName = await getUserDisplayName({
@@ -135,16 +133,16 @@ const Header = () => {
                 </span>
               )}
 
-              {/* NOTIFICATION BELL - only show when authenticated */}
+              {/* NOTIFICATION BELL - only show when authenticated
               {isAuthenticated && !showLoadingState && user && (
                 <NotificationBell userId={user.id} />
-              )}
+              )} */}
 
               {/* LOGIN/LOGOUT BUTTON */}
               <button
                 onClick={handleAuthToggle}
                 disabled={showLoadingState}
-                className={`flex items-center px-2 py-2 text-sm lg:text-base font-medium rounded-full bg-light-mint/90 text-prussian hover:bg-light-mint transition-all duration-200 shadow-md hover:shadow-lg ${
+                className={`flex hover:cursor-pointer space-x-2 items-center px-2 py-2 text-sm lg:text-base font-medium rounded-full bg-light-mint/90 text-prussian hover:bg-light-mint transition-all duration-200 shadow-md hover:shadow-lg ${
                   !isAuthenticated ? 'gap-2 px-2 lg:px-4' : ''
                 } ${showLoadingState ? 'opacity-50 cursor-not-allowed' : ''}`}
               >

@@ -6,28 +6,12 @@ import NgoProjectsApplicationsTable from './NgoProjectsApplicationsTable';
 import DashboardBar from './DashboardBar';
 import { Projects } from '@/types/project';
 import { Applications } from '@/types/application';
-import { authenticatedFetcher, getUserId, isAuthenticated } from '@/lib/auth';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { swrFetcher } from '@/contexts/AuthContext';
 
 const NgoDashboard = () => {
-  const [ngoId, setNgoId] = useState<string | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/login');
-      return;
-    }
-
-    const id = getUserId();
-    if (!id) {
-      router.push('/login');
-      return;
-    }
-
-    setNgoId(id);
-  }, [router]);
+  const { user } = useAuth();
+  const ngoId = user?.id;
 
   const {
     data: projectsData,
@@ -35,12 +19,12 @@ const NgoDashboard = () => {
     isValidating: isValidatingProjects,
     error: errorProjects,
   } = useSWR<{
-    data: { projects: Projects };
+    projects: Projects;
   }>(
     ngoId
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}/projects?includeStats=true`
       : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
   const {
@@ -49,46 +33,46 @@ const NgoDashboard = () => {
     isValidating: isValidatingApplications,
     error: errorApplications,
   } = useSWR<{
-    data: { applications: Applications };
+    applications: Applications;
   }>(
     ngoId
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}/applications`
       : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
-  if (!ngoId) return <div>Lade...</div>;
-  if (
-    isLoadingProjects ||
-    isLoadingApplications ||
-    !projectsData ||
-    !applicationsData
-  )
+  if (!user || !ngoId || isLoadingProjects || isLoadingApplications) {
     return <div>Lade...</div>;
-  if (errorProjects || errorApplications)
+  }
+
+  if (errorProjects || errorApplications) {
     return (
       <div>
         Fehler:{' '}
-        {errorProjects ? errorProjects.message : errorApplications.message}
+        {errorProjects ? errorProjects.message : errorApplications?.message}
       </div>
     );
+  }
+
+  if (!projectsData || !applicationsData) {
+    return <div>Lade...</div>;
+  }
 
   return (
     <>
       <DashboardBar />
       <div className='container-site rounded-2xl'>
         <div className='py-4 flex flex-col gap-4'>
-          <NgoProjectsTable projects={projectsData.data.projects} />
+          <NgoProjectsTable projects={projectsData.projects} />
           <NgoProjectsApplicationsTable
-            applications={applicationsData.data.applications}
+            applications={applicationsData.applications}
           />
         </div>
       </div>
 
-      {isValidatingProjects ||
-        (isValidatingApplications && (
-          <span className='ml-4 text-gray-400'>Lädt neu...</span>
-        ))}
+      {(isValidatingProjects || isValidatingApplications) && (
+        <span className='ml-4 text-gray-400'>Lädt neu...</span>
+      )}
     </>
   );
 };
