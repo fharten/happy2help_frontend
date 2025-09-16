@@ -38,7 +38,7 @@ export default function ProjectCard({ project }: ProjectProps) {
         <div className='flex justify-center w-full md:order-2 order-1'>
           <div className='w-full aspect-[4/3]'>
             <Image
-              className='w-full h-full object-cover rounded-t-[1.5rem] lg:rounded-tl-[0rem] lg:rounded-r-[1.5rem] shadow-lg'
+              className='w-full h-full object-cover rounded-t-[1.5rem] md:rounded-tl-[0rem] md:rounded-r-[2rem] shadow-lg'
               src={getImageSrc()}
               alt={`Bild vom Projekt ${project.name}`}
               width={500}
@@ -95,10 +95,12 @@ export default function ProjectCard({ project }: ProjectProps) {
 
               {/* Description */}
               <div className='hidden md:block'>
-                <CardDescription className='text-base text-prussian/70 leading-relaxed font-medium'>
-                  {project.description.length > 160
-                    ? project.description.substring(0, 157) + '...'
-                    : project.description}
+                <CardDescription className='text-base text-prussian/70 leading-relaxed font-medium break-words hyphens-auto overflow-hidden'>
+                  <p className='break-all'>
+                    {project.description.length > 160
+                      ? project.description.substring(0, 157) + '...'
+                      : project.description}
+                  </p>
                 </CardDescription>
               </div>
             </CardHeader>
