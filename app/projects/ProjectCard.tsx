@@ -38,7 +38,7 @@ export default function ProjectCard({ project }: ProjectProps) {
         <div className='flex justify-center w-full md:order-2 order-1'>
           <div className='w-full aspect-[4/3]'>
             <Image
-              className='w-full h-full object-cover rounded-t-[1.5rem] lg:rounded-tl-[0rem] lg:rounded-r-[1.5rem] shadow-lg'
+              className='w-full h-full object-cover rounded-t-[1.5rem] md:rounded-tl-[0rem] md:rounded-r-[2rem] shadow-lg'
               src={getImageSrc()}
               alt={`Bild vom Projekt ${project.name}`}
               width={500}
