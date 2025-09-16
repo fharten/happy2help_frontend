@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { authenticatedFetcher } from '@/lib/auth';
+import { Projects } from '@/types/project';
 import {
   MapPin,
   Calendar,
@@ -16,6 +17,7 @@ import {
   User as UserIcon,
   AlertCircle,
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface NgoProfile {
   id: string;
@@ -49,7 +51,19 @@ export default function NgoInfo() {
     authenticatedFetcher
   );
 
-  if (isLoading || !data)
+  // get projects of the NGO
+  const {
+    data: projectsData,
+    isLoading: isLoadingProjects,
+    error: errorProjects,
+  } = useSWR<{
+    data: { projects: Projects };
+  }>(
+    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
+    authenticatedFetcher
+  );
+
+  if (isLoading || isLoadingProjects || !data || !projectsData)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -69,8 +83,22 @@ export default function NgoInfo() {
       </div>
     );
 
+  if (errorProjects)
+    return (
+      <div className='container-site'>
+        <div className='bg-red-50/80 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center border border-red-200'>
+          <div className='text-red-700 font-medium'>
+            Fehler beim Laden: {errorProjects.message}
+          </div>
+        </div>
+      </div>
+    );
+
   const ngo = data.data;
   const ngoImage = ngo.image || '/images/projects/logo_happy2help.jpg';
+  const projects = projectsData.data.projects;
+
+  console.log('PROJECTS: ', projects);
 
   const imageUrl =
     ngoImage.startsWith('http') || ngoImage.startsWith('/')
@@ -276,6 +304,22 @@ export default function NgoInfo() {
                   Keine Tätigkeitsfelder angegeben
                 </span>
               )}
+            </div>
+          </div>
+          {/* Projekte */}
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+              Projekte
+            </h3>
+            <div className='font-medium text-prussian'>
+              <ul>
+                {projects &&
+                  projects.map((project) => (
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      {project.name}
+                    </Link>
+                  ))}
+              </ul>
             </div>
           </div>
         </CardContent>
