@@ -41,12 +41,8 @@ export function isNgo(user: AuthUser): boolean {
   }
 
   // METHOD 5: CHECK IF USER HAS ROLE 'NGO' (IF ROLE IS IN USER OBJECT)
-  if ('role' in user && user.role === 'ngo') {
-    console.log('NGO detected via user role field');
-    return true;
-  }
+  if ('role' in user && user.role === 'ngo') return true;
 
-  console.log('Not detected as NGO');
   return false;
 }
 
@@ -64,10 +60,7 @@ export function getUserRole(user: AuthUser): string {
         const { accessToken } = JSON.parse(tokens);
         const decoded = decodeToken(accessToken);
 
-        if (decoded && decoded.role) {
-          console.log('Role from JWT:', decoded.role);
-          return decoded.role;
-        }
+        if (decoded && decoded.role) return decoded.role;
       }
     } catch (error) {
       console.warn('Failed to decode token for role check:', error);

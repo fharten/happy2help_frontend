@@ -1,11 +1,12 @@
-import React from "react";
-import UserInfo from "./UserInfo";
+import React from 'react';
+import UserInfo from './UserInfo';
+import { OwnerOrAdminOrNgoRoute } from '@/components/auth/ProtectedRoute';
 
 const UsersDetailPage = () => {
   return (
-    <div>
+    <OwnerOrAdminOrNgoRoute resourceType='user'>
       <UserInfo />
-    </div>
+    </OwnerOrAdminOrNgoRoute>
   );
 };
 

@@ -116,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await AuthService.loginNgo(credentials);
-      console.log('Login NGO Response:', res);
 
       // DECODE TOKEN TO GET ADDITIONAL USER INFO
       const decodedToken = decodeToken(res.tokens.accessToken);

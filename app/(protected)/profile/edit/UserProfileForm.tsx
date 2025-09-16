@@ -140,7 +140,6 @@ const UserProfileForm = () => {
   const onSubmit = async (values: FormValues) => {
     if (!userId) return;
 
-    console.log('first');
     try {
       const submitData = {
         ...values,
@@ -160,8 +159,6 @@ const UserProfileForm = () => {
           body: JSON.stringify(submitData),
         },
       );
-
-      console.log(res);
 
       if (!res.ok) {
         toast.error('Fehler beim Speichern der Änderungen');

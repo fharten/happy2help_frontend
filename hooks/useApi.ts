@@ -29,8 +29,7 @@ export function useApi(options: UseApiOptions = {}) {
           tokens.refreshToken,
           (_newTokens) => {
             void _newTokens;
-            // TOKEN REFRESH IS HANDLES BY THE CONTEXTS AUTO REFREASH
-            console.log('Tokens refreshed during API call');
+            // TOKEN REFRESH IS HANDLED BY THE CONTEXTS AUTO REFREASH
           },
         );
 

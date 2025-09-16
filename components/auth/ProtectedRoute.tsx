@@ -31,10 +31,16 @@ interface NotificationResource {
   [key: string]: unknown;
 }
 
+interface UserResource {
+  id: string;
+  [key: string]: unknown;
+}
+
 type ResourceData =
   | ProjectResource
   | ApplicationResource
-  | NotificationResource;
+  | NotificationResource
+  | UserResource;
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -129,10 +135,24 @@ function checkResourceOwnership(
 
     case 'notification': {
       const notificationResource = resource as NotificationResource;
-      return (
+      const canAccess =
         notificationResource.userId === user.id ||
-        notificationResource.ngoId === user.id
-      );
+        notificationResource.ngoId === user.id;
+      return canAccess;
+    }
+
+    case 'user': {
+      const userResource = resource as UserResource;
+
+      // User owns their own profile
+      if (hasEntityType(user, 'user') && userResource.id === user.id) {
+        return true;
+      }
+      // NGOs can view any user profile
+      if (hasEntityType(user, 'ngo')) {
+        return true;
+      }
+      return false;
     }
 
     default:
@@ -152,7 +172,7 @@ export function ResourceOwnerRoute({
     </div>
   ),
 }: ProtectedRouteProps & {
-  resourceType: 'project' | 'application' | 'notification';
+  resourceType: 'project' | 'application' | 'notification' | 'user';
   allowedRoles?: string[];
 }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -265,13 +285,13 @@ export function ResourceOwnerRoute({
   return <>{loadingComponent}</>;
 }
 
-// RESOURCE-SPECIFIC OWNER ROUTES
+// RESOURCE-SPECIFIC OWNER ROUTES (Strict ownership only)
 export function ProjectOwnerRoute({
   children,
   ...props
 }: Omit<ProtectedRouteProps, 'customCheck'>) {
   return (
-    <ResourceOwnerRoute resourceType='project' {...props}>
+    <ResourceOwnerRoute resourceType='project' allowedRoles={[]} {...props}>
       {children}
     </ResourceOwnerRoute>
   );
@@ -282,7 +302,7 @@ export function ApplicationOwnerRoute({
   ...props
 }: Omit<ProtectedRouteProps, 'customCheck'>) {
   return (
-    <ResourceOwnerRoute resourceType='application' {...props}>
+    <ResourceOwnerRoute resourceType='application' allowedRoles={[]} {...props}>
       {children}
     </ResourceOwnerRoute>
   );
@@ -293,7 +313,164 @@ export function NotificationOwnerRoute({
   ...props
 }: Omit<ProtectedRouteProps, 'customCheck'>) {
   return (
-    <ResourceOwnerRoute resourceType='notification' {...props}>
+    <ResourceOwnerRoute
+      resourceType='notification'
+      allowedRoles={[]}
+      {...props}
+    >
+      {children}
+    </ResourceOwnerRoute>
+  );
+}
+
+// USER-SPECIFIC ROUTES (For user profiles with special access rules)
+export function UserOwnerOnlyRoute({
+  children,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'>) {
+  return (
+    <ProtectedRoute
+      customCheck={(user) => {
+        const pathParts = window.location.pathname.split('/');
+        const userId = pathParts[pathParts.length - 1];
+
+        // Only the user themselves can access (must be user entity AND own profile)
+        const canAccess = hasEntityType(user, 'user') && user.id === userId;
+        return canAccess;
+      }}
+      {...props}
+    >
+      {children}
+    </ProtectedRoute>
+  );
+}
+
+export function UserOwnerRoute({
+  children,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'>) {
+  return (
+    <ProtectedRoute
+      customCheck={(user) => {
+        const pathParts = window.location.pathname.split('/');
+        const userId = pathParts[pathParts.length - 1];
+
+        // Admin can access any user profile
+        if (hasRole(user, 'admin')) return true;
+
+        // User can access their own profile
+        if (hasEntityType(user, 'user') && user.id === userId) return true;
+
+        // NGO can access any user profile
+        if (hasEntityType(user, 'ngo')) return true;
+
+        return false;
+      }}
+      {...props}
+    >
+      {children}
+    </ProtectedRoute>
+  );
+}
+
+// STRICT RESOURCE OWNERSHIP ROUTES (Only resource owners, no admin/NGO bypass)
+export function OnlyResourceOwnerRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  if (resourceType === 'user') {
+    return <UserOwnerOnlyRoute {...props}>{children}</UserOwnerOnlyRoute>;
+  }
+
+  return (
+    <ResourceOwnerRoute
+      resourceType={resourceType}
+      allowedRoles={[]} // No admin bypass
+      {...props}
+    >
+      {children}
+    </ResourceOwnerRoute>
+  );
+}
+
+// RESOURCE OWNER + ENTITY NGO (Owner OR any NGO)
+export function ResourceOwnerOrEntityNgoRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  if (resourceType === 'user') {
+    return (
+      <ProtectedRoute
+        customCheck={(user) => {
+          const pathParts = window.location.pathname.split('/');
+          const userId = pathParts[pathParts.length - 1];
+
+          // User owns their own profile OR any NGO can access
+          return (
+            (hasEntityType(user, 'user') && user.id === userId) ||
+            hasEntityType(user, 'ngo')
+          );
+        }}
+        {...props}
+      >
+        {children}
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ResourceOwnerRoute
+      resourceType={resourceType}
+      allowedRoles={[]} // No admin bypass
+      {...props}
+    >
+      <ProtectedRoute customCheck={(user) => hasEntityType(user, 'ngo')}>
+        {children}
+      </ProtectedRoute>
+    </ResourceOwnerRoute>
+  );
+}
+
+// RESOURCE OWNER + ADMIN (Owner OR admin)
+export function ResourceOwnerOrAdminRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  if (resourceType === 'user') {
+    return (
+      <ProtectedRoute
+        customCheck={(user) => {
+          const pathParts = window.location.pathname.split('/');
+          const userId = pathParts[pathParts.length - 1];
+
+          // User owns their own profile OR admin can access
+          return (
+            (hasEntityType(user, 'user') && user.id === userId) ||
+            hasRole(user, 'admin')
+          );
+        }}
+        {...props}
+      >
+        {children}
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ResourceOwnerRoute
+      resourceType={resourceType}
+      allowedRoles={['admin']} // Admin can bypass ownership
+      {...props}
+    >
       {children}
     </ResourceOwnerRoute>
   );
@@ -353,6 +530,59 @@ export function AdminOrEntityNgoRoute({
     >
       {children}
     </ProtectedRoute>
+  );
+}
+
+// LEGACY COMBINATION ROUTES (Updated for clarity)
+export function OwnerOrNgoRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  return (
+    <ResourceOwnerOrEntityNgoRoute resourceType={resourceType} {...props}>
+      {children}
+    </ResourceOwnerOrEntityNgoRoute>
+  );
+}
+
+export function OwnerOrAdminRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  return (
+    <ResourceOwnerOrAdminRoute resourceType={resourceType} {...props}>
+      {children}
+    </ResourceOwnerOrAdminRoute>
+  );
+}
+
+export function OwnerOrAdminOrNgoRoute({
+  children,
+  resourceType,
+  ...props
+}: Omit<ProtectedRouteProps, 'customCheck'> & {
+  resourceType: 'project' | 'application' | 'notification' | 'user';
+}) {
+  if (resourceType === 'user') {
+    return <UserOwnerRoute {...props}>{children}</UserOwnerRoute>;
+  }
+
+  return (
+    <ResourceOwnerRoute
+      resourceType={resourceType}
+      allowedRoles={['admin']} // Admin can bypass ownership
+      {...props}
+    >
+      <ProtectedRoute customCheck={(user) => hasEntityType(user, 'ngo')}>
+        {children}
+      </ProtectedRoute>
+    </ResourceOwnerRoute>
   );
 }
 

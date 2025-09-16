@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { authenticatedFetcher } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Calendar, Mail, Phone, User as UserIcon } from 'lucide-react';
 
 interface UserProfileInfo {
@@ -34,13 +34,18 @@ interface UserProfileInfo {
 
 export default function UserInfo() {
   const { id } = useParams();
+  const { user: currentUser } = useAuth();
 
-  const { data, isLoading, error } = useSWR<{ data: UserProfileInfo }>(
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useSWR<UserProfileInfo>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}` : null,
-    authenticatedFetcher
+    // Uses the global SWR fetcher from AuthContext
   );
 
-  if (isLoading || !data)
+  if (isLoading || !user)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -60,13 +65,16 @@ export default function UserInfo() {
       </div>
     );
 
-  const user = data.data;
   const userImage = user.image || '/images/users/default-user.jpg';
 
   const imageUrl =
     userImage.startsWith('http') || userImage.startsWith('/')
       ? userImage
       : `/images/projects/${userImage}`;
+
+  // Use firstName/lastName with fallback to firstname/lastname for backward compatibility
+  const displayFirstName = user.firstName || user.firstname;
+  const displayLastName = user.lastName || user.lastname;
 
   return (
     <div className='container-site'>
@@ -79,7 +87,7 @@ export default function UserInfo() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imageUrl}
-                    alt={`Profilbild von ${user.firstName} ${user.lastName}`}
+                    alt={`Profilbild von ${displayFirstName} ${displayLastName}`}
                     className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     onError={(e) => {
                       e.currentTarget.src = '/images/users/default-user.jpg';
@@ -88,7 +96,7 @@ export default function UserInfo() {
                 ) : (
                   <Image
                     src={imageUrl}
-                    alt={`Profilbild von ${user.firstName} ${user.lastName}`}
+                    alt={`Profilbild von ${displayFirstName} ${displayLastName}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
@@ -98,15 +106,18 @@ export default function UserInfo() {
             </div>
             <div className='space-y-2'>
               <CardTitle className='text-3xl font-bold text-prussian'>
-                {user.firstName} {user.lastName}
+                {displayFirstName} {displayLastName}
               </CardTitle>
-              <div className='flex items-center gap-2 text-prussian/70'>
-                <MapPin size={16} />
-                <span>
-                  {user.zipCode && `${user.zipCode} `}
-                  {user.city}, {user.state}
-                </span>
-              </div>
+              {(user.zipCode || user.city || user.state) && (
+                <div className='flex items-center gap-2 text-prussian/70'>
+                  <MapPin size={16} />
+                  <span>
+                    {user.zipCode && `${user.zipCode} `}
+                    {user.city && `${user.city}${user.state ? ', ' : ''}`}
+                    {user.state}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -182,6 +193,18 @@ export default function UserInfo() {
             </div>
           )}
 
+          {/* Beschreibung */}
+          {user.description && (
+            <div className='space-y-4'>
+              <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                Über mich
+              </h3>
+              <div className='text-prussian/80 leading-relaxed'>
+                {user.description}
+              </div>
+            </div>
+          )}
+
           {/* Fähigkeiten */}
           <div className='space-y-4'>
             <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
@@ -206,6 +229,26 @@ export default function UserInfo() {
             </div>
           </div>
 
+          {/* Projekte */}
+          {user.projects && user.projects.length > 0 && (
+            <div className='space-y-4'>
+              <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                Projekte
+              </h3>
+              <div className='flex flex-wrap gap-2'>
+                {user.projects.map((project: { id: string; name: string }) => (
+                  <Badge
+                    key={project.id}
+                    variant='outline'
+                    className='border-light-mint/40 text-prussian hover:bg-light-mint/10'
+                  >
+                    {project.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Vereinsmitgliedschaften */}
           {user.ngoMemberships && user.ngoMemberships.length > 0 && (
             <div className='space-y-4'>
@@ -222,7 +265,7 @@ export default function UserInfo() {
                     >
                       {membership.name}
                     </Badge>
-                  )
+                  ),
                 )}
               </div>
             </div>

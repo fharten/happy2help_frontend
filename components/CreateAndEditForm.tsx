@@ -325,10 +325,6 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
       });
 
       const createdOrUpdated = await req;
-      console.log(
-        isUpdate ? 'Updated project:' : 'Created project:',
-        createdOrUpdated,
-      );
 
       if (isUpdate && projectId) {
         router.push(`/projects/${projectId}`);

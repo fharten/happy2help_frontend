@@ -47,7 +47,6 @@ const UserProfile = () => {
     userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
     swrFetcher,
   );
-  console.log(userData);
 
   if (isLoading || !userData)
     return (
