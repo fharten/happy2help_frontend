@@ -65,7 +65,6 @@ export default function UserInfo() {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                (
                 {user.image && (
                   <Image
                     src={user.image}
