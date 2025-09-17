@@ -21,6 +21,9 @@ async function deleteApplication(applicationId: string, accessToken: string) {
     throw new Error(error.message || 'Failed to delete application');
   }
 
+  // todo: replace by mutate
+  location.reload();
+
   if (res.status == 204) {
     return (
       <>{alert('Du hast deine Bewerbung für das Projekt zurückgezogen.')}</>
