@@ -393,7 +393,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                     maxHeight: '100%',
                     maxWidth: '100%',
                   }}
-                  alt='Project image'
+                  alt={`Bild für Projekt ${projectDetailData.name}`}
                 />
 
                 <button
