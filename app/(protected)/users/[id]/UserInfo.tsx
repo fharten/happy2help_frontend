@@ -6,8 +6,8 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Calendar, Mail, Phone, User as UserIcon } from 'lucide-react';
+import Link from 'next/link';
 
 interface UserProfileInfo {
   id: string;
@@ -20,7 +20,7 @@ interface UserProfileInfo {
   description?: string;
   city?: string;
   country?: string;
-  skills?: Array<{ id: string; name: string }>;
+  skills?: Array<string>;
   projects?: Array<{ id: string; name: string }>;
   createdAt: string;
   updatedAt: string;
@@ -34,7 +34,6 @@ interface UserProfileInfo {
 
 export default function UserInfo() {
   const { id } = useParams();
-  const { user: currentUser } = useAuth();
 
   const {
     data: user,
@@ -212,13 +211,13 @@ export default function UserInfo() {
             </h3>
             <div className='flex flex-wrap gap-2'>
               {user.skills && user.skills.length > 0 ? (
-                user.skills.map((skill: { id: string; name: string }) => (
+                user.skills.map((skill: string) => (
                   <Badge
-                    key={skill.id}
+                    key={skill}
                     variant='secondary'
                     className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
                   >
-                    {skill.name}
+                    {skill}
                   </Badge>
                 ))
               ) : (
@@ -237,13 +236,14 @@ export default function UserInfo() {
               </h3>
               <div className='flex flex-wrap gap-2'>
                 {user.projects.map((project: { id: string; name: string }) => (
-                  <Badge
-                    key={project.id}
-                    variant='outline'
-                    className='border-light-mint/40 text-prussian hover:bg-light-mint/10'
-                  >
-                    {project.name}
-                  </Badge>
+                  <Link href={`/projects/${project.id}`} key={project.id}>
+                    <Badge
+                      variant='outline'
+                      className='border-light-mint/40 text-prussian hover:bg-light-mint/10'
+                    >
+                      {project.name}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             </div>
