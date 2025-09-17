@@ -33,7 +33,7 @@ import { XCircle } from 'lucide-react';
 interface Skill {
   id: string;
   name: string;
-  description: string;
+  description?: string;
 }
 
 interface UserProfile {
@@ -56,7 +56,7 @@ type UserDetailResponse = Omit<UserProfile, 'skills'> & {
   role?: string;
   isActivated?: boolean;
   isDisabled?: boolean;
-  skills?: Array<{ id: string; name: string; description: string }> | string[];
+  skills?: Array<{ id: string; name: string; description?: string }> | string[];
 };
 
 function useSkills() {

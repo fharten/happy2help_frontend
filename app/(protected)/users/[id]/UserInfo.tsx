@@ -23,7 +23,7 @@ interface UserProfileInfo {
   description?: string;
   city?: string;
   country?: string;
-  skills?: Array<{ id: string; name: string; description: string }>;
+  skills?: Array<{ id: string; name: string; description?: string }>;
   projects?: Array<{ id: string; name: string }>;
   createdAt: string;
   updatedAt: string;
@@ -202,7 +202,7 @@ export default function UserInfo() {
                   (skill: {
                     id: string;
                     name: string;
-                    description: string;
+                    description?: string;
                   }) => (
                     <Badge
                       key={skill.id}
