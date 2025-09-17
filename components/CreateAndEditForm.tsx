@@ -444,19 +444,23 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
             name='zipCode'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>PLZ*</FormLabel>
+                <FormLabel>Postleitzahl</FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
+                    type='text'
                     inputMode='numeric'
+                    placeholder='12345'
+                    maxLength={5}
+                    className='h-11'
                     value={field.value ?? ''}
-                    onChange={(event) => {
-                      const value = event.target.valueAsNumber;
-                      field.onChange(!value ? undefined : Number(value));
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
+                      if (value === '') {
+                        field.onChange(undefined);
+                      } else {
+                        field.onChange(parseInt(value, 10));
+                      }
                     }}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
                   />
                 </FormControl>
                 <FormMessage />
