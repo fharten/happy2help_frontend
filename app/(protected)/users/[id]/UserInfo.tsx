@@ -12,6 +12,7 @@ import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 import SpinnerComponent from '@/components/SpinnerComponent';
 import ButtonComponent from '@/components/ButtonComponent';
 
+
 interface UserProfileInfo {
   id: string;
   firstname: string;
