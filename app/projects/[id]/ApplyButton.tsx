@@ -1,0 +1,76 @@
+'use client';
+
+import { useAuth } from '@/contexts/AuthContext';
+import ButtonComponent from '@/components/ButtonComponent';
+
+interface ApplicationData {
+  projectId: string;
+  userId: string;
+}
+
+async function createApplication(data: ApplicationData, accessToken: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
+  console.log('Response from server: ', res);
+
+  // you can't apply more than once
+  if (res.status == 409 && res.statusText == 'Conflict') {
+    return <>{alert('Du hast dich bereits für dieses Projekt beworben!')}</>;
+  }
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to create application');
+  }
+
+  if (res.status == 201 && res.statusText == 'Created') {
+    return (
+      <>
+        {alert(
+          'Du hast dich auf das Projekt beworben. Der Verein wird über deine Bewerbung informiert.'
+        )}
+      </>
+    );
+  }
+
+  const newApplication = await res.json();
+  return newApplication;
+}
+
+interface PropsType {
+  children: any;
+  projectId: string;
+}
+
+export default function ApplyButton({ children, projectId }: PropsType) {
+  const { user, tokens } = useAuth();
+
+  const applicationData = {
+    projectId: projectId,
+    userId: user!.id,
+  };
+
+  const handleClick = () => {
+    createApplication(applicationData, tokens!.accessToken);
+  };
+
+  return (
+    <ButtonComponent
+      variant='primary'
+      size='lg'
+      onClick={handleClick}
+      className='w-full lg:w-auto'
+    >
+      {children}
+    </ButtonComponent>
+  );
+}

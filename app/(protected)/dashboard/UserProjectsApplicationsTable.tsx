@@ -18,6 +18,10 @@ import { DateTime } from 'luxon';
 import { Applications } from '@/types/application';
 import { CircleCheck, CircleX, EllipsisVertical, Loader } from 'lucide-react';
 import Link from 'next/link';
+import {
+  ApplicationWithdrawButton,
+  ApplicationWithdrawButtonMobile,
+} from './UserApplicationWithdrawButton';
 
 const UserProjectsApplicationsTable = ({
   applications,
@@ -56,7 +60,7 @@ const UserProjectsApplicationsTable = ({
                         String(application.project.startingAt),
                         {
                           zone: 'utc',
-                        },
+                        }
                       )
                         .setZone('Europe/Berlin')
                         .toFormat('dd.LL.yyyy')}
@@ -78,7 +82,12 @@ const UserProjectsApplicationsTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
                       <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
-                        Anfrage zurückziehen
+                        {/* Withdraw Button */}
+                        <ApplicationWithdrawButtonMobile
+                          applicationId={application.id}
+                        >
+                          Bewerbung zurückziehen
+                        </ApplicationWithdrawButtonMobile>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -161,6 +170,7 @@ const UserProjectsApplicationsTable = ({
                   Status
                 </TableHead>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
+                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -240,6 +250,18 @@ const UserProjectsApplicationsTable = ({
                   </TableCell>
                   {application.status !== 'rejected' && (
                     <TableCell className='px-6 py-5 whitespace-nowrap'>
+                      {/* Withdraw Button */}
+                      <div className='lg:mt-0 mt-4'>
+                        <ApplicationWithdrawButton
+                          applicationId={application.id}
+                        >
+                          Bewerbung zurückziehen
+                        </ApplicationWithdrawButton>
+                      </div>
+                    </TableCell>
+                  )}
+                  {application.status !== 'rejected' && (
+                    <TableCell className='px-6 py-5 whitespace-nowrap'>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <ButtonComponent variant='action' size='sm'>
@@ -248,7 +270,7 @@ const UserProjectsApplicationsTable = ({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
                           <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
-                            Anfrage zurückziehen
+                            Für zukünftige Erweiterungen
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
