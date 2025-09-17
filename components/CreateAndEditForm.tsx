@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 
 import { format, parse, parseISO, isValid } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, XCircle } from 'lucide-react';
 import { de } from 'date-fns/locale';
 import { MultiSelect, type Option as SelectOption } from './ui/multiselect';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +32,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from './ui/textarea';
+import ImageDropzone from './ImageDropzone';
+import Image from 'next/image';
+import { Card } from './ui/card';
 
 interface Skill {
   id: string;
@@ -43,20 +46,6 @@ interface Category {
   id: string;
   name: string;
   description: string;
-}
-
-interface SkillResponse {
-  success: boolean;
-  message: string;
-  data: Skill[] | undefined;
-  count: number;
-}
-
-interface CategoryResponse {
-  success: boolean;
-  message: string;
-  data: Category[] | undefined;
-  count: number;
 }
 
 interface Project {
@@ -227,7 +216,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
     mode: 'onSubmit',
   });
 
-  const { data: projectDetailData } = useSWR<ProjectDetailResponse>(
+  const { data: projectDetailData, mutate } = useSWR<ProjectDetailResponse>(
     isUpdate && projectId
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${projectId}`
       : null,
@@ -294,7 +283,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
       state: data.state,
       principal: data.principal,
       compensation: data.compensation || undefined,
-      images: ['dummy.jpg'],
+      images: data.images,
       skills: data.skills,
       categories: data.categories,
       isActive: data.isActive,
@@ -324,7 +313,11 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
             : 'Fehler: Das Projekt konnte nicht angelegt werden.',
       });
 
-      const createdOrUpdated = await req;
+      await req;
+
+      if (isUpdate && projectId && mutate) {
+        await mutate();
+      }
 
       if (isUpdate && projectId) {
         router.push(`/projects/${projectId}`);
@@ -336,200 +329,207 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
     }
   };
 
+  const handleDeleteImage = async (imageIndex: number) => {
+    if (!tokens?.accessToken || !projectId) {
+      toast.error('Authentifizierung fehlgeschlagen');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${projectId}/images/${imageIndex}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete image');
+      }
+
+      toast.success('Bild wurde gelöscht');
+
+      if (mutate) {
+        await mutate();
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Fehler beim Löschen des Bildes');
+    }
+  };
+
   // Show loading if we don't have user yet
   if (!user || !ngoId) {
     return <div>Lade...</div>;
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-        <FormField
-          control={form.control}
-          name='name'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Projektname*</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className='container-site'>
+      <ImageDropzone
+        resourceId={projectId}
+        resourceType='projects'
+        onUploadSuccess={() => mutate()}
+      />
 
-        <FormField
-          control={form.control}
-          name='city'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Stadt*</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='zipCode'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>PLZ*</FormLabel>
-              <FormControl>
-                <Input
-                  type='number'
-                  inputMode='numeric'
-                  value={field.value ?? ''}
-                  onChange={(event) => {
-                    const value = event.target.valueAsNumber;
-                    field.onChange(!value ? undefined : Number(value));
+      {projectDetailData?.images && projectDetailData?.images.length > 0 && (
+        <>
+          <h2 className='mb-2 font-sans'>Projektbilder</h2>
+          <div className='flex mb-8 h-24 gap-x-4'>
+            {projectDetailData?.images.map((image, index) => (
+              <Card
+                className='bg-light-mint/10 flex items-center justify-center h-full relative group'
+                key={image}
+              >
+                <Image
+                  width={100}
+                  height={100}
+                  src={image}
+                  style={{
+                    objectFit: 'cover',
+                    maxHeight: '100%',
+                    maxWidth: '100%',
                   }}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
+                  alt='Project image'
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name='state'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bundesland*</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <button
+                  onClick={() => handleDeleteImage(index)}
+                  className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
+                  type='button'
+                >
+                  <XCircle fill='red' />
+                </button>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
 
-        <FormField
-          control={form.control}
-          name='principal'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ansprechpartner*</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='compensation'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Vergütung (optional)</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='description'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Projektbeschreibung*</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder='Beschreibe deine Projektidee.'
-                  className='resize-none'
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name='startingAt'
-          render={({ field }) => {
-            const toDate = (value?: string) => {
-              if (!value) return undefined;
-              const candidates = [
-                () => parseISO(value),
-                () => parse(value, 'yyyy-MM-dd', new Date()),
-                () => new Date(value),
-              ];
-              for (const mk of candidates) {
-                const date = mk();
-                if (isValid(date)) return date;
-              }
-              return undefined;
-            };
-
-            const selectedDate = toDate(field.value);
-
-            return (
-              <FormItem className='flex flex-col'>
-                <FormLabel>Startdatum*</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <ButtonComponent
-                        variant='secondary'
-                        size='md'
-                        className={cn(
-                          'w-[240px] pl-3 text-left font-normal',
-                          !selectedDate && 'text-muted-foreground',
-                        )}
-                      >
-                        {selectedDate && isValid(selectedDate) ? (
-                          format(selectedDate, 'PPP', { locale: de })
-                        ) : (
-                          <span>Datum wählen</span>
-                        )}
-                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                      </ButtonComponent>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
-                    <Calendar
-                      mode='single'
-                      selected={selectedDate}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
-                      }
-                      disabled={(date) => date < new Date('2024-12-31')}
-                      captionLayout='dropdown'
-                      locale={de}
-                    />
-                  </PopoverContent>
-                </Popover>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+          <FormField
+            control={form.control}
+            name='name'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Projektname*</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name='endingAt'
-          render={({ field }) => {
-            const toDate = (value: unknown) => {
-              if (!value) return undefined;
+          <FormField
+            control={form.control}
+            name='city'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Stadt*</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              if (value instanceof Date)
-                return isValid(value) ? value : undefined;
+          <FormField
+            control={form.control}
+            name='zipCode'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>PLZ*</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    inputMode='numeric'
+                    value={field.value ?? ''}
+                    onChange={(event) => {
+                      const value = event.target.valueAsNumber;
+                      field.onChange(!value ? undefined : Number(value));
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              if (typeof value === 'string') {
+          <FormField
+            control={form.control}
+            name='state'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bundesland*</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='principal'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ansprechpartner*</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='compensation'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Vergütung (optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='description'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Projektbeschreibung*</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='Beschreibe deine Projektidee.'
+                    className='resize-none'
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='startingAt'
+            render={({ field }) => {
+              const toDate = (value?: string) => {
+                if (!value) return undefined;
                 const candidates = [
                   () => parseISO(value),
                   () => parse(value, 'yyyy-MM-dd', new Date()),
@@ -539,112 +539,180 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                   const date = mk();
                   if (isValid(date)) return date;
                 }
-              }
+                return undefined;
+              };
 
-              return undefined;
-            };
+              const selectedDate = toDate(field.value);
 
-            const selectedDate = toDate(field.value);
+              return (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Startdatum*</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <ButtonComponent
+                          variant='secondary'
+                          size='md'
+                          className={cn(
+                            'w-[240px] pl-3 text-left font-normal',
+                            !selectedDate && 'text-muted-foreground',
+                          )}
+                        >
+                          {selectedDate && isValid(selectedDate) ? (
+                            format(selectedDate, 'PPP', { locale: de })
+                          ) : (
+                            <span>Datum wählen</span>
+                          )}
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        </ButtonComponent>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={selectedDate}
+                        onSelect={(date) =>
+                          field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
+                        }
+                        disabled={(date) => date < new Date('2024-12-31')}
+                        captionLayout='dropdown'
+                        locale={de}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
 
-            return (
-              <FormItem className='flex flex-col'>
-                <FormLabel>Enddatum*</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <ButtonComponent
-                        variant='secondary'
-                        size='md'
-                        className={cn(
-                          'w-[240px] pl-3 text-left font-normal',
-                          !selectedDate && 'text-muted-foreground',
-                        )}
-                      >
-                        {selectedDate && isValid(selectedDate) ? (
-                          format(selectedDate, 'PPP', { locale: de })
-                        ) : (
-                          <span>Datum wählen</span>
-                        )}
-                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                      </ButtonComponent>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
-                    <Calendar
-                      mode='single'
-                      selected={selectedDate}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
-                      }
-                      disabled={(date) => date < new Date('2024-12-31')}
-                      captionLayout='dropdown'
-                      locale={de}
+          <FormField
+            control={form.control}
+            name='endingAt'
+            render={({ field }) => {
+              const toDate = (value: unknown) => {
+                if (!value) return undefined;
+
+                if (value instanceof Date)
+                  return isValid(value) ? value : undefined;
+
+                if (typeof value === 'string') {
+                  const candidates = [
+                    () => parseISO(value),
+                    () => parse(value, 'yyyy-MM-dd', new Date()),
+                    () => new Date(value),
+                  ];
+                  for (const mk of candidates) {
+                    const date = mk();
+                    if (isValid(date)) return date;
+                  }
+                }
+
+                return undefined;
+              };
+
+              const selectedDate = toDate(field.value);
+
+              return (
+                <FormItem className='flex flex-col'>
+                  <FormLabel>Enddatum*</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <ButtonComponent
+                          variant='secondary'
+                          size='md'
+                          className={cn(
+                            'w-[240px] pl-3 text-left font-normal',
+                            !selectedDate && 'text-muted-foreground',
+                          )}
+                        >
+                          {selectedDate && isValid(selectedDate) ? (
+                            format(selectedDate, 'PPP', { locale: de })
+                          ) : (
+                            <span>Datum wählen</span>
+                          )}
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        </ButtonComponent>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={selectedDate}
+                        onSelect={(date) =>
+                          field.onChange(date ? format(date, 'yyyy-MM-dd') : '')
+                        }
+                        disabled={(date) => date < new Date('2024-12-31')}
+                        captionLayout='dropdown'
+                        locale={de}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name='skills'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gesuchte Fähigkeiten*</FormLabel>
+                <FormControl>
+                  {skillOptions.length > 0 ? (
+                    <MultiSelect
+                      options={skillOptions}
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      placeholder='Fähigkeiten auswählen'
+                      searchPlaceholder='Suchen…'
                     />
-                  </PopoverContent>
-                </Popover>
+                  ) : (
+                    <div>Lade Fähigkeiten...</div>
+                  )}
+                </FormControl>
                 <FormMessage />
               </FormItem>
-            );
-          }}
-        />
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name='skills'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gesuchte Fähigkeiten*</FormLabel>
-              <FormControl>
-                {skillOptions.length > 0 ? (
-                  <MultiSelect
-                    options={skillOptions}
-                    value={field.value ?? []}
-                    onChange={field.onChange}
-                    placeholder='Fähigkeiten auswählen'
-                    searchPlaceholder='Suchen…'
-                  />
-                ) : (
-                  <div>Lade Fähigkeiten...</div>
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name='categories'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Projektkategorie</FormLabel>
+                <FormControl>
+                  {categoryOptions.length > 0 ? (
+                    <MultiSelect
+                      options={categoryOptions}
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      placeholder='Kategorien auswählen'
+                      searchPlaceholder='Suchen…'
+                    />
+                  ) : (
+                    <div>Lade Kategorien...</div>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name='categories'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Projektkategorie</FormLabel>
-              <FormControl>
-                {categoryOptions.length > 0 ? (
-                  <MultiSelect
-                    options={categoryOptions}
-                    value={field.value ?? []}
-                    onChange={field.onChange}
-                    placeholder='Kategorien auswählen'
-                    searchPlaceholder='Suchen…'
-                  />
-                ) : (
-                  <div>Lade Kategorien...</div>
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <ButtonComponent variant='primary' size='md' type='submit'>
-          Speichern
-        </ButtonComponent>
-        <Link href='./../dashboard'>
-          <ButtonComponent variant='secondary' size='md'>
-            Abbrechen
+          <ButtonComponent variant='primary' size='md' type='submit'>
+            Speichern
           </ButtonComponent>
-        </Link>
-      </form>
-    </Form>
+          <Link href='./../dashboard'>
+            <ButtonComponent variant='secondary' size='md'>
+              Abbrechen
+            </ButtonComponent>
+          </Link>
+        </form>
+      </Form>
+    </div>
   );
 }
