@@ -368,51 +368,18 @@ const NgoProfileForm = () => {
                         <FormLabel>Postleitzahl</FormLabel>
                         <FormControl>
                           <Input
-                            type='number'
+                            type='text'
+                            inputMode='numeric'
                             placeholder='12345'
+                            maxLength={5}
                             className='h-11'
                             value={field.value ?? ''}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
                               if (value === '') {
                                 field.onChange(undefined);
                               } else {
-                                const numValue = parseInt(value, 10);
-                                if (!isNaN(numValue)) {
-                                  field.onChange(numValue);
-                                }
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              const allowedKeys = [
-                                'Backspace',
-                                'Delete',
-                                'Tab',
-                                'Escape',
-                                'Enter',
-                                'Home',
-                                'End',
-                                'ArrowLeft',
-                                'ArrowRight',
-                                'ArrowDown',
-                                'ArrowUp',
-                              ];
-
-                              if (
-                                (e.ctrlKey || e.metaKey) &&
-                                ['a', 'c', 'v', 'x'].includes(
-                                  e.key.toLowerCase(),
-                                )
-                              ) {
-                                return;
-                              }
-
-                              if (allowedKeys.includes(e.key)) {
-                                return;
-                              }
-
-                              if (!/^[0-9]$/.test(e.key)) {
-                                e.preventDefault();
+                                field.onChange(parseInt(value, 10));
                               }
                             }}
                           />
