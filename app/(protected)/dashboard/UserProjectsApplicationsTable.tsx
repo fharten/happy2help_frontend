@@ -81,7 +81,7 @@ const UserProjectsApplicationsTable = ({
                       <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
                         {/* Withdraw Button */}
                         <WithdrawButtonMobile applicationId={application.id}>
-                          Anfrage zurückziehen
+                          Bewerbung zurückziehen
                         </WithdrawButtonMobile>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -263,7 +263,7 @@ const UserProjectsApplicationsTable = ({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
                           <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
-                            Anfrage zurückziehen
+                            Für zukünftige Erweiterungen
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
