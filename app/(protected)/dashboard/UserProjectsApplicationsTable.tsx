@@ -18,7 +18,10 @@ import { DateTime } from 'luxon';
 import { Applications } from '@/types/application';
 import { CircleCheck, CircleX, EllipsisVertical, Loader } from 'lucide-react';
 import Link from 'next/link';
-import { WithdrawButton, WithdrawButtonMobile } from './WithdrawButton';
+import {
+  ApplicationWithdrawButton,
+  ApplicationWithdrawButtonMobile,
+} from './UserApplicationWithdrawButton';
 
 const UserProjectsApplicationsTable = ({
   applications,
@@ -80,9 +83,11 @@ const UserProjectsApplicationsTable = ({
                     <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
                       <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
                         {/* Withdraw Button */}
-                        <WithdrawButtonMobile applicationId={application.id}>
+                        <ApplicationWithdrawButtonMobile
+                          applicationId={application.id}
+                        >
                           Bewerbung zurückziehen
-                        </WithdrawButtonMobile>
+                        </ApplicationWithdrawButtonMobile>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -247,9 +252,11 @@ const UserProjectsApplicationsTable = ({
                     <TableCell className='px-6 py-5 whitespace-nowrap'>
                       {/* Withdraw Button */}
                       <div className='lg:mt-0 mt-4'>
-                        <WithdrawButton applicationId={application.id}>
+                        <ApplicationWithdrawButton
+                          applicationId={application.id}
+                        >
                           Bewerbung zurückziehen
-                        </WithdrawButton>
+                        </ApplicationWithdrawButton>
                       </div>
                     </TableCell>
                   )}

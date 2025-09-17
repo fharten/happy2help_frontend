@@ -38,7 +38,10 @@ interface PropsType {
   applicationId: string;
 }
 
-export function WithdrawButton({ children, applicationId }: PropsType) {
+export function ApplicationWithdrawButton({
+  children,
+  applicationId,
+}: PropsType) {
   const { user, tokens } = useAuth();
 
   const handleClick = () => {
@@ -57,7 +60,10 @@ export function WithdrawButton({ children, applicationId }: PropsType) {
   );
 }
 
-export function WithdrawButtonMobile({ children, applicationId }: PropsType) {
+export function ApplicationWithdrawButtonMobile({
+  children,
+  applicationId,
+}: PropsType) {
   const { user, tokens } = useAuth();
 
   const handleClick = () => {
