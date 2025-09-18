@@ -23,7 +23,6 @@ const ApplicationRejectButton = ({ children, application }: PropsType) => {
   const { tokens } = useAuth();
 
   const handleTextSubmit = async (text: string) => {
-    debugger;
     console.log('Empfangener Text:', text);
     setSubmittedText(text);
 

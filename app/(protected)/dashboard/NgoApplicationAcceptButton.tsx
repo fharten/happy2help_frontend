@@ -19,9 +19,8 @@ export async function updateApplicationStatus(
   application: Application,
   accessToken: string
 ) {
-  debugger;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}/status`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`,
     {
       method: 'PUT',
       headers: {
@@ -32,8 +31,6 @@ export async function updateApplicationStatus(
     }
   );
   console.log('Response from server: ', res);
-
-  debugger;
 
   if (!res.ok) {
     const error = await res.json();
