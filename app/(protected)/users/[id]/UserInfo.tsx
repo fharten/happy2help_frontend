@@ -12,7 +12,6 @@ import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 import SpinnerComponent from '@/components/SpinnerComponent';
 import ButtonComponent from '@/components/ButtonComponent';
 
-
 interface UserProfileInfo {
   id: string;
   firstname: string;
@@ -98,13 +97,13 @@ export default function UserInfo() {
         <CardContent className='space-y-8'>
           {/* Persönliche Informationen */}
           <div className='space-y-4'>
-            <div className='flex border-b border-light-mint/30 pb-2 '>
+            <div className='flex flex-col space-y-2 md:flex-row border-b border-light-mint/30 pb-2 '>
               <h3 className='text-lg font-semibold text-prussian flex flex-1 items-center gap-2'>
                 <UserIcon size={20} />
                 Persönliche Informationen
               </h3>
               {id === userLoggedIn?.id && (
-                <Link href={`/users/${id}/edit`}>
+                <Link href='/profile/edit'>
                   <ButtonComponent
                     variant='primary'
                     size='md'

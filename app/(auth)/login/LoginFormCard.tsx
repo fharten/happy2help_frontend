@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ButtonComponent from '@/components/ButtonComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Toaster } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const LoginFormCard = ({ entity }: { entity: string }) => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,9 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loginUser, loginNgo } = useAuth();
+  const { user, isLoading: isLoadingUser, loginUser, loginNgo } = useAuth();
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +43,10 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isLoadingUser && user) router.push('/');
+  }, [isLoadingUser, router, user]);
 
   return (
     <Card>
