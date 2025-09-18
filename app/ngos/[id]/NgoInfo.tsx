@@ -53,7 +53,7 @@ export default function NgoInfo() {
     data: ngo,
     isLoading,
     error,
-  } = useSWR<NgoProfile>(
+  } = useSWR<{ data: NgoProfile }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
     authenticatedFetcher,
   );
@@ -68,7 +68,7 @@ export default function NgoInfo() {
     authenticatedFetcher,
   );
 
-  if (isLoading || isLoadingProjects || !ngo || !projectsData)
+  if (isLoading || isLoadingNgo || isLoadingProjects || !ngo || !projectsData)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -106,17 +106,17 @@ export default function NgoInfo() {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {ngo.image && (
+                {ngo.data.image && (
                   <Image
-                    src={ngo.image}
-                    alt={`Logo von ${ngo.name}`}
+                    src={ngo.data.image}
+                    alt={`Logo von ${ngo.data.name}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
                   />
                 )}
               </div>
-              {ngo.isDisabled && (
+              {ngo.data.isDisabled && (
                 <div className='absolute -top-2 -right-2 bg-red-500 rounded-full p-1'>
                   <AlertCircle size={16} className='text-white' />
                 </div>
@@ -124,15 +124,15 @@ export default function NgoInfo() {
             </div>
             <div className='space-y-2'>
               <CardTitle className='text-3xl font-bold text-prussian'>
-                {ngo.name}
+                {ngo.data.name}
               </CardTitle>
               <div className='flex items-center gap-2 text-prussian/70'>
                 <MapPin size={16} />
                 <span>
-                  {ngo.zipCode} {ngo.city}, {ngo.state}
+                  {ngo.data.zipCode} {ngo.data.city}, {ngo.data.state}
                 </span>
               </div>
-              {ngo.isDisabled && (
+              {ngo.data.isDisabled && (
                 <div className='bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm'>
                   <div className='flex items-center gap-2'>
                     <AlertCircle size={16} />
@@ -155,7 +155,7 @@ export default function NgoInfo() {
                 Vereinsinformationen
               </h3>
               {id === ngoLoggedIn?.id && (
-                <Link href={`/ngos/${id}/edit`}>
+                <Link href='/profile/edit'>
                   <ButtonComponent
                     variant='primary'
                     size='md'
@@ -172,7 +172,7 @@ export default function NgoInfo() {
                 <div>
                   <div className='text-sm text-prussian/60'>Vorstand</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.principal}
+                    {ngo.data.principal}
                   </div>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function NgoInfo() {
                     Registriert seit
                   </div>
                   <div className='font-medium text-prussian'>
-                    {new Date(ngo.createdAt).toLocaleDateString('de-DE', {
+                    {new Date(ngo.data.createdAt).toLocaleDateString('de-DE', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -201,23 +201,25 @@ export default function NgoInfo() {
               Kontaktinformationen
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {ngo.contactEmail && (
+              {ngo.data.contactEmail && (
                 <div className='flex items-center gap-3'>
                   <Mail size={16} className='text-prussian/60' />
                   <div>
                     <div className='text-sm text-prussian/60'>E-Mail</div>
                     <div className='font-medium text-prussian'>
-                      {ngo.contactEmail}
+                      {ngo.data.contactEmail}
                     </div>
                   </div>
                 </div>
               )}
-              {ngo.phone && (
+              {ngo.data.phone && (
                 <div className='flex items-center gap-3'>
                   <Phone size={16} className='text-prussian/60' />
                   <div>
                     <div className='text-sm text-prussian/60'>Telefon</div>
-                    <div className='font-medium text-prussian'>{ngo.phone}</div>
+                    <div className='font-medium text-prussian'>
+                      {ngo.data.phone}
+                    </div>
                   </div>
                 </div>
               )}
@@ -235,7 +237,9 @@ export default function NgoInfo() {
                 <Building size={16} className='text-prussian/60' />
                 <div>
                   <div className='text-sm text-prussian/60'>Name</div>
-                  <div className='font-medium text-prussian'>{ngo.name}</div>
+                  <div className='font-medium text-prussian'>
+                    {ngo.data.name}
+                  </div>
                 </div>
               </div>
               <div className='flex items-center gap-3'>
@@ -243,7 +247,7 @@ export default function NgoInfo() {
                 <div>
                   <div className='text-sm text-prussian/60'>Straße & Nr.</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.streetAndNumber}
+                    {ngo.data.streetAndNumber}
                   </div>
                 </div>
               </div>
@@ -252,7 +256,7 @@ export default function NgoInfo() {
                 <div>
                   <div className='text-sm text-prussian/60'>PLZ & Ort</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.zipCode} {ngo.city}
+                    {ngo.data.zipCode} {ngo.data.city}
                   </div>
                 </div>
               </div>
@@ -273,7 +277,9 @@ export default function NgoInfo() {
                 </svg>
                 <div>
                   <div className='text-sm text-prussian/60'>Bundesland</div>
-                  <div className='font-medium text-prussian'>{ngo.state}</div>
+                  <div className='font-medium text-prussian'>
+                    {ngo.data.state}
+                  </div>
                 </div>
               </div>
             </div>
@@ -285,8 +291,8 @@ export default function NgoInfo() {
               Tätigkeitsfelder
             </h3>
             <div className='flex flex-wrap gap-2'>
-              {ngo.industry && ngo.industry.length > 0 ? (
-                ngo.industry.map((field: string) => (
+              {ngo.data.industry && ngo.data.industry.length > 0 ? (
+                ngo.data.industry.map((field: string) => (
                   <Badge
                     key={field}
                     variant='secondary'

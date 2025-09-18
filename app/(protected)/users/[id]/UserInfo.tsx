@@ -103,7 +103,7 @@ export default function UserInfo() {
                 Persönliche Informationen
               </h3>
               {id === userLoggedIn?.id && (
-                <Link href={`/users/${id}/edit`}>
+                <Link href='/profile/edit'>
                   <ButtonComponent
                     variant='primary'
                     size='md'
