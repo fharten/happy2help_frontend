@@ -3,7 +3,7 @@ import { User } from '@/types/user';
 import { decodeToken } from '@/lib/jwt-utils';
 
 export function isUser(user: AuthUser): boolean {
-  return user.hasOwnProperty('role');
+  return user.hasOwnProperty('role') && user.role !== 'ngo';
 }
 
 export function isNgo(user: AuthUser): boolean {
