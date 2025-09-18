@@ -18,6 +18,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import ButtonComponent from '@/components/ButtonComponent';
 
 interface NgoProfile {
   id: string;
@@ -45,10 +47,15 @@ interface NgoProfile {
 
 export default function NgoInfo() {
   const { id } = useParams();
+  const { user: ngoLoggedIn, isLoading: isLoadingNgo } = useAuth();
 
-  const { data, isLoading, error } = useSWR<{ data: NgoProfile }>(
+  const {
+    data: ngo,
+    isLoading,
+    error,
+  } = useSWR<NgoProfile>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
-    authenticatedFetcher
+    authenticatedFetcher,
   );
 
   // get projects of the NGO
@@ -56,14 +63,12 @@ export default function NgoInfo() {
     data: projectsData,
     isLoading: isLoadingProjects,
     error: errorProjects,
-  } = useSWR<{
-    data: { projects: Projects };
-  }>(
+  } = useSWR<{ data: { projects: Projects } }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
-    authenticatedFetcher
+    authenticatedFetcher,
   );
 
-  if (isLoading || isLoadingProjects || !data || !projectsData)
+  if (isLoading || isLoadingProjects || !ngo || !projectsData)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -94,17 +99,6 @@ export default function NgoInfo() {
       </div>
     );
 
-  const ngo = data.data;
-  const ngoImage = ngo.image || '/images/projects/logo_happy2help.jpg';
-  const projects = projectsData.data.projects;
-
-  console.log('PROJECTS: ', projects);
-
-  const imageUrl =
-    ngoImage.startsWith('http') || ngoImage.startsWith('/')
-      ? ngoImage
-      : `/images/projects/${ngoImage}`;
-
   return (
     <div className='container-site'>
       <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
@@ -112,20 +106,9 @@ export default function NgoInfo() {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {imageUrl.startsWith('http') ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageUrl}
-                    alt={`Logo von ${ngo.name}`}
-                    className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
-                    onError={(e) => {
-                      e.currentTarget.src =
-                        '/images/projects/logo_happy2help.jpg';
-                    }}
-                  />
-                ) : (
+                {ngo.image && (
                   <Image
-                    src={imageUrl}
+                    src={ngo.image}
                     alt={`Logo von ${ngo.name}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
@@ -166,10 +149,23 @@ export default function NgoInfo() {
         <CardContent className='space-y-8'>
           {/* Grundinformationen */}
           <div className='space-y-4'>
-            <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2 flex items-center gap-2'>
-              <Building size={20} />
-              Vereinsinformationen
-            </h3>
+            <div className='flex flex-col space-y-2 md:flex-row border-b border-light-mint/30 pb-2 '>
+              <h3 className='text-lg font-semibold text-prussian flex flex-1 items-center gap-2'>
+                <Building size={20} />
+                Vereinsinformationen
+              </h3>
+              {id === ngoLoggedIn?.id && (
+                <Link href={`/ngos/${id}/edit`}>
+                  <ButtonComponent
+                    variant='primary'
+                    size='md'
+                    className='data-[state=active]:bg-light-mint/20 data-[state=active]:border-light-mint/50 data-[state=active]:rounded-2xl data-[state=inactive]:bg-white/60 data-[state=inactive]:border-light-mint/30 data-[state=inactive]:rounded-2xl'
+                  >
+                    Bearbeiten
+                  </ButtonComponent>
+                </Link>
+              )}
+            </div>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='flex items-center gap-3'>
                 <UserIcon size={16} className='text-prussian/60' />
@@ -313,12 +309,11 @@ export default function NgoInfo() {
             </h3>
             <div className='font-medium text-prussian'>
               <ul>
-                {projects &&
-                  projects.map((project) => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      {project.name}
-                    </Link>
-                  ))}
+                {projectsData?.data?.projects.map((project) => (
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    {project.name}
+                  </Link>
+                ))}
               </ul>
             </div>
           </div>
