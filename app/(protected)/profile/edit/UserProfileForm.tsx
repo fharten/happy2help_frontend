@@ -29,7 +29,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageDropzone from '@/components/ImageDropzone';
 import { XCircle } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
+// import { Switch } from '@/components/ui/switch';
 
 interface Skill {
   id: string;
@@ -48,7 +48,7 @@ interface UserProfile {
   zipCode?: number;
   city?: string;
   state?: string;
-  isDisabled: boolean;
+  // isDisabled: boolean;
 }
 
 // Type for API response when fetching user details
@@ -58,7 +58,7 @@ type UserDetailResponse = Omit<UserProfile, 'skills' | 'ngoMemberships'> & {
   image?: string;
   role?: string;
   isActivated?: boolean;
-  isDisabled?: boolean;
+  // isDisabled?: boolean;
   skills?: Array<{ id: string; name: string; description?: string }> | string[];
   ngoMemberships?: Array<{ id: string; name: string }> | string[];
 };
@@ -123,7 +123,7 @@ const formSchema = z.object({
     .optional(),
   city: z.string().optional(),
   state: z.string().optional(),
-  isDisabled: z.boolean(),
+  // isDisabled: z.boolean(),
 });
 
 const UserEditForm = () => {
@@ -150,7 +150,7 @@ const UserEditForm = () => {
       zipCode: undefined,
       city: '',
       state: '',
-      isDisabled: false,
+      // isDisabled: false,
     },
     mode: 'onSubmit',
   });
@@ -190,7 +190,7 @@ const UserEditForm = () => {
         zipCode: userDetailData.zipCode ?? undefined,
         city: userDetailData.city ?? '',
         state: userDetailData.state ?? '',
-        isDisabled: userDetailData.isDisabled ?? false,
+        // isDisabled: userDetailData.isDisabled ?? false,
       },
       { keepDirty: false, keepTouched: true },
     );
@@ -218,7 +218,7 @@ const UserEditForm = () => {
       zipCode: data.zipCode,
       city: data.city,
       state: data.state,
-      isDisabled: data.isDisabled,
+      // isDisabled: data.isDisabled,
     };
 
     try {
@@ -568,7 +568,7 @@ const UserEditForm = () => {
                 </h3>
 
                 {/* DISABLED */}
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -590,7 +590,7 @@ const UserEditForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
 
               <div className='flex gap-4'>
