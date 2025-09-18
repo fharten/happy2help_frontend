@@ -15,7 +15,7 @@ import {
   Phone,
   Building,
   User as UserIcon,
-  AlertCircle,
+  // AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -116,11 +116,6 @@ export default function NgoInfo() {
                   />
                 )}
               </div>
-              {ngo.data.isDisabled && (
-                <div className='absolute -top-2 -right-2 bg-red-500 rounded-full p-1'>
-                  <AlertCircle size={16} className='text-white' />
-                </div>
-              )}
             </div>
             <div className='space-y-2'>
               <CardTitle className='text-3xl font-bold text-prussian'>
@@ -132,16 +127,6 @@ export default function NgoInfo() {
                   {ngo.data.zipCode} {ngo.data.city}, {ngo.data.state}
                 </span>
               </div>
-              {ngo.data.isDisabled && (
-                <div className='bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm'>
-                  <div className='flex items-center gap-2'>
-                    <AlertCircle size={16} />
-                    <span className='font-medium'>
-                      Verein ist vorübergehend deaktiviert
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </CardHeader>

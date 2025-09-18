@@ -29,7 +29,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ImageDropzone from '@/components/ImageDropzone';
 import { XCircle } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
+// import { Switch } from '@/components/ui/switch';
 
 interface Category {
   id: string;
@@ -44,7 +44,7 @@ interface NgoProfile {
   principal?: string;
   streetAndNumber?: string;
   categories?: string[];
-  isDisabled?: boolean;
+  //isDisabled?: boolean;
   zipCode?: number;
   city?: string;
   state?: string;
@@ -59,7 +59,7 @@ type UserDetailResponse = Omit<NgoProfile, 'skills' | 'categories'> & {
   principal?: string;
   streetAndNumber?: string;
   isActivated?: boolean;
-  isDisabled?: boolean;
+  //isDisabled?: boolean;
   skills?: Array<{ id: string; name: string; description?: string }> | string[];
   categories?:
     | Array<{ id: string; name: string; description?: string }>
@@ -131,7 +131,7 @@ const formSchema = z.object({
     .optional(),
   city: z.string().optional(),
   state: z.string().optional(),
-  isDisabled: z.boolean(),
+  //isDisabled: z.boolean(),
 });
 
 const NgoEditForm = () => {
@@ -156,7 +156,7 @@ const NgoEditForm = () => {
       streetAndNumber: '',
       contactEmail: '',
       phone: '',
-      isDisabled: false,
+      //isDisabled: false,
       categories: [],
       zipCode: undefined,
       city: '',
@@ -517,7 +517,7 @@ const NgoEditForm = () => {
                 </h3>
 
                 {/* DISABLED */}
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -540,7 +540,7 @@ const NgoEditForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
 
               <div className='flex gap-4'>
