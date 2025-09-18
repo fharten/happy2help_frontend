@@ -78,8 +78,8 @@ export function ProtectedRoute({
     }
 
     if (customCheck && !customCheck(user)) {
-      router.push('/unauthorized');
-      return;
+      // router.push('/unauthorized');
+      //return;
     }
   }, [user, isLoading, isAuthenticated, customCheck, router, fallbackPath]);
 
@@ -332,10 +332,20 @@ export function UserOwnerOnlyRoute({
     <ProtectedRoute
       customCheck={(user) => {
         const pathParts = window.location.pathname.split('/');
-        const userId = pathParts[pathParts.length - 1];
+        const userIndex = pathParts.findIndex(
+          (part) => part === 'users' || part === 'ngos',
+        );
+
+        // WORKS FOR /users/:userId AND /users/:userId/edit
+        const userId =
+          userIndex !== -1 && userIndex + 1 < pathParts.length
+            ? pathParts[userIndex + 1]
+            : null;
 
         // Only the user themselves can access (must be user entity AND own profile)
-        const canAccess = hasEntityType(user, 'user') && user.id === userId;
+        const canAccess =
+          (hasEntityType(user, 'user') && user.id === userId) ||
+          (hasEntityType(user, 'ngo') && user.id === userId);
         return canAccess;
       }}
       {...props}

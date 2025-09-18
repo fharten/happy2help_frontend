@@ -15,9 +15,11 @@ import {
   Phone,
   Building,
   User as UserIcon,
-  AlertCircle,
+  // AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import ButtonComponent from '@/components/ButtonComponent';
 
 interface NgoProfile {
   id: string;
@@ -45,10 +47,15 @@ interface NgoProfile {
 
 export default function NgoInfo() {
   const { id } = useParams();
+  const { user: ngoLoggedIn, isLoading: isLoadingNgo } = useAuth();
 
-  const { data, isLoading, error } = useSWR<{ data: NgoProfile }>(
+  const {
+    data: ngo,
+    isLoading,
+    error,
+  } = useSWR<{ data: NgoProfile }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
-    authenticatedFetcher
+    authenticatedFetcher,
   );
 
   // get projects of the NGO
@@ -56,14 +63,12 @@ export default function NgoInfo() {
     data: projectsData,
     isLoading: isLoadingProjects,
     error: errorProjects,
-  } = useSWR<{
-    data: { projects: Projects };
-  }>(
+  } = useSWR<{ data: { projects: Projects } }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
-    authenticatedFetcher
+    authenticatedFetcher,
   );
 
-  if (isLoading || isLoadingProjects || !data || !projectsData)
+  if (isLoading || isLoadingNgo || isLoadingProjects || !ngo || !projectsData)
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -94,17 +99,6 @@ export default function NgoInfo() {
       </div>
     );
 
-  const ngo = data.data;
-  const ngoImage = ngo.image || '/images/projects/logo_happy2help.jpg';
-  const projects = projectsData.data.projects;
-
-  console.log('PROJECTS: ', projects);
-
-  const imageUrl =
-    ngoImage.startsWith('http') || ngoImage.startsWith('/')
-      ? ngoImage
-      : `/images/projects/${ngoImage}`;
-
   return (
     <div className='container-site'>
       <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
@@ -112,53 +106,27 @@ export default function NgoInfo() {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {imageUrl.startsWith('http') ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageUrl}
-                    alt={`Logo von ${ngo.name}`}
-                    className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
-                    onError={(e) => {
-                      e.currentTarget.src =
-                        '/images/projects/logo_happy2help.jpg';
-                    }}
-                  />
-                ) : (
+                {ngo.data.image && (
                   <Image
-                    src={imageUrl}
-                    alt={`Logo von ${ngo.name}`}
+                    src={ngo.data.image}
+                    alt={`Logo von ${ngo.data.name}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
                   />
                 )}
               </div>
-              {ngo.isDisabled && (
-                <div className='absolute -top-2 -right-2 bg-red-500 rounded-full p-1'>
-                  <AlertCircle size={16} className='text-white' />
-                </div>
-              )}
             </div>
             <div className='space-y-2'>
               <CardTitle className='text-3xl font-bold text-prussian'>
-                {ngo.name}
+                {ngo.data.name}
               </CardTitle>
               <div className='flex items-center gap-2 text-prussian/70'>
                 <MapPin size={16} />
                 <span>
-                  {ngo.zipCode} {ngo.city}, {ngo.state}
+                  {ngo.data.zipCode} {ngo.data.city}, {ngo.data.state}
                 </span>
               </div>
-              {ngo.isDisabled && (
-                <div className='bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm'>
-                  <div className='flex items-center gap-2'>
-                    <AlertCircle size={16} />
-                    <span className='font-medium'>
-                      Verein ist vorübergehend deaktiviert
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -166,17 +134,30 @@ export default function NgoInfo() {
         <CardContent className='space-y-8'>
           {/* Grundinformationen */}
           <div className='space-y-4'>
-            <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2 flex items-center gap-2'>
-              <Building size={20} />
-              Vereinsinformationen
-            </h3>
+            <div className='flex flex-col space-y-2 md:flex-row border-b border-light-mint/30 pb-2 '>
+              <h3 className='text-lg font-semibold text-prussian flex flex-1 items-center gap-2'>
+                <Building size={20} />
+                Vereinsinformationen
+              </h3>
+              {id === ngoLoggedIn?.id && (
+                <Link href='/profile/edit'>
+                  <ButtonComponent
+                    variant='primary'
+                    size='md'
+                    className='data-[state=active]:bg-light-mint/20 data-[state=active]:border-light-mint/50 data-[state=active]:rounded-2xl data-[state=inactive]:bg-white/60 data-[state=inactive]:border-light-mint/30 data-[state=inactive]:rounded-2xl'
+                  >
+                    Bearbeiten
+                  </ButtonComponent>
+                </Link>
+              )}
+            </div>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='flex items-center gap-3'>
                 <UserIcon size={16} className='text-prussian/60' />
                 <div>
                   <div className='text-sm text-prussian/60'>Vorstand</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.principal}
+                    {ngo.data.principal}
                   </div>
                 </div>
               </div>
@@ -187,7 +168,7 @@ export default function NgoInfo() {
                     Registriert seit
                   </div>
                   <div className='font-medium text-prussian'>
-                    {new Date(ngo.createdAt).toLocaleDateString('de-DE', {
+                    {new Date(ngo.data.createdAt).toLocaleDateString('de-DE', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -205,23 +186,25 @@ export default function NgoInfo() {
               Kontaktinformationen
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {ngo.contactEmail && (
+              {ngo.data.contactEmail && (
                 <div className='flex items-center gap-3'>
                   <Mail size={16} className='text-prussian/60' />
                   <div>
                     <div className='text-sm text-prussian/60'>E-Mail</div>
                     <div className='font-medium text-prussian'>
-                      {ngo.contactEmail}
+                      {ngo.data.contactEmail}
                     </div>
                   </div>
                 </div>
               )}
-              {ngo.phone && (
+              {ngo.data.phone && (
                 <div className='flex items-center gap-3'>
                   <Phone size={16} className='text-prussian/60' />
                   <div>
                     <div className='text-sm text-prussian/60'>Telefon</div>
-                    <div className='font-medium text-prussian'>{ngo.phone}</div>
+                    <div className='font-medium text-prussian'>
+                      {ngo.data.phone}
+                    </div>
                   </div>
                 </div>
               )}
@@ -239,7 +222,9 @@ export default function NgoInfo() {
                 <Building size={16} className='text-prussian/60' />
                 <div>
                   <div className='text-sm text-prussian/60'>Name</div>
-                  <div className='font-medium text-prussian'>{ngo.name}</div>
+                  <div className='font-medium text-prussian'>
+                    {ngo.data.name}
+                  </div>
                 </div>
               </div>
               <div className='flex items-center gap-3'>
@@ -247,7 +232,7 @@ export default function NgoInfo() {
                 <div>
                   <div className='text-sm text-prussian/60'>Straße & Nr.</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.streetAndNumber}
+                    {ngo.data.streetAndNumber}
                   </div>
                 </div>
               </div>
@@ -256,7 +241,7 @@ export default function NgoInfo() {
                 <div>
                   <div className='text-sm text-prussian/60'>PLZ & Ort</div>
                   <div className='font-medium text-prussian'>
-                    {ngo.zipCode} {ngo.city}
+                    {ngo.data.zipCode} {ngo.data.city}
                   </div>
                 </div>
               </div>
@@ -277,7 +262,9 @@ export default function NgoInfo() {
                 </svg>
                 <div>
                   <div className='text-sm text-prussian/60'>Bundesland</div>
-                  <div className='font-medium text-prussian'>{ngo.state}</div>
+                  <div className='font-medium text-prussian'>
+                    {ngo.data.state}
+                  </div>
                 </div>
               </div>
             </div>
@@ -289,8 +276,8 @@ export default function NgoInfo() {
               Tätigkeitsfelder
             </h3>
             <div className='flex flex-wrap gap-2'>
-              {ngo.industry && ngo.industry.length > 0 ? (
-                ngo.industry.map((field: string) => (
+              {ngo.data.industry && ngo.data.industry.length > 0 ? (
+                ngo.data.industry.map((field: string) => (
                   <Badge
                     key={field}
                     variant='secondary'
@@ -313,12 +300,11 @@ export default function NgoInfo() {
             </h3>
             <div className='font-medium text-prussian'>
               <ul>
-                {projects &&
-                  projects.map((project) => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      {project.name}
-                    </Link>
-                  ))}
+                {projectsData?.data?.projects.map((project) => (
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    {project.name}
+                  </Link>
+                ))}
               </ul>
             </div>
           </div>
