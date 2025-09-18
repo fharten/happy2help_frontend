@@ -1,16 +1,20 @@
 'use client';
-
-import useSWR from 'swr';
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { z } from 'zod';
+import {
+  MultiSelect,
+  type Option as SelectOption,
+} from '@/components/ui/multiselect';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-
+import { z } from 'zod';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import ButtonComponent from '@/components/ButtonComponent';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import useSWR from 'swr';
+import { toast, Toaster } from 'sonner';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+
 import {
   Form,
   FormControl,
@@ -21,84 +25,128 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { getAuthToken } from '@/lib/auth';
-import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+import Image from 'next/image';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ImageDropzone from '@/components/ImageDropzone';
+import { XCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
-interface UserFormData {
-  firstname: string;
-  lastname: string;
+interface Skill {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface UserProfile {
   firstName?: string;
   lastName?: string;
-  email: string;
-  phone?: string;
-  description?: string;
-  city?: string;
-  country?: string;
-  skills?: Array<{ id: string; name: string }>;
-  yearOfBirth?: string;
-  image?: string;
   contactEmail?: string;
-  ngoMemberships?: Array<{ id: string; name: string }>;
+  phone?: string;
+  skills?: string[];
+  yearOfBirth?: number;
+  ngoMemberships?: string[];
   zipCode?: number;
+  city?: string;
   state?: string;
+  isDisabled: boolean;
+}
+
+// Type for API response when fetching user details
+type UserDetailResponse = Omit<UserProfile, 'skills' | 'ngoMemberships'> & {
+  id?: string;
+  loginEmail?: string;
+  image?: string;
+  role?: string;
+  isActivated?: boolean;
   isDisabled?: boolean;
+  skills?: Array<{ id: string; name: string; description?: string }> | string[];
+  ngoMemberships?: Array<{ id: string; name: string }> | string[];
+};
+
+function useSkills() {
+  const { data, error, isLoading, mutate } = useSWR<Skill[]>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`,
+  );
+
+  return {
+    skills: data || [],
+    isLoading,
+    isError: error,
+    mutate,
+  };
+}
+
+// Update user with authentication
+async function updateUser(id: string, user: UserProfile, accessToken: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(user),
+    },
+  );
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to update user profile');
+  }
+
+  const updatedUser = await res.json();
+  return updatedUser;
 }
 
 const formSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: 'Vorname muss mindestens 2 Zeichen lang sein.' }),
-  lastName: z
-    .string()
-    .min(2, { message: 'Vorname muss mindestens 2 Zeichen lang sein.' }),
-  image: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   contactEmail: z
-    .email({ message: 'Ungültige E-Mail-Adresse.' })
+    .email({ message: 'Bitte eine gültige E-Mail-Adresse eingeben.' })
     .optional()
     .or(z.literal('')),
   phone: z.string().optional(),
-  skills: z
-    .array(z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }))
-    .min(1, { message: 'Mindestens einen Skill angeben.' }),
+  skills: z.array(z.string()).optional().default([]),
+  yearOfBirth: z
+    .number()
+    .min(1900, { message: 'Geburtsjahr muss nach 1900 liegen.' })
+    .max(new Date().getFullYear(), {
+      message: 'Geburtsjahr kann nicht in der Zukunft liegen.',
+    })
+    .optional(),
   ngoMemberships: z.array(z.string()).optional(),
-  yearOfBirth: z.number().optional(),
-  zipCode: z.number().int().gte(10000).lte(99999).optional(),
-  city: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  state: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
+  zipCode: z
+    .number()
+    .min(10000, { message: 'Postleitzahl muss 5-stellig sein.' })
+    .max(99999, { message: 'Postleitzahl muss 5-stellig sein.' })
+    .optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
   isDisabled: z.boolean(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-const UserProfileForm = () => {
-  const { user } = useAuth();
+const UserEditForm = () => {
+  const { skills } = useSkills();
+  const { user, tokens } = useAuth();
   const userId = user?.id;
-
   const router = useRouter();
 
-  const {
-    data: userData,
-    isLoading,
-    isValidating,
-    error,
-  } = useSWR<UserFormData>(
-    userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
-    swrFetcher,
-  );
+  const skillOptions: SelectOption[] = (skills ?? []).map((skill) => ({
+    value: skill.id,
+    label: skill.name,
+  }));
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UserProfile, undefined, UserProfile>({
+    resolver: zodResolver<UserProfile, undefined, UserProfile>(formSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
-      image: '',
       contactEmail: '',
       phone: '',
-      yearOfBirth: undefined,
       skills: [],
       ngoMemberships: [],
+      yearOfBirth: undefined,
       zipCode: undefined,
       city: '',
       state: '',
@@ -107,84 +155,128 @@ const UserProfileForm = () => {
     mode: 'onSubmit',
   });
 
+  const { data: userDetailData, mutate } = useSWR<UserDetailResponse>(
+    userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
+    swrFetcher,
+  );
+
   useEffect(() => {
-    if (!userData) return;
+    if (!userDetailData) return;
 
-    form.reset({
-      firstName: userData.firstName ?? '',
-      lastName: userData.lastName ?? '',
-      image: userData.image ?? '',
-      contactEmail: userData.contactEmail ?? '',
-      phone: userData.phone ?? '',
-      yearOfBirth: userData.yearOfBirth
-        ? parseInt(userData.yearOfBirth, 10)
-        : undefined,
-      skills: Array.isArray(userData.skills)
-        ? userData.skills.map((skill) =>
-            typeof skill === 'string' ? skill : skill.name,
-          )
-        : [],
-      ngoMemberships: Array.isArray(userData.ngoMemberships)
-        ? userData.ngoMemberships.map((membership) =>
-            typeof membership === 'string' ? membership : membership.name,
-          )
-        : [],
-      zipCode:
-        typeof userData.zipCode === 'number' ? userData.zipCode : undefined,
-      city: userData.city ?? '',
-      state: userData.state ?? '',
-      isDisabled: !!userData.isDisabled,
-    });
-  }, [userData, form]);
+    // Handle skills - they might be an array of objects or array of strings
+    let skillIds: string[] = [];
+    if (Array.isArray(userDetailData.skills)) {
+      skillIds = userDetailData.skills.map((skill) =>
+        typeof skill === 'string' ? skill : skill.id,
+      );
+    }
 
-  const onSubmit = async (values: FormValues) => {
-    if (!userId) return;
+    let membershipIds: string[] = [];
+    if (Array.isArray(userDetailData.ngoMemberships)) {
+      membershipIds = userDetailData.ngoMemberships.map((ngoMembership) =>
+        typeof ngoMembership === 'string' ? ngoMembership : ngoMembership.id,
+      );
+    }
+
+    form.reset(
+      {
+        firstName: userDetailData.firstName ?? '',
+        lastName: userDetailData.lastName ?? '',
+        contactEmail: userDetailData.contactEmail ?? '',
+        phone: userDetailData.phone ?? '',
+        skills: skillIds,
+        ngoMemberships: membershipIds,
+        yearOfBirth: userDetailData.yearOfBirth ?? undefined,
+        zipCode: userDetailData.zipCode ?? undefined,
+        city: userDetailData.city ?? '',
+        state: userDetailData.state ?? '',
+        isDisabled: userDetailData.isDisabled ?? false,
+      },
+      { keepDirty: false, keepTouched: true },
+    );
+  }, [userDetailData, form]);
+
+  const onSubmit: SubmitHandler<UserProfile> = async (data) => {
+    if (!tokens?.accessToken) {
+      toast.error('Authentifizierung fehlgeschlagen');
+      return;
+    }
+
+    if (!userId) {
+      toast.error('Benutzer ID nicht gefunden');
+      return;
+    }
+
+    // Clean up empty strings and undefined values
+    const submittedUser = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      contactEmail: data.contactEmail || undefined,
+      phone: data.phone || undefined,
+      skills: data.skills,
+      yearOfBirth: data.yearOfBirth,
+      zipCode: data.zipCode,
+      city: data.city,
+      state: data.state,
+      isDisabled: data.isDisabled,
+    };
 
     try {
-      const submitData = {
-        ...values,
-        contactEmail:
-          values.contactEmail === '' ? undefined : values.contactEmail,
-      };
+      const req = updateUser(userId, submittedUser, tokens.accessToken);
 
-      const token = getAuthToken();
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify(submitData),
-        },
-      );
+      toast.promise(req, {
+        loading: 'Profil wird aktualisiert…',
+        success: 'Profil wurde aktualisiert.',
+        error: (error) =>
+          error instanceof Error && error.message
+            ? `Fehler: ${error.message}`
+            : 'Fehler: Das Profil konnte nicht aktualisiert werden.',
+      });
 
-      if (!res.ok) {
-        toast.error('Fehler beim Speichern der Änderungen');
-        throw new Error(`Update failed with status ${res.status}`);
-      }
-
-      toast.success('Profil erfolgreich aktualisiert!');
-      router.push('/profile');
-    } catch (err) {
-      console.error('An error occurred:', err);
-      toast.error('Ein Fehler ist aufgetreten');
+      await req;
+      router.push(`/users/${userId}`);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  if (isLoading || !userData)
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        Lade...
-      </div>
-    );
-  if (error)
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        Fehler: {error.message}
-      </div>
-    );
+  const handleDeleteImage = async () => {
+    if (!tokens?.accessToken || !userId) {
+      toast.error('Authentifizierung fehlgeschlagen');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}/images`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete image');
+      }
+
+      toast.success('Bild wurde gelöscht');
+
+      if (mutate) {
+        await mutate();
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Fehler beim Löschen des Bildes');
+    }
+  };
+
+  // Show loading if we don't have user yet or if trying to edit someone else's profile without permission
+  if (!user || !userId) {
+    return <div>Lade...</div>;
+  }
 
   return (
     <div className='container-site'>
@@ -195,6 +287,40 @@ const UserProfileForm = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className='p-8'>
+          <ImageDropzone
+            resourceId={userId}
+            resourceType='users'
+            onUploadSuccess={() => mutate()}
+          />
+
+          {userDetailData?.image && (
+            <>
+              <h2 className='mb-2 font-sans'>Bild</h2>
+              <div className='flex mb-8 h-24 gap-x-4'>
+                <Card className='bg-light-mint/10 flex items-center justify-center h-full relative group'>
+                  <Image
+                    width={100}
+                    height={100}
+                    src={userDetailData.image}
+                    style={{
+                      objectFit: 'cover',
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                    }}
+                    alt='Project image'
+                  />
+
+                  <button
+                    onClick={() => handleDeleteImage}
+                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
+                    type='button'
+                  >
+                    <XCircle fill='red' />
+                  </button>
+                </Card>
+              </div>
+            </>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
               {/* Persönliche Informationen */}
@@ -212,14 +338,13 @@ const UserProfileForm = () => {
                       <FormItem>
                         <FormLabel>Vorname</FormLabel>
                         <FormControl>
-                          <Input {...field} className='h-11' />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {/* LAST NAME */}
                   <FormField
                     control={form.control}
                     name='lastName'
@@ -227,33 +352,13 @@ const UserProfileForm = () => {
                       <FormItem>
                         <FormLabel>Nachname</FormLabel>
                         <FormControl>
-                          <Input {...field} className='h-11' />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-
-                {/* IMAGE */}
-                <FormField
-                  control={form.control}
-                  name='image'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Profilbild</FormLabel>
-                      <FormControl>
-                        <Input {...field} className='h-11' />
-                      </FormControl>
-                      <FormDescription>
-                        Link zu Ihrem Profilbild
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* YEAR OF BIRTH */}
                 <FormField
                   control={form.control}
                   name='yearOfBirth'
@@ -262,13 +367,28 @@ const UserProfileForm = () => {
                       <FormLabel>Geburtsjahr</FormLabel>
                       <FormControl>
                         <Input
-                          {...field}
-                          value={field.value || ''}
+                          type='text'
+                          inputMode='numeric'
+                          placeholder='1900'
+                          maxLength={4}
                           className='h-11'
-                          placeholder='z.B. 1990'
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
+                            if (value === '') {
+                              field.onChange(undefined);
+                            } else {
+                              const numValue = parseInt(value, 10);
+                              const currentYear = new Date().getFullYear();
+                              if (numValue >= 1900 && numValue <= currentYear) {
+                                field.onChange(numValue);
+                              } else if (value.length < 4) {
+                                field.onChange(numValue);
+                              }
+                            }
+                          }}
                         />
                       </FormControl>
-                      <FormDescription>Optional</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -281,7 +401,6 @@ const UserProfileForm = () => {
                   Fähigkeiten und Engagement
                 </h3>
 
-                {/* SKILLS */}
                 <FormField
                   control={form.control}
                   name='skills'
@@ -289,29 +408,24 @@ const UserProfileForm = () => {
                     <FormItem>
                       <FormLabel>Fähigkeiten</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder='Kamera, Bühnenbau, Gitarre,...'
-                          className='h-11'
-                          value={field.value?.join(', ') ?? ''}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const arr = raw
-                              .split(',')
-                              .map((s) => s.trim())
-                              .filter((s) => s.length > 0);
-                            field.onChange(arr);
-                          }}
-                        />
+                        {skillOptions.length > 0 ? (
+                          <MultiSelect
+                            options={skillOptions}
+                            value={field.value ?? []}
+                            onChange={field.onChange}
+                            placeholder='Fähigkeiten auswählen'
+                            searchPlaceholder='Suchen…'
+                            className='bg-light-mint/0'
+                          />
+                        ) : (
+                          <div>Lade Fähigkeiten...</div>
+                        )}
                       </FormControl>
-                      <FormDescription>
-                        Bitte Skills getrennt von Kommata eingeben
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* NGO MEMBERSHIPS */}
                 <FormField
                   control={form.control}
                   name='ngoMemberships'
@@ -347,20 +461,14 @@ const UserProfileForm = () => {
                   Kontaktinformationen
                 </h3>
 
-                {/* CONTACT EMAIL */}
                 <FormField
                   control={form.control}
                   name='contactEmail'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Abweichende Kontakt-E-Mail-Adresse</FormLabel>
+                      <FormLabel>Kontakt E-Mail</FormLabel>
                       <FormControl>
-                        <Input
-                          type='email'
-                          {...field}
-                          value={field.value || ''}
-                          className='h-11'
-                        />
+                        <Input type='email' {...field} />
                       </FormControl>
                       <FormDescription>
                         Optional. Falls du nicht unter deiner Login-E-Mail
@@ -371,7 +479,6 @@ const UserProfileForm = () => {
                   )}
                 />
 
-                {/* PHONE */}
                 <FormField
                   control={form.control}
                   name='phone'
@@ -379,11 +486,7 @@ const UserProfileForm = () => {
                     <FormItem>
                       <FormLabel>Telefonnummer</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value || ''}
-                          className='h-11'
-                        />
+                        <Input {...field} />
                       </FormControl>
                       <FormDescription>Optional</FormDescription>
                       <FormMessage />
@@ -399,7 +502,6 @@ const UserProfileForm = () => {
                 </h3>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  {/* ZIP CODE */}
                   <FormField
                     control={form.control}
                     name='zipCode'
@@ -408,55 +510,18 @@ const UserProfileForm = () => {
                         <FormLabel>Postleitzahl</FormLabel>
                         <FormControl>
                           <Input
-                            type='number'
+                            type='text'
+                            inputMode='numeric'
                             placeholder='12345'
+                            maxLength={5}
                             className='h-11'
                             value={field.value ?? ''}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
                               if (value === '') {
                                 field.onChange(undefined);
                               } else {
-                                const numValue = parseInt(value, 10);
-                                if (!isNaN(numValue)) {
-                                  field.onChange(numValue);
-                                }
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              // ALLOW: navigation and editing keys
-                              const allowedKeys = [
-                                'Backspace',
-                                'Delete',
-                                'Tab',
-                                'Escape',
-                                'Enter',
-                                'Home',
-                                'End',
-                                'ArrowLeft',
-                                'ArrowRight',
-                                'ArrowDown',
-                                'ArrowUp',
-                              ];
-
-                              // ALLOW: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                              if (
-                                (e.ctrlKey || e.metaKey) &&
-                                ['a', 'c', 'v', 'x'].includes(
-                                  e.key.toLowerCase(),
-                                )
-                              ) {
-                                return;
-                              }
-
-                              // ALLOW navigation and editing keys
-                              if (allowedKeys.includes(e.key)) {
-                                return;
-                              }
-
-                              // ALLOW only numbers (0-9)
-                              if (!/^[0-9]$/.test(e.key)) {
-                                e.preventDefault();
+                                field.onChange(parseInt(value, 10));
                               }
                             }}
                           />
@@ -466,7 +531,6 @@ const UserProfileForm = () => {
                     )}
                   />
 
-                  {/* CITY */}
                   <FormField
                     control={form.control}
                     name='city'
@@ -474,7 +538,7 @@ const UserProfileForm = () => {
                       <FormItem>
                         <FormLabel>Stadt</FormLabel>
                         <FormControl>
-                          <Input {...field} className='h-11' />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -482,7 +546,6 @@ const UserProfileForm = () => {
                   />
                 </div>
 
-                {/* STATE */}
                 <FormField
                   control={form.control}
                   name='state'
@@ -490,7 +553,7 @@ const UserProfileForm = () => {
                     <FormItem>
                       <FormLabel>Bundesland</FormLabel>
                       <FormControl>
-                        <Input {...field} className='h-11' />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -530,30 +593,15 @@ const UserProfileForm = () => {
                 />
               </div>
 
-              {isValidating && (
-                <div className='text-center'>
-                  <span className='text-prussian/60'>Lädt neu...</span>
-                </div>
-              )}
-
-              <div className='flex flex-col sm:flex-row gap-4 pt-6'>
-                <ButtonComponent
-                  type='submit'
-                  variant='primary'
-                  size='lg'
-                  className='flex-1'
-                >
-                  Änderungen speichern
+              <div className='flex gap-4'>
+                <ButtonComponent variant='primary' size='md' type='submit'>
+                  Speichern
                 </ButtonComponent>
-                <ButtonComponent
-                  type='button'
-                  variant='secondary'
-                  size='lg'
-                  className='flex-1'
-                  onClick={() => router.push('/profile')}
-                >
-                  Abbrechen
-                </ButtonComponent>
+                <Link href={`/users/${userId}`}>
+                  <ButtonComponent variant='secondary' size='md'>
+                    Abbrechen
+                  </ButtonComponent>
+                </Link>
               </div>
             </form>
           </Form>
@@ -564,4 +612,4 @@ const UserProfileForm = () => {
   );
 };
 
-export default UserProfileForm;
+export default UserEditForm;
