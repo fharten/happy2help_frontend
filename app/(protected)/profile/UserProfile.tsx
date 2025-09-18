@@ -194,7 +194,7 @@ const UserProfile = () => {
             <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
               Fähigkeiten
             </h3>
-            {/* <div className='flex flex-wrap gap-2'>
+            <div className='flex flex-wrap gap-2'>
               {userData.skills && userData.skills.length > 0 ? (
                 userData.skills.map((skill: string) => (
                   <Badge
@@ -210,7 +210,7 @@ const UserProfile = () => {
                   Keine Fähigkeiten angegeben
                 </span>
               )}
-            </div> */}
+            </div>
           </div>
 
           {/* Vereinsmitgliedschaften */}

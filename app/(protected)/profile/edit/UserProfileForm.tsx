@@ -203,7 +203,7 @@ const UserEditForm = () => {
     }
 
     if (!userId) {
-      toast.error('Benutzer ID nicht gefunden');
+      toast.error('Benutzer-ID nicht gefunden');
       return;
     }
 
