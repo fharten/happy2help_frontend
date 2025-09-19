@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+
 
 interface UserProfile {
   id: string;
@@ -48,6 +50,8 @@ const UserProfile = () => {
     swrFetcher,
   );
 
+  const [hasImgError, setHasImgError] = useState(false);
+
   if (isLoading || !userData)
     return (
       <div className='container-site'>
@@ -57,6 +61,7 @@ const UserProfile = () => {
       </div>
     );
 
+    
   if (error)
     return (
       <div className='container-site'>
@@ -75,6 +80,8 @@ const UserProfile = () => {
       ? userImage
       : `/images/projects/${userImage}`;
 
+
+
   return (
     <div className='container-site'>
       <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
@@ -82,15 +89,18 @@ const UserProfile = () => {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {imageUrl.startsWith('http') ? (
+                {hasImgError ? (
+                  <div className='w-32 h-32 rounded-full border-4 border-light-mint/40 shadow-lg bg-prussian/10 flex items-center justify-center text-prussian font-semibold'>
+                    {userData.firstName?.[0]}
+                    {userData.lastName?.[0]}
+                  </div>
+                ) : imageUrl.startsWith('http') ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imageUrl}
                     alt={`Profilbild von ${userData.firstName} ${userData.lastName}`}
                     className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/users/default-user.jpg';
-                    }}
+                    onError={() => setHasImgError(true)}
                   />
                 ) : (
                   <Image
@@ -99,6 +109,7 @@ const UserProfile = () => {
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
+                    onError={() => setHasImgError(true)}
                   />
                 )}
               </div>
@@ -190,7 +201,7 @@ const UserProfile = () => {
           )}
 
           {/* Fähigkeiten */}
-          <div className='space-y-4'>
+          {/* <div className='space-y-4'>
             <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
               Fähigkeiten
             </h3>
@@ -211,7 +222,7 @@ const UserProfile = () => {
                 </span>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Vereinsmitgliedschaften */}
           {userData.ngoMemberships && userData.ngoMemberships.length > 0 && (
