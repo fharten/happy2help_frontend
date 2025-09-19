@@ -157,6 +157,11 @@ const ProjectDetailPage = () => {
               <h1 className='text-2xl lg:text-4xl font-bold text-prussian tracking-tight leading-tight'>
                 {project.name}
               </h1>
+              <h2 className='text-l lg:text-2xl font-bold text-prussian tracking-tight leading-tight'>
+                <Link key={project.ngo.id} href={`/ngos/${project.ngo.id}`}>
+                  {project.ngo.name}
+                </Link>
+              </h2>
               <BadgeComponent
                 variant={project.isActive ? 'success' : 'warning'}
                 size='md'
@@ -238,6 +243,14 @@ const ProjectDetailPage = () => {
             Ansprechpartner & Details
           </h3>
           <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <span className='text-prussian/70 font-medium'>Verein:</span>
+              <span className='text-prussian font-semibold'>
+                <Link key={project.ngo.id} href={`/ngos/${project.ngo.id}`}>
+                  {project.ngo.name}
+                </Link>
+              </span>
+            </div>
             <div className='flex items-center justify-between'>
               <span className='text-prussian/70 font-medium'>
                 Ansprechpartner:
