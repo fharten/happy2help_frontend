@@ -3,17 +3,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import {
-  House,
-  LayoutDashboard,
-  Pencil,
-  Scroll,
-  LogIn,
-  LogOut,
-} from 'lucide-react';
+import { House, LayoutDashboard, Scroll, LogIn, LogOut } from 'lucide-react';
 // import NotificationBell from './NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserDisplayName } from '@/lib/user-utils';
+import Image from 'next/image';
+import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const pathname = usePathname();
@@ -101,17 +96,6 @@ const Header = () => {
                 Dashboard
               </Link>
               <Link
-                href={'/projects/edit'}
-                className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
-                  pathname.startsWith('/projects/edit')
-                    ? 'bg-white/60 text-prussian font-semibold shadow-lg'
-                    : 'text-prussian/70 hover:text-prussian hover:bg-white/30'
-                }`}
-              >
-                <Pencil size={18} strokeWidth={2.5} />
-                Edit Project
-              </Link>
-              <Link
                 href={'/projects'}
                 className={`flex items-center gap-3 px-6 py-2 text-base font-medium rounded-full transition-all duration-200 ${
                   pathname === '/projects'
@@ -128,16 +112,26 @@ const Header = () => {
             <div className='flex items-center gap-2 lg:gap-3'>
               {/* GREETING */}
               {isAuthenticated && !showLoadingState && (
-                <span className='hidden md:inline text-sm text-prussian font-medium'>
-                  Hallo, {displayName}
-                </span>
+                <div className='flex items-center gap-x-2'>
+                  {user?.image && (
+                    <div className='relative size-10 rounded-full overflow-hidden'>
+                      <Image
+                        src={user?.image ?? '/fallback.png'}
+                        alt={`${displayName} profile image`}
+                        fill
+                        className='object-cover'
+                      />
+                    </div>
+                  )}
+                  <p className='hidden md:inline text-sm text-prussian font-medium'>
+                    Hallo, <span className='font-bold'>{displayName}</span>
+                  </p>
+                </div>
               )}
-
-              {/* NOTIFICATION BELL - only show when authenticated
+              {/* NOTIFICATION BELL - only show when authenticated */}
               {isAuthenticated && !showLoadingState && user && (
-                <NotificationBell userId={user.id} />
-              )} */}
-
+                <NotificationBell user={user} />
+              )}
               {/* LOGIN/LOGOUT BUTTON */}
               <button
                 onClick={handleAuthToggle}
@@ -191,16 +185,6 @@ const Header = () => {
             }`}
           >
             <LayoutDashboard size={18} strokeWidth={2.5} />
-          </Link>
-          <Link
-            href={'/projects/edit'}
-            className={`p-2.5 rounded-full transition-all duration-200 ${
-              pathname.startsWith('/projects/edit')
-                ? 'bg-white/60 text-prussian shadow-lg'
-                : 'text-prussian/70 hover:text-prussian hover:bg-white/30'
-            }`}
-          >
-            <Pencil size={18} strokeWidth={2.5} />
           </Link>
           <Link
             href={'/projects'}

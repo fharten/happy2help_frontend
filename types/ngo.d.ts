@@ -1,4 +1,4 @@
-import { Projects } from "./project.d";
+import { Projects } from './project.d';
 
 export interface Ngo {
   id: string;
@@ -14,6 +14,7 @@ export interface Ngo {
   principal: string;
   contactEmail?: string;
   phone?: string;
+  role?: string;
   isActivated: boolean;
   isDisabled: boolean;
   createdAt: Date;
