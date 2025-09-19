@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Bell, Dot, CheckCircle2 } from 'lucide-react';
 import useSWR from 'swr';
 import {
@@ -15,6 +15,18 @@ import { isUser, isNgo } from '@/lib/user-utils';
 interface NotificationBellProps {
   user: AuthUser;
 }
+
+// Helper function to check if error is an AbortError
+const isAbortError = (error: unknown): error is DOMException => {
+  return error instanceof DOMException && error.name === 'AbortError';
+};
+
+// Helper function to get error message safely
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'Unknown error occurred';
+};
 
 // SWR fetcher function with authentication
 const fetcher = async (url: string) => {
@@ -39,7 +51,7 @@ const fetcher = async (url: string) => {
     }
 
     return response.json();
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error(
         'Network error - check if backend is running and CORS is configured',
@@ -87,7 +99,116 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
     },
   );
 
-  const notifications = response?.data || [];
+  const notifications = useMemo(() => response?.data || [], [response?.data]);
+
+  // Enhanced SSE event handler wrapped in useCallback
+  const handleSSEEvent = useCallback(
+    (eventType: string, data: string) => {
+      try {
+        const parsedData = JSON.parse(data);
+        console.log(`SSE event (${eventType}):`, parsedData);
+
+        switch (eventType) {
+          case 'notification':
+          case 'notification_created': // Handle notification_created event
+            console.log('New notification received');
+            // Optimistically add the new notification to the current data
+            if (parsedData.id) {
+              const currentNotifications = notifications || [];
+              const newNotification: Notification = {
+                ...parsedData,
+                // Ensure it has the proper structure
+                createdAt: parsedData.createdAt || new Date().toISOString(),
+                updatedAt: parsedData.updatedAt || new Date().toISOString(),
+              };
+
+              // Check if notification already exists (avoid duplicates)
+              const exists = currentNotifications.some(
+                (n) => n.id === parsedData.id,
+              );
+
+              if (!exists) {
+                const updatedData = {
+                  success: true,
+                  message: 'Updated successfully',
+                  data: [newNotification, ...currentNotifications], // Add to beginning
+                };
+
+                // Update the cache optimistically
+                mutate(updatedData, false);
+              }
+            } else {
+              // Fallback to full refresh if we don't have proper data
+              mutate();
+            }
+            break;
+
+          case 'notification_updated':
+            console.log('Notification updated');
+            // Handle notification updates (like marking as read)
+            if (parsedData.id) {
+              const currentNotifications = notifications || [];
+              const updatedNotifications = currentNotifications.map(
+                (notification) =>
+                  notification.id === parsedData.id
+                    ? { ...notification, ...parsedData }
+                    : notification,
+              );
+
+              const updatedData = {
+                success: true,
+                message: 'Updated successfully',
+                data: updatedNotifications,
+              };
+
+              mutate(updatedData, false);
+            } else {
+              mutate(); // Fallback to full refresh
+            }
+            break;
+
+          case 'notification_deleted':
+            console.log('Notification deleted');
+            // Handle notification deletions
+            if (parsedData.id) {
+              const currentNotifications = notifications || [];
+              const filteredNotifications = currentNotifications.filter(
+                (notification) => notification.id !== parsedData.id,
+              );
+
+              const updatedData = {
+                success: true,
+                message: 'Updated successfully',
+                data: filteredNotifications,
+              };
+
+              mutate(updatedData, false);
+            } else {
+              mutate(); // Fallback to full refresh
+            }
+            break;
+
+          case 'ping':
+            // Heartbeat - no action needed
+            console.log('SSE heartbeat received');
+            break;
+
+          default:
+            // Handle generic messages or connection confirmations
+            if (parsedData.type === 'connected') {
+              console.log('SSE connection confirmed');
+            } else {
+              console.log(`Unhandled SSE event type: ${eventType}`);
+              mutate(); // Refresh on any other event
+            }
+        }
+      } catch (error: unknown) {
+        console.error('Error parsing SSE event data:', getErrorMessage(error));
+        console.error('Raw data:', data);
+      }
+    },
+    [notifications, mutate],
+  ); // Add dependencies
 
   // Custom SSE implementation using fetch with ReadableStream
   useEffect(() => {
@@ -168,14 +289,22 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
               }
             }
           }
-        } catch (readError) {
-          if (readError.name !== 'AbortError') {
-            console.error('Error reading SSE stream:', readError);
+        } catch (readError: unknown) {
+          if (!isAbortError(readError)) {
+            console.error(
+              'Error reading SSE stream:',
+              getErrorMessage(readError),
+            );
+            console.error('Full error object:', readError);
           }
         }
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Error setting up SSE connection:', error);
+      } catch (error: unknown) {
+        if (!isAbortError(error)) {
+          console.error(
+            'Error setting up SSE connection:',
+            getErrorMessage(error),
+          );
+          console.error('Full error object:', error);
           setIsConnected(false);
 
           // Attempt to reconnect after delay
@@ -186,36 +315,6 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
             }
           }, 5000);
         }
-      }
-    };
-
-    const handleSSEEvent = (eventType: string, data: string) => {
-      try {
-        const parsedData = JSON.parse(data);
-        console.log(`SSE event (${eventType}):`, parsedData);
-
-        switch (eventType) {
-          case 'notification':
-            console.log('New notification received');
-            mutate(); // Refresh notifications
-            break;
-          case 'notification_updated':
-            console.log('Notification updated');
-            mutate(); // Refresh notifications
-            break;
-          case 'ping':
-            // Heartbeat - no action needed
-            break;
-          default:
-            // Handle generic messages or connection confirmations
-            if (parsedData.type === 'connected') {
-              console.log('SSE connection confirmed');
-            } else {
-              mutate(); // Refresh on any other event
-            }
-        }
-      } catch (error) {
-        console.error('Error parsing SSE event data:', error);
       }
     };
 
@@ -235,7 +334,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
         readerRef.current = null;
       }
     };
-  }, [endpoints?.stream, user.id, mutate]);
+  }, [endpoints?.stream, user.id, mutate, handleSSEEvent]);
 
   const unreadCount = notifications.filter(
     (notification) => !notification.read,
@@ -282,8 +381,11 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
           `Failed to mark notification as read: ${response.status}`,
         );
       }
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    } catch (error: unknown) {
+      console.error(
+        'Error marking notification as read:',
+        getErrorMessage(error),
+      );
       mutate();
     }
   };
@@ -295,8 +397,11 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
       await Promise.all(
         unreadNotifications.map((notification) => markAsRead(notification.id)),
       );
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+    } catch (error: unknown) {
+      console.error(
+        'Error marking all notifications as read:',
+        getErrorMessage(error),
+      );
     }
   };
 
