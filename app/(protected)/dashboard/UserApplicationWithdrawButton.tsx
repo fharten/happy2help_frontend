@@ -34,7 +34,7 @@ async function deleteApplication(applicationId: string, accessToken: string) {
 }
 
 interface PropsType {
-  children: any;
+  children: React.ReactNode;
   applicationId: string;
 }
 
@@ -42,7 +42,7 @@ export function ApplicationWithdrawButton({
   children,
   applicationId,
 }: PropsType) {
-  const { user, tokens } = useAuth();
+  const { tokens } = useAuth();
 
   const handleClick = () => {
     deleteApplication(applicationId, tokens!.accessToken);
@@ -64,7 +64,7 @@ export function ApplicationWithdrawButtonMobile({
   children,
   applicationId,
 }: PropsType) {
-  const { user, tokens } = useAuth();
+  const { tokens } = useAuth();
 
   const handleClick = () => {
     deleteApplication(applicationId, tokens!.accessToken);

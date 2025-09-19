@@ -6,7 +6,7 @@ export interface Application {
   projectId: string;
   userId: string;
   ngoId: string;
-  status: string;
+  status: ApplicationStatus;
   skills: Skills;
   message?: string;
   reviewNotes?: string;
