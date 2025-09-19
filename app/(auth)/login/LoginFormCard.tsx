@@ -107,7 +107,7 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
           </div>
           <div className='mt-4 text-center text-sm'>
             Du hast noch keinen Account?{' '}
-            <a href='#' className='underline underline-offset-4'>
+            <a href='register' className='underline underline-offset-4'>
               Registrieren
             </a>
           </div>
