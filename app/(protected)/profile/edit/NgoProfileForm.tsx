@@ -1,16 +1,20 @@
 'use client';
-
-import useSWR from 'swr';
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { z } from 'zod';
+import {
+  MultiSelect,
+  type Option as SelectOption,
+} from '@/components/ui/multiselect';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-
+import { z } from 'zod';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import ButtonComponent from '@/components/ButtonComponent';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import useSWR from 'swr';
+import { toast, Toaster } from 'sonner';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+
 import {
   Form,
   FormControl,
@@ -21,182 +25,302 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { getAuthToken } from '@/lib/auth';
-import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+import Image from 'next/image';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import ImageDropzone from '@/components/ImageDropzone';
+import { XCircle } from 'lucide-react';
+// import { Switch } from '@/components/ui/switch';
 
-interface NgoProfile {
+interface Category {
   id: string;
   name: string;
-  email: string;
-  phone?: string;
   description?: string;
-  website?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  categories?: Array<{ id: string; name: string }>;
-  projects?: Array<{ id: string; name: string }>;
-  createdAt: string;
-  updatedAt: string;
-  image?: string;
-  isDisabled?: boolean;
-  zipCode?: string;
-  state?: string;
-  principal?: string;
+}
+
+interface NgoProfile {
+  name?: string;
   contactEmail?: string;
+  phone?: string;
+  principal?: string;
   streetAndNumber?: string;
-  industry?: string[];
+  categories?: string[];
+  //isDisabled?: boolean;
+  zipCode?: number;
+  city?: string;
+  state?: string;
+}
+
+// Type for API response when fetching ngo details
+type UserDetailResponse = Omit<NgoProfile, 'skills' | 'categories'> & {
+  id?: string;
+  loginEmail?: string;
+  image?: string;
+  role?: string;
+  principal?: string;
+  streetAndNumber?: string;
+  isActivated?: boolean;
+  //isDisabled?: boolean;
+  skills?: Array<{ id: string; name: string; description?: string }> | string[];
+  categories?:
+    | Array<{ id: string; name: string; description?: string }>
+    | string[];
+};
+
+function useCategories() {
+  const { data, error, isLoading, mutate } = useSWR<Category[]>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
+    swrFetcher,
+  );
+
+  return {
+    categories: data || [],
+    isLoading,
+    isError: error,
+    mutate,
+  };
+}
+
+// Update ngo with authentication
+async function updateUser(id: string, ngo: NgoProfile, accessToken: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(ngo),
+    },
+  );
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || 'Failed to update ngo profile');
+  }
+
+  const updatedUser = await res.json();
+  return updatedUser;
 }
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: 'Vereinsname muss mindestens 2 Zeichen lang sein.' }),
-  image: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
+  name: z.string().optional(),
+  contactEmail: z
+    .email({ message: 'Bitte eine gültige E-Mail-Adresse eingeben.' })
+    .optional()
+    .or(z.literal('')),
+  phone: z.string().optional(),
   principal: z
     .string()
     .min(2, {
       message: 'Name des Vorstands muss mindestens 2 Zeichen lang sein.',
     })
     .includes(' ', { message: 'Bitte Vor- und Nachnamen angeben.' }),
-  contactEmail: z
-    .email({ message: 'Ungültige E-Mail-Adresse.' })
-    .optional()
-    .or(z.literal('')),
-
-  phone: z.string().optional(),
-  industry: z
-    .array(z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }))
-    .min(1, { message: 'Mindestens ein Tätigkeitsfeld angeben.' }),
-  streetAndNumber: z
-    .string()
-    .min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  zipCode: z.number().int().gte(10000).lte(99999).optional(),
-  city: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  state: z.string().min(1, { message: 'Dieses Feld ist verpflichtend.' }),
-  isDisabled: z.boolean(),
+  categories: z.array(z.string()).optional().default([]),
+  yearOfBirth: z
+    .number()
+    .min(1900, { message: 'Geburtsjahr muss nach 1900 liegen.' })
+    .max(new Date().getFullYear(), {
+      message: 'Geburtsjahr kann nicht in der Zukunft liegen.',
+    })
+    .optional(),
+  zipCode: z
+    .number()
+    .min(10000, { message: 'Postleitzahl muss 5-stellig sein.' })
+    .max(99999, { message: 'Postleitzahl muss 5-stellig sein.' })
+    .optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  //isDisabled: z.boolean(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-const NgoProfileForm = () => {
-  const { user } = useAuth();
-  const ngoId = user?.id;
-
+const NgoEditForm = () => {
+  const { categories } = useCategories();
+  const { user: ngo, tokens } = useAuth();
   const router = useRouter();
 
-  const {
-    data: ngo,
-    isLoading,
-    isValidating,
-    error,
-  } = useSWR<NgoProfile>(
-    ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
-    swrFetcher,
+  const ngoId = ngo?.id;
+
+  const categoryOptions: SelectOption[] = (categories ?? []).map(
+    (category) => ({
+      value: category.id,
+      label: category.name,
+    }),
   );
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<NgoProfile, undefined, NgoProfile>({
+    resolver: zodResolver<NgoProfile, undefined, NgoProfile>(formSchema),
     defaultValues: {
       name: '',
-      image: '',
       principal: '',
+      streetAndNumber: '',
       contactEmail: '',
       phone: '',
-      industry: [],
-      streetAndNumber: '',
+      //isDisabled: false,
+      categories: [],
       zipCode: undefined,
       city: '',
       state: '',
-      isDisabled: false,
     },
     mode: 'onSubmit',
   });
 
+  const { data: ngoDetailData, mutate } = useSWR<UserDetailResponse>(
+    ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
+    swrFetcher,
+  );
+
   useEffect(() => {
-    if (!ngo) return;
+    if (!ngoDetailData) return;
 
-    form.reset({
-      name: ngo.name ?? '',
-      image: ngo.image ?? '',
-      principal: ngo.principal ?? '',
-      contactEmail: ngo.contactEmail ?? '',
-      phone: ngo.phone ?? '',
-      industry: Array.isArray(ngo.industry) ? ngo.industry : [],
-      streetAndNumber: ngo.streetAndNumber ?? '',
-      zipCode: typeof ngo.zipCode === 'number' ? ngo.zipCode : undefined,
-      city: ngo.city ?? '',
-      state: ngo.state ?? '',
-      isDisabled: !!ngo.isDisabled,
-    });
-  }, [ngo, form]);
+    // Handle categories - they might be an array of objects or array of strings
+    let categoryIds: string[] = [];
+    if (Array.isArray(ngoDetailData.categories)) {
+      categoryIds = ngoDetailData.categories.map((category) =>
+        typeof category === 'string' ? category : category.id,
+      );
+    }
 
-  const onSubmit = async (values: FormValues) => {
-    if (!ngoId) return;
+    form.reset(
+      {
+        name: ngoDetailData.name ?? '',
+        principal: ngoDetailData.principal ?? '',
+        contactEmail: ngoDetailData.contactEmail ?? '',
+        phone: ngoDetailData.phone ?? '',
+        streetAndNumber: ngoDetailData.streetAndNumber ?? '',
+        categories: categoryIds,
+        zipCode: ngoDetailData.zipCode ?? undefined,
+        city: ngoDetailData.city ?? '',
+        state: ngoDetailData.state ?? '',
+      },
+      { keepDirty: false, keepTouched: true },
+    );
+  }, [ngoDetailData, form]);
+
+  const onSubmit: SubmitHandler<NgoProfile> = async (data) => {
+    if (!tokens?.accessToken) {
+      toast.error('Authentifizierung fehlgeschlagen');
+      return;
+    }
+
+    if (!ngoId) {
+      toast.error('Benutzer ID nicht gefunden');
+      return;
+    }
+
+    // Clean up empty strings and undefined values
+    const submittedNgo = {
+      name: data.name,
+      principal: data.principal,
+      contactEmail: data.contactEmail || undefined,
+      phone: data.phone || undefined,
+      categories: data.categories,
+      streetAndNumber: data.streetAndNumber,
+      zipCode: data.zipCode,
+      city: data.city,
+      state: data.state,
+    };
 
     try {
-      const submitData = {
-        ...values,
-        contactEmail:
-          values.contactEmail === '' ? undefined : values.contactEmail,
-      };
+      const req = updateUser(ngoId, submittedNgo, tokens.accessToken);
 
-      const token = getAuthToken();
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify(submitData),
-        },
-      );
+      toast.promise(req, {
+        loading: 'Profil wird aktualisiert…',
+        success: 'Profil wurde aktualisiert.',
+        error: (error) =>
+          error instanceof Error && error.message
+            ? `Fehler: ${error.message}`
+            : 'Fehler: Das Profil konnte nicht aktualisiert werden.',
+      });
 
-      if (!res.ok) {
-        toast.error('Fehler beim Speichern der Änderungen');
-        throw new Error(`Update failed with status ${res.status}`);
-      }
-
-      toast.success('Profil erfolgreich aktualisiert!');
-      router.push('/profile');
-    } catch (err) {
-      console.error('An error occurred:', err);
-      toast.error('Ein Fehler ist aufgetreten');
+      await req;
+      router.push(`/ngos/${ngoId}`);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  if (!ngoId)
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        Lade...
-      </div>
-    );
-  if (isLoading || !ngo)
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        Lade...
-      </div>
-    );
-  if (error)
-    return (
-      <div className='flex justify-center items-center min-h-screen'>
-        Fehler: {error.message}
-      </div>
-    );
+  const handleDeleteImage = async () => {
+    if (!tokens?.accessToken || !ngoId) {
+      toast.error('Authentifizierung fehlgeschlagen');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}/images`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete image');
+      }
+
+      toast.success('Bild wurde gelöscht');
+
+      if (mutate) {
+        await mutate();
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Fehler beim Löschen des Bildes');
+    }
+  };
+
+  // Show loading if we don't have ngo yet or if trying to edit someone else's profile without permission
+  if (!ngo || !ngoId) {
+    return <div>Lade...</div>;
+  }
 
   return (
     <div className='container-site'>
       <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
         <CardHeader>
-          <CardTitle className='text-2xl font-bold text-center text-prussian'>
+          {/* <CardTitle className='text-2xl font-bold text-center text-prussian'>
             Vereinsprofil bearbeiten
-          </CardTitle>
+          </CardTitle> */}
         </CardHeader>
         <CardContent className='p-8'>
+          <ImageDropzone
+            resourceId={ngoId}
+            resourceType='ngos'
+            onUploadSuccess={() => mutate()}
+          />
+
+          {ngoDetailData?.image && (
+            <>
+              <h2 className='mb-2 font-sans'>Bild</h2>
+              <div className='flex mb-8 h-24 gap-x-4'>
+                <Card className='bg-light-mint/10 flex items-center justify-center h-full relative group'>
+                  <Image
+                    width={100}
+                    height={100}
+                    src={ngoDetailData.image}
+                    style={{
+                      objectFit: 'cover',
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                    }}
+                    alt='Project image'
+                  />
+
+                  <button
+                    onClick={() => handleDeleteImage()}
+                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
+                    type='button'
+                  >
+                    <XCircle fill='red' />
+                  </button>
+                </Card>
+              </div>
+            </>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
               {/* Grundinformationen */}
@@ -205,38 +329,20 @@ const NgoProfileForm = () => {
                   Grundinformationen
                 </h3>
 
-                {/* NAME */}
                 <FormField
                   control={form.control}
                   name='name'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vereinsname</FormLabel>
+                      <FormLabel>Vorname</FormLabel>
                       <FormControl>
-                        <Input {...field} className='h-11' />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* IMAGE */}
-                <FormField
-                  control={form.control}
-                  name='image'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vereinslogo</FormLabel>
-                      <FormControl>
-                        <Input {...field} className='h-11' />
-                      </FormControl>
-                      <FormDescription>Link zum Vereinslogo</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* PRINCIPAL */}
                 <FormField
                   control={form.control}
                   name='principal'
@@ -254,30 +360,29 @@ const NgoProfileForm = () => {
                   )}
                 />
 
-                {/* INDUSTRY */}
                 <FormField
                   control={form.control}
-                  name='industry'
+                  name='categories'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tätigkeitsfelder</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder='Energie, Sport, Kinder, Diversität,...'
-                          className='h-11'
-                          value={field.value?.join(', ') ?? ''}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const arr = raw
-                              .split(',')
-                              .map((s) => s.trim())
-                              .filter((s) => s.length > 0);
-                            field.onChange(arr);
-                          }}
-                        />
+                        {categoryOptions.length > 0 ? (
+                          <MultiSelect
+                            options={categoryOptions}
+                            value={field.value ?? []}
+                            onChange={field.onChange}
+                            placeholder='Kategorien auswählen'
+                            searchPlaceholder='Suchen…'
+                            className='bg-light-mint/0'
+                          />
+                        ) : (
+                          <div>Lade Kategorien...</div>
+                        )}
                       </FormControl>
                       <FormDescription>
-                        Bitte Tätigkeitsfelder getrennt von Kommata eingeben
+                        Wähle die Bereiche aus, in denen deine Organisation
+                        tätig ist
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -291,20 +396,14 @@ const NgoProfileForm = () => {
                   Kontaktinformationen
                 </h3>
 
-                {/* CONTACT EMAIL */}
                 <FormField
                   control={form.control}
                   name='contactEmail'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Abweichende Kontakt-E-Mail-Adresse</FormLabel>
+                      <FormLabel>Kontakt E-Mail</FormLabel>
                       <FormControl>
-                        <Input
-                          type='email'
-                          {...field}
-                          value={field.value || ''}
-                          className='h-11'
-                        />
+                        <Input type='email' {...field} />
                       </FormControl>
                       <FormDescription>
                         Optional. Falls du nicht unter deiner Login-E-Mail
@@ -315,7 +414,6 @@ const NgoProfileForm = () => {
                   )}
                 />
 
-                {/* PHONE */}
                 <FormField
                   control={form.control}
                   name='phone'
@@ -323,11 +421,7 @@ const NgoProfileForm = () => {
                     <FormItem>
                       <FormLabel>Telefonnummer</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value || ''}
-                          className='h-11'
-                        />
+                        <Input {...field} />
                       </FormControl>
                       <FormDescription>Optional</FormDescription>
                       <FormMessage />
@@ -342,24 +436,21 @@ const NgoProfileForm = () => {
                   Adresse
                 </h3>
 
-                {/* ADDRESS */}
                 <FormField
                   control={form.control}
                   name='streetAndNumber'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Anschrift</FormLabel>
+                      <FormLabel>Straße und Hausnummer</FormLabel>
                       <FormControl>
-                        <Input {...field} className='h-11' />
+                        <Input {...field} />
                       </FormControl>
-                      <FormDescription>Straße und Hausnummer</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  {/* ZIP CODE */}
                   <FormField
                     control={form.control}
                     name='zipCode'
@@ -389,7 +480,6 @@ const NgoProfileForm = () => {
                     )}
                   />
 
-                  {/* CITY */}
                   <FormField
                     control={form.control}
                     name='city'
@@ -397,7 +487,7 @@ const NgoProfileForm = () => {
                       <FormItem>
                         <FormLabel>Stadt</FormLabel>
                         <FormControl>
-                          <Input {...field} className='h-11' />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -405,7 +495,6 @@ const NgoProfileForm = () => {
                   />
                 </div>
 
-                {/* STATE */}
                 <FormField
                   control={form.control}
                   name='state'
@@ -413,7 +502,7 @@ const NgoProfileForm = () => {
                     <FormItem>
                       <FormLabel>Bundesland</FormLabel>
                       <FormControl>
-                        <Input {...field} className='h-11' />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -428,7 +517,7 @@ const NgoProfileForm = () => {
                 </h3>
 
                 {/* DISABLED */}
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -451,33 +540,18 @@ const NgoProfileForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
 
-              {isValidating && (
-                <div className='text-center'>
-                  <span className='text-prussian/60'>Lädt neu...</span>
-                </div>
-              )}
-
-              <div className='flex flex-col sm:flex-row gap-4 pt-6'>
-                <ButtonComponent
-                  type='submit'
-                  variant='primary'
-                  size='lg'
-                  className='flex-1'
-                >
-                  Änderungen speichern
+              <div className='flex gap-4'>
+                <ButtonComponent variant='primary' size='md' type='submit'>
+                  Speichern
                 </ButtonComponent>
-                <ButtonComponent
-                  type='button'
-                  variant='secondary'
-                  size='lg'
-                  className='flex-1'
-                  onClick={() => router.push('/profile')}
-                >
-                  Abbrechen
-                </ButtonComponent>
+                <Link href={`/users/${ngoId}`}>
+                  <ButtonComponent variant='secondary' size='md'>
+                    Abbrechen
+                  </ButtonComponent>
+                </Link>
               </div>
             </form>
           </Form>
@@ -488,4 +562,4 @@ const NgoProfileForm = () => {
   );
 };
 
-export default NgoProfileForm;
+export default NgoEditForm;

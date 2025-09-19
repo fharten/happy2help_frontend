@@ -2,13 +2,6 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      'img-c.udemycdn.com',
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'picsum.photos',
-      'localhost',
-    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -17,6 +10,8 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '3333',
+        pathname: '/uploads/**',
       },
     ],
   },
