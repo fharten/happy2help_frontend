@@ -47,7 +47,7 @@ async function createApplication(data: ApplicationData, accessToken: string) {
 }
 
 interface PropsType {
-  children: any;
+  children: React.ReactNode;
   projectId: string;
 }
 

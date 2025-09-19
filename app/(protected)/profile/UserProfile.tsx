@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,12 +18,17 @@ import {
 } from 'lucide-react';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
+interface Skill {
+  id: string;
+  name: string;
+}
+
 interface UserProfile {
   id: string;
   firstName: string;
   lastName: string;
   image: string;
-  skills: string[];
+  skills: Skill[];
   ngoMemberships: string[];
   city: string;
   state: string;
@@ -48,6 +54,8 @@ const UserProfile = () => {
     swrFetcher,
   );
 
+  const [hasImgError, setHasImgError] = useState(false);
+
   if (isLoading || !userData)
     return (
       <div className='container-site'>
@@ -57,6 +65,7 @@ const UserProfile = () => {
       </div>
     );
 
+    
   if (error)
     return (
       <div className='container-site'>
@@ -75,6 +84,8 @@ const UserProfile = () => {
       ? userImage
       : `/images/projects/${userImage}`;
 
+
+
   return (
     <div className='container-site'>
       <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
@@ -82,15 +93,18 @@ const UserProfile = () => {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {imageUrl.startsWith('http') ? (
+                {hasImgError ? (
+                  <div className='w-32 h-32 rounded-full border-4 border-light-mint/40 shadow-lg bg-prussian/10 flex items-center justify-center text-prussian font-semibold'>
+                    {userData.firstName?.[0]}
+                    {userData.lastName?.[0]}
+                  </div>
+                ) : imageUrl.startsWith('http') ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imageUrl}
                     alt={`Profilbild von ${userData.firstName} ${userData.lastName}`}
                     className='w-full h-full rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/users/default-user.jpg';
-                    }}
+                    onError={() => setHasImgError(true)}
                   />
                 ) : (
                   <Image
@@ -99,6 +113,7 @@ const UserProfile = () => {
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
+                    onError={() => setHasImgError(true)}
                   />
                 )}
               </div>
@@ -196,13 +211,13 @@ const UserProfile = () => {
             </h3>
             <div className='flex flex-wrap gap-2'>
               {userData.skills && userData.skills.length > 0 ? (
-                userData.skills.map((skill: string) => (
+                userData.skills.map((skill) => (
                   <Badge
-                    key={skill}
+                    key={skill.id}
                     variant='secondary'
                     className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
                   >
-                    {skill}
+                    {skill.name}
                   </Badge>
                 ))
               ) : (
