@@ -11,7 +11,7 @@ enum ApplicationStatus {
 }
 
 interface PropsType {
-  children: any;
+  children: React.ReactNode;
   application: Application;
 }
 
