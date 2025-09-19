@@ -18,13 +18,17 @@ import {
 } from 'lucide-react';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
+interface Skill {
+  id: string;
+  name: string;
+}
 
 interface UserProfile {
   id: string;
   firstName: string;
   lastName: string;
   image: string;
-  skills: string[];
+  skills: Skill[];
   ngoMemberships: string[];
   city: string;
   state: string;
@@ -201,19 +205,19 @@ const UserProfile = () => {
           )}
 
           {/* Fähigkeiten */}
-          {/* <div className='space-y-4'>
+          <div className='space-y-4'>
             <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
               Fähigkeiten
             </h3>
             <div className='flex flex-wrap gap-2'>
               {userData.skills && userData.skills.length > 0 ? (
-                userData.skills.map((skill: string) => (
+                userData.skills.map((skill) => (
                   <Badge
-                    key={skill}
+                    key={skill.id}
                     variant='secondary'
                     className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
                   >
-                    {skill}
+                    {skill.name}
                   </Badge>
                 ))
               ) : (
@@ -222,7 +226,7 @@ const UserProfile = () => {
                 </span>
               )}
             </div>
-          </div> */}
+          </div>
 
           {/* Vereinsmitgliedschaften */}
           {userData.ngoMemberships && userData.ngoMemberships.length > 0 && (
