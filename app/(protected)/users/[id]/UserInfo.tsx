@@ -2,6 +2,7 @@
 
 import React from 'react';
 import useSWR from 'swr';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +48,7 @@ export default function UserInfo() {
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}` : null,
     swrFetcher,
   );
+ const [hasImgError, setHasImgError] = useState(false);
 
   return isLoading || !user ? (
     <SpinnerComponent />
@@ -65,13 +67,19 @@ export default function UserInfo() {
           <div className='flex flex-col items-center gap-6'>
             <div className='relative'>
               <div className='relative w-32 h-32'>
-                {user.image && (
+                 {hasImgError || !user.image ? (
+                  <div className='w-32 h-32 rounded-full border-4 border-light-mint/40 shadow-lg bg-prussian/10 flex items-center justify-center text-prussian font-semibold text-2xl'>
+                    {user.firstName?.[0]}
+                    {user.lastName?.[0]}
+                  </div>
+                ) : (
                   <Image
                     src={user.image}
                     alt={`Profilbild von ${user.firstName} ${user.lastName}`}
                     fill
                     className='rounded-full object-cover border-4 border-light-mint/40 shadow-lg'
                     sizes='128px'
+                    onError={() => setHasImgError(true)}
                   />
                 )}
               </div>
