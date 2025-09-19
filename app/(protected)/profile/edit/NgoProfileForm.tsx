@@ -69,7 +69,7 @@ type UserDetailResponse = Omit<NgoProfile, 'skills' | 'categories'> & {
 function useCategories() {
   const { data, error, isLoading, mutate } = useSWR<Category[]>(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
-    swrFetcher,
+    swrFetcher
   );
 
   return {
@@ -91,7 +91,7 @@ async function updateUser(id: string, ngo: NgoProfile, accessToken: string) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(ngo),
-    },
+    }
   );
 
   if (!res.ok) {
@@ -145,7 +145,7 @@ const NgoEditForm = () => {
     (category) => ({
       value: category.id,
       label: category.name,
-    }),
+    })
   );
 
   const form = useForm<NgoProfile, undefined, NgoProfile>({
@@ -167,7 +167,7 @@ const NgoEditForm = () => {
 
   const { data: ngoDetailData, mutate } = useSWR<UserDetailResponse>(
     ngoId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${ngoId}` : null,
-    swrFetcher,
+    swrFetcher
   );
 
   useEffect(() => {
@@ -177,7 +177,7 @@ const NgoEditForm = () => {
     let categoryIds: string[] = [];
     if (Array.isArray(ngoDetailData.categories)) {
       categoryIds = ngoDetailData.categories.map((category) =>
-        typeof category === 'string' ? category : category.id,
+        typeof category === 'string' ? category : category.id
       );
     }
 
@@ -193,7 +193,7 @@ const NgoEditForm = () => {
         city: ngoDetailData.city ?? '',
         state: ngoDetailData.state ?? '',
       },
-      { keepDirty: false, keepTouched: true },
+      { keepDirty: false, keepTouched: true }
     );
   }, [ngoDetailData, form]);
 
@@ -254,7 +254,7 @@ const NgoEditForm = () => {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -547,7 +547,7 @@ const NgoEditForm = () => {
                 <ButtonComponent variant='primary' size='md' type='submit'>
                   Speichern
                 </ButtonComponent>
-                <Link href={`/users/${ngoId}`}>
+                <Link href={`/ngos/${ngoId}`}>
                   <ButtonComponent variant='secondary' size='md'>
                     Abbrechen
                   </ButtonComponent>
