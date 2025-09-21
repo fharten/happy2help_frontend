@@ -21,29 +21,12 @@ import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 import ApplyButton from './ApplyButton';
 import { getUserEntityType } from '@/lib/user-utils';
 
-type FetchError = Error & { info?: unknown; status?: number };
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const error: FetchError = new Error(
-      'An error occurred while fetching the data.',
-    );
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-
-  return res.json();
-};
-
 const ProjectDetailPage = () => {
   const { id } = useParams();
   const pathname = usePathname();
   const parentUrl = pathname?.split('/').slice(0, -1).join('/') || '/';
 
-  const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
+  const { data, isLoading, isValidating, error } = useSWR<Project>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
     swrFetcher,
   );
@@ -73,15 +56,7 @@ const ProjectDetailPage = () => {
       </div>
     );
 
-  const project = data.data;
-  const availableImages = ['project1_img1.jpg', 'project1_img2.jpg'];
-
-  const getImageSrc = (imageName?: string) => {
-    if (imageName && availableImages.includes(imageName)) {
-      return `/images/projects/${imageName}`;
-    }
-    return '/images/fallback.png';
-  };
+  const project = data;
 
   return (
     <div className='container-site'>
@@ -110,16 +85,16 @@ const ProjectDetailPage = () => {
                   className='h-full flex items-center justify-center'
                 >
                   <Image
-                    src={getImageSrc(image)}
+                    src={image}
                     alt={`Projektbild ${index + 1}`}
                     width={1200}
                     height={600}
                     className='w-full h-full object-cover'
                     sizes='(max-width: 640px) 100vw, 1200px'
-                    priority={index === 0} // wichtig für seo
+                    priority={index === 0}
                     onError={(e) => {
-                      // wenn fehler, dann fallback image
-                      e.currentTarget.src = '/images/fallback.png';
+                      e.currentTarget.src =
+                        'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png';
                     }}
                   />
                 </CarouselItem>
