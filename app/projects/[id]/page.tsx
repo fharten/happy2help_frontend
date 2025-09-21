@@ -17,7 +17,7 @@ import { Project } from '@/types/project.d';
 import { Skill } from '@/types/skill.d';
 import ButtonComponent from '@/components/ButtonComponent';
 import BadgeComponent from '@/components/BadgeComponent';
-import { useAuth } from '@/contexts/AuthContext';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 import ApplyButton from './ApplyButton';
 import { getUserEntityType } from '@/lib/user-utils';
 
@@ -28,7 +28,7 @@ const fetcher = async (url: string) => {
 
   if (!res.ok) {
     const error: FetchError = new Error(
-      'An error occurred while fetching the data.'
+      'An error occurred while fetching the data.',
     );
     error.info = await res.json();
     error.status = res.status;
@@ -44,8 +44,8 @@ const ProjectDetailPage = () => {
   const parentUrl = pathname?.split('/').slice(0, -1).join('/') || '/';
 
   const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
-    id ? `http://localhost:3333/api/projects/${id}` : null,
-    fetcher
+    id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
+    swrFetcher,
   );
 
   // get user if logged in
