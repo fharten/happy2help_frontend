@@ -5,9 +5,10 @@ import { Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import useSWR from 'swr';
-import { getUserId, getUserType, authenticatedFetcher } from '@/lib/auth';
+import { getUserId, getUserType } from '@/lib/auth';
 import { User } from '@/types/user.d';
 import { Ngo } from '@/types/ngo.d';
+import { swrFetcher } from '@/contexts/AuthContext';
 
 const DashboardBar = () => {
   const [themeIsDark, setThemeIsDark] = useState(false);
@@ -22,7 +23,7 @@ const DashboardBar = () => {
     userId && userType
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/${userType}/${userId}`
       : null,
-    authenticatedFetcher
+    swrFetcher,
   );
 
   // Get display name based on user type
