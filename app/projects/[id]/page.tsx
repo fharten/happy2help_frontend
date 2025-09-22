@@ -26,10 +26,18 @@ const ProjectDetailPage = () => {
   const pathname = usePathname();
   const parentUrl = pathname?.split('/').slice(0, -1).join('/') || '/';
 
-  const fetcher = (url: string | URL | Request) =>
-    fetch(url).then((r) => r.json());
+  const fetcher = async (url: string | URL | Request) => {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json.data; // Extract just the data property
+  };
 
-  const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
+  const {
+    data: project,
+    isLoading,
+    isValidating,
+    error,
+  } = useSWR<Project>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
     fetcher,
   );
@@ -39,7 +47,7 @@ const ProjectDetailPage = () => {
   let entityType = 'unknown';
   if (user) entityType = getUserEntityType(user!);
 
-  if (isLoading || isUserLoading || !data) {
+  if (isLoading || isUserLoading || !project) {
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -58,8 +66,6 @@ const ProjectDetailPage = () => {
         </div>
       </div>
     );
-
-  const project = data.data;
 
   return (
     <div className='container-site'>
