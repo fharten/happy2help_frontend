@@ -471,8 +471,7 @@ const UserEditForm = () => {
                         <Input type='email' {...field} />
                       </FormControl>
                       <FormDescription>
-                        Optional. Falls du nicht unter deiner Login-E-Mail
-                        kontaktiert werden möchtest
+                        Alternative E-Mail-Adresse zur Kontaktaufnahme (optionales Feld)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

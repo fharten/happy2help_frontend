@@ -405,8 +405,7 @@ const NgoEditForm = () => {
                         <Input type='email' {...field} />
                       </FormControl>
                       <FormDescription>
-                        Optional, falls du nicht unter deiner Login-E-Mail
-                        kontaktiert werden möchtest.
+                        Alternative E-Mail-Adresse zur Kontaktaufnahme (optionales Feld)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
