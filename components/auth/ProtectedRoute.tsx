@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasRole, hasEntityType } from '@/lib/user-utils';
@@ -63,6 +63,11 @@ export function ProtectedRoute({
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const shouldAllow = useMemo(() => {
+    if (!customCheck || !user) return true;
+    return customCheck(user);
+  }, [customCheck, user]);
+
   useEffect(() => {
     if (isLoading) {
       return;
@@ -77,11 +82,12 @@ export function ProtectedRoute({
       return;
     }
 
-    if (customCheck && !customCheck(user)) {
-      // router.push('/unauthorized');
-      //return;
+    if (!shouldAllow) {
+      // ← Use shouldAllow instead of calling customCheck
+      router.push('/unauthorized');
+      return;
     }
-  }, [user, isLoading, isAuthenticated, customCheck, router, fallbackPath]);
+  }, [user, isLoading, isAuthenticated, shouldAllow, router, fallbackPath]);
 
   if (isLoading) {
     return <>{loadingComponent}</>;
@@ -91,7 +97,7 @@ export function ProtectedRoute({
     return <>{loadingComponent}</>;
   }
 
-  if (customCheck && !customCheck(user)) {
+  if (!shouldAllow) {
     return <>{loadingComponent}</>;
   }
 
@@ -359,19 +365,23 @@ export function UserOwnerRoute({
   children,
   ...props
 }: Omit<ProtectedRouteProps, 'customCheck'>) {
+  const params = useParams();
+
   return (
     <ProtectedRoute
       customCheck={(user) => {
-        const pathParts = window.location.pathname.split('/');
-        const userId = pathParts[pathParts.length - 1];
+        // Get the ID from Next.js params, not from window.location
+        const userId = params?.id as string;
 
-        // Admin can access any user profile
+        if (!userId) return false;
+
+        // ADMIN CAN ACCESS ANY PROFILE
         if (hasRole(user, 'admin')) return true;
 
-        // User can access their own profile
+        // USER CAN ACCESS THEIR OWN PROFILE
         if (hasEntityType(user, 'user') && user.id === userId) return true;
 
-        // NGO can access any user profile
+        // NGO CAN ACCEESS ANY PROFILE
         if (hasEntityType(user, 'ngo')) return true;
 
         return false;
@@ -414,12 +424,13 @@ export function ResourceOwnerOrEntityNgoRoute({
 }: Omit<ProtectedRouteProps, 'customCheck'> & {
   resourceType: 'project' | 'application' | 'notification' | 'user';
 }) {
+  const params = useParams();
+
   if (resourceType === 'user') {
     return (
       <ProtectedRoute
         customCheck={(user) => {
-          const pathParts = window.location.pathname.split('/');
-          const userId = pathParts[pathParts.length - 1];
+          const userId = params?.id as string;
 
           // User owns their own profile OR any NGO can access
           return (
@@ -455,12 +466,13 @@ export function ResourceOwnerOrAdminRoute({
 }: Omit<ProtectedRouteProps, 'customCheck'> & {
   resourceType: 'project' | 'application' | 'notification' | 'user';
 }) {
+  const params = useParams();
+
   if (resourceType === 'user') {
     return (
       <ProtectedRoute
         customCheck={(user) => {
-          const pathParts = window.location.pathname.split('/');
-          const userId = pathParts[pathParts.length - 1];
+          const userId = params?.id as string;
 
           // User owns their own profile OR admin can access
           return (

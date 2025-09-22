@@ -16,7 +16,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import ButtonComponent from '@/components/ButtonComponent';
 
 interface NgoProfile {
@@ -46,6 +46,8 @@ interface NgoProfile {
 export default function NgoInfo() {
   const { id } = useParams();
   const { user: ngoLoggedIn, isLoading: isLoadingNgo } = useAuth();
+  const fetcher = (url: string | URL | Request) =>
+    fetch(url).then((r) => r.json());
 
   const {
     data: ngoResponse,
@@ -53,7 +55,7 @@ export default function NgoInfo() {
     error,
   } = useSWR<{ data: NgoProfile }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
-    swrFetcher,
+    fetcher,
   );
 
   const {
@@ -62,7 +64,7 @@ export default function NgoInfo() {
     error: errorProjects,
   } = useSWR<{ data: { projects: Projects } }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
-    swrFetcher,
+    fetcher,
   );
   const [hasImgError, setHasImgError] = useState(false);
 
