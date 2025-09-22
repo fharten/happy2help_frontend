@@ -23,7 +23,7 @@ type MessageDialogProps = {
 const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
   const [text, setText] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = () => {(event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); }
     if (text.trim()) {
       onSubmit(text); // Text weitergeben
       setText(''); // Eingabefeld leeren
