@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import ButtonComponent from '@/components/ButtonComponent';
+import { toast } from 'sonner';
 
 interface ApplicationData {
   projectId: string;
@@ -24,22 +25,21 @@ async function createApplication(data: ApplicationData, accessToken: string) {
 
   // you can't apply more than once
   if (res.status == 409 && res.statusText == 'Conflict') {
-    return <>{alert('Du hast dich bereits für dieses Projekt beworben!')}</>;
+    toast.warning('Du hast dich bereits für dieses Projekt beworben!');
+    return;
   }
 
   if (!res.ok) {
     const error = await res.json();
+    toast.error(error.message || 'Fehler beim Erstellen der Bewerbung');
     throw new Error(error.message || 'Failed to create application');
   }
 
   if (res.status == 201 && res.statusText == 'Created') {
-    return (
-      <>
-        {alert(
-          'Du hast dich auf das Projekt beworben. Der Verein wird über deine Bewerbung informiert.'
-        )}
-      </>
+    toast.success(
+      'Du hast dich erfolgreich beworben! Der Verein wird über deine Bewerbung informiert.'
     );
+    return;
   }
 
   const newApplication = await res.json();
@@ -59,8 +59,12 @@ export default function ApplyButton({ children, projectId }: PropsType) {
     userId: user!.id,
   };
 
-  const handleClick = () => {
-    createApplication(applicationData, tokens!.accessToken);
+  const handleClick = async () => {
+    try {
+      await createApplication(applicationData, tokens!.accessToken);
+    } catch (error) {
+      console.error('Error creating application:', error);
+    }
   };
 
   return (
