@@ -341,10 +341,7 @@ const UserEditForm = () => {
                       name='firstName'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>
-                          
-                          
-                          </FormLabel>
+                          <FormLabel>Vorname</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
