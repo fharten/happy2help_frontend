@@ -9,12 +9,17 @@ import { getUserId, getUserType } from '@/lib/auth';
 import { User } from '@/types/user.d';
 import { Ngo } from '@/types/ngo.d';
 import { swrFetcher } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { getUserEntityType } from '@/lib/user-utils';
 
 const DashboardBar = () => {
   const [themeIsDark, setThemeIsDark] = useState(false);
   const router = useRouter();
 
   // Get user info for personalized greeting
+  const { user: userLoggedIn } = useAuth();
+  const entityType = getUserEntityType(userLoggedIn!);
+
   const userId = getUserId();
   const userType = getUserType();
 
@@ -23,21 +28,8 @@ const DashboardBar = () => {
     userId && userType
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/${userType}/${userId}`
       : null,
-    swrFetcher,
+    swrFetcher
   );
-
-  // Get display name based on user type
-  const getDisplayName = () => {
-    if (!data?.data) return '';
-
-    if (userType === 'users') {
-      const user = data.data as User;
-      return user.firstName || 'Benutzer';
-    } else {
-      const ngo = data.data as Ngo;
-      return ngo.name || 'Verein';
-    }
-  };
 
   return (
     <div className='w-full mb-6 container-site'>
@@ -46,7 +38,11 @@ const DashboardBar = () => {
         <div className='flex flex-col space-y-4 lg:hidden'>
           <div>
             <h2 className='text-xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}`}
+              {isLoading
+                ? 'Dashboard'
+                : entityType === 'user'
+                ? `Hallo ${userLoggedIn?.firstName} ${userLoggedIn?.lastName}!`
+                : `Hallo ${userLoggedIn?.name}!`}
             </h2>
             <p className='text-prussian/70 text-sm font-medium'>
               Verwalte dein Profil und deine Einstellungen
@@ -74,7 +70,11 @@ const DashboardBar = () => {
         <div className='hidden lg:flex items-center justify-between'>
           <div>
             <h2 className='text-2xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}`}
+              {isLoading
+                ? 'Dashboard'
+                : entityType === 'user'
+                ? `Hallo ${userLoggedIn?.firstName} ${userLoggedIn?.lastName}!`
+                : `Hallo ${userLoggedIn?.name}!`}
             </h2>
             <p className='text-prussian/70 text-base font-medium'>
               Verwalte dein Profil und deine Einstellungen
