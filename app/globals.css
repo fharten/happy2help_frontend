@@ -147,7 +147,7 @@
   --foreground: #22223b;
 
   /* shadcn/ui Variables für Toast */
-  --popover: #ffffff;
+  --popover: red;
   --popover-foreground: #22223b;
   --border: #e2e8f0;
   --muted: #f1f5f9;

@@ -14,6 +14,7 @@ import ButtonComponent from '@/components/ButtonComponent';
 import useSWR from 'swr';
 import { toast, Toaster } from 'sonner';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+import MainHeadline from '@/components/MainHeadline';
 
 import {
   Form,
@@ -26,7 +27,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import ImageDropzone from '@/components/ImageDropzone';
 import { XCircle } from 'lucide-react';
 // import { Switch } from '@/components/ui/switch';
@@ -279,201 +280,63 @@ const NgoEditForm = () => {
   }
 
   return (
-    <div className='container-site'>
-      <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
-        <CardHeader>
-          {/* <CardTitle className='text-2xl font-bold text-center text-prussian'>
-            Vereinsprofil bearbeiten
-          </CardTitle> */}
-        </CardHeader>
-        <CardContent className='p-8'>
-          <ImageDropzone
-            resourceId={ngoId}
-            resourceType='ngos'
-            onUploadSuccess={() => mutate()}
-          />
+    <>
+      <div className='container-site'>
+        <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
+          <CardContent className='p-8'>
+            <ImageDropzone
+              resourceId={ngoId}
+              resourceType='ngos'
+              onUploadSuccess={() => mutate()}
+            />
 
-          {ngoDetailData?.image && (
-            <>
-              <h2 className='mb-2 font-sans'>Bild</h2>
-              <div className='flex mb-8 h-24 gap-x-4'>
-                <Card className='bg-light-mint/10 flex items-center justify-center h-full relative group'>
-                  <Image
-                    width={100}
-                    height={100}
-                    src={ngoDetailData.image}
-                    style={{
-                      objectFit: 'cover',
-                      maxHeight: '100%',
-                      maxWidth: '100%',
-                    }}
-                    alt='Project image'
-                  />
+            {ngoDetailData?.image && (
+              <>
+                <h2 className='mb-2 font-sans'>Bild</h2>
+                <div className='flex mb-8 h-24 gap-x-4'>
+                  <Card className='bg-light-mint/10 flex items-center justify-center h-full relative group'>
+                    <Image
+                      width={100}
+                      height={100}
+                      src={ngoDetailData.image}
+                      style={{
+                        objectFit: 'cover',
+                        maxHeight: '100%',
+                        maxWidth: '100%',
+                      }}
+                      alt='Project image'
+                    />
 
-                  <button
-                    onClick={() => handleDeleteImage()}
-                    className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
-                    type='button'
-                  >
-                    <XCircle fill='red' />
-                  </button>
-                </Card>
-              </div>
-            </>
-          )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-              {/* Grundinformationen */}
-              <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
-                  Grundinformationen
-                </h3>
+                    <button
+                      onClick={() => handleDeleteImage()}
+                      className='absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'
+                      type='button'
+                    >
+                      <XCircle fill='red' />
+                    </button>
+                  </Card>
+                </div>
+              </>
+            )}
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='space-y-8'
+              >
+                {/* Grundinformationen */}
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                    Grundinformationen
+                  </h3>
 
-                <FormField
-                  control={form.control}
-                  name='name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vorname</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='principal'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vorstand</FormLabel>
-                      <FormControl>
-                        <Input {...field} className='h-11' />
-                      </FormControl>
-                      <FormDescription>
-                        Vor- und Nachname des Vorstands
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='categories'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tätigkeitsfelder</FormLabel>
-                      <FormControl>
-                        {categoryOptions.length > 0 ? (
-                          <MultiSelect
-                            options={categoryOptions}
-                            value={field.value ?? []}
-                            onChange={field.onChange}
-                            placeholder='Kategorien auswählen'
-                            searchPlaceholder='Suchen…'
-                            className='bg-light-mint/0'
-                          />
-                        ) : (
-                          <div>Lade Kategorien...</div>
-                        )}
-                      </FormControl>
-                      <FormDescription>
-                        Wähle die Bereiche aus, in denen deine Organisation
-                        tätig ist
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Kontaktinformationen */}
-              <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
-                  Kontaktinformationen
-                </h3>
-
-                <FormField
-                  control={form.control}
-                  name='contactEmail'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Kontakt E-Mail</FormLabel>
-                      <FormControl>
-                        <Input type='email' {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Optional. Falls du nicht unter deiner Login-E-Mail
-                        kontaktiert werden möchtest
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='phone'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telefonnummer</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormDescription>Optional</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Adressinformationen */}
-              <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
-                  Adresse
-                </h3>
-
-                <FormField
-                  control={form.control}
-                  name='streetAndNumber'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Straße und Hausnummer</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                   <FormField
                     control={form.control}
-                    name='zipCode'
+                    name='name'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postleitzahl</FormLabel>
+                        <FormLabel>Vorname</FormLabel>
                         <FormControl>
-                          <Input
-                            type='text'
-                            inputMode='numeric'
-                            placeholder='12345'
-                            maxLength={5}
-                            className='h-11'
-                            value={field.value ?? ''}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
-                              if (value === '') {
-                                field.onChange(undefined);
-                              } else {
-                                field.onChange(parseInt(value, 10));
-                              }
-                            }}
-                          />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -482,10 +345,162 @@ const NgoEditForm = () => {
 
                   <FormField
                     control={form.control}
-                    name='city'
+                    name='principal'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stadt</FormLabel>
+                        <FormLabel>Vorstand</FormLabel>
+                        <FormControl>
+                          <Input {...field} className='h-11' />
+                        </FormControl>
+                        <FormDescription>
+                          Vor- und Nachname des Vorstands
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='categories'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tätigkeitsfelder</FormLabel>
+                        <FormControl>
+                          {categoryOptions.length > 0 ? (
+                            <MultiSelect
+                              options={categoryOptions}
+                              value={field.value ?? []}
+                              onChange={field.onChange}
+                              placeholder='Kategorien auswählen'
+                              searchPlaceholder='Suchen…'
+                              className='bg-light-mint/0'
+                            />
+                          ) : (
+                            <div>Lade Kategorien...</div>
+                          )}
+                        </FormControl>
+                        <FormDescription>
+                          Wähle die Bereiche aus, in denen deine Organisation
+                          tätig ist
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Kontaktinformationen */}
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                    Kontaktinformationen
+                  </h3>
+
+                  <FormField
+                    control={form.control}
+                    name='contactEmail'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kontakt E-Mail</FormLabel>
+                        <FormControl>
+                          <Input type='email' {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Optional. Falls du nicht unter deiner Login-E-Mail
+                          kontaktiert werden möchtest
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='phone'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefonnummer</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormDescription>Optional</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Adressinformationen */}
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                    Adresse
+                  </h3>
+
+                  <FormField
+                    control={form.control}
+                    name='streetAndNumber'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Straße und Hausnummer</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <FormField
+                      control={form.control}
+                      name='zipCode'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Postleitzahl</FormLabel>
+                          <FormControl>
+                            <Input
+                              type='text'
+                              inputMode='numeric'
+                              placeholder='12345'
+                              maxLength={5}
+                              className='h-11'
+                              value={field.value ?? ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
+                                if (value === '') {
+                                  field.onChange(undefined);
+                                } else {
+                                  field.onChange(parseInt(value, 10));
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name='city'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Stadt</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name='state'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bundesland</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -495,29 +510,14 @@ const NgoEditForm = () => {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name='state'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bundesland</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                {/* Kontoeinstellungen */}
+                <div className='space-y-6'>
+                  <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                    Kontoeinstellungen
+                  </h3>
 
-              {/* Kontoeinstellungen */}
-              <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
-                  Kontoeinstellungen
-                </h3>
-
-                {/* DISABLED */}
-                {/* <FormField
+                  {/* DISABLED */}
+                  {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -541,24 +541,25 @@ const NgoEditForm = () => {
                     </FormItem>
                   )}
                 /> */}
-              </div>
+                </div>
 
-              <div className='flex gap-4'>
-                <ButtonComponent variant='primary' size='md' type='submit'>
-                  Speichern
-                </ButtonComponent>
-                <Link href={`/ngos/${ngoId}`}>
-                  <ButtonComponent variant='secondary' size='md'>
-                    Abbrechen
+                <div className='flex gap-4'>
+                  <ButtonComponent variant='primary' size='md' type='submit'>
+                    Speichern
                   </ButtonComponent>
-                </Link>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <Toaster position='top-center' richColors />
-    </div>
+                  <Link href={`/ngos/${ngoId}`}>
+                    <ButtonComponent variant='secondary' size='md'>
+                      Abbrechen
+                    </ButtonComponent>
+                  </Link>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+        <Toaster position='top-center' richColors />
+      </div>
+    </>
   );
 };
 

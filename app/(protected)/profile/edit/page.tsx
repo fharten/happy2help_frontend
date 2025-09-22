@@ -22,10 +22,18 @@ const ProfileEditPage = () => {
 
   return (
     <div className='min-h-screen bg-white'>
-      <MainHeadline>
-        {entityType === 'user'
-          ? 'Profil bearbeiten'
-          : 'Vereinsprofil bearbeiten'}
+      <MainHeadline variant='page'>
+        {entityType === 'user' ? (
+          <>
+            <span className='font-extralight'>Profil </span>
+            <strong className='font-bold'>bearbeiten</strong>
+          </>
+        ) : (
+          <>
+            <span className='font-extralight'>Vereinsprofil </span>
+            <strong className='font-bold'>bearbeiten</strong>
+          </>
+        )}
       </MainHeadline>
 
       <div className='pb-16'>

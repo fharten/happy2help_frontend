@@ -54,7 +54,7 @@ const fetcher = async (url: string) => {
   } catch (error: unknown) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error(
-        'Network error - check if backend is running and CORS is configured',
+        'Network error - check if backend is running and CORS is configured'
       );
     }
     throw error;
@@ -96,7 +96,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
       refreshInterval: 0,
       revalidateOnFocus: true,
       errorRetryCount: 3,
-    },
+    }
   );
 
   const notifications = useMemo(() => response?.data || [], [response?.data]);
@@ -124,7 +124,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
 
               // Check if notification already exists (avoid duplicates)
               const exists = currentNotifications.some(
-                (n) => n.id === parsedData.id,
+                (n) => n.id === parsedData.id
               );
 
               if (!exists) {
@@ -152,7 +152,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
                 (notification) =>
                   notification.id === parsedData.id
                     ? { ...notification, ...parsedData }
-                    : notification,
+                    : notification
               );
 
               const updatedData = {
@@ -173,7 +173,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
             if (parsedData.id) {
               const currentNotifications = notifications || [];
               const filteredNotifications = currentNotifications.filter(
-                (notification) => notification.id !== parsedData.id,
+                (notification) => notification.id !== parsedData.id
               );
 
               const updatedData = {
@@ -207,7 +207,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
         console.error('Raw data:', data);
       }
     },
-    [notifications, mutate],
+    [notifications, mutate]
   ); // Add dependencies
 
   // Custom SSE implementation using fetch with ReadableStream
@@ -293,7 +293,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
           if (!isAbortError(readError)) {
             console.error(
               'Error reading SSE stream:',
-              getErrorMessage(readError),
+              getErrorMessage(readError)
             );
             console.error('Full error object:', readError);
           }
@@ -302,7 +302,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
         if (!isAbortError(error)) {
           console.error(
             'Error setting up SSE connection:',
-            getErrorMessage(error),
+            getErrorMessage(error)
           );
           console.error('Full error object:', error);
           setIsConnected(false);
@@ -337,7 +337,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
   }, [endpoints?.stream, user.id, mutate, handleSSEEvent]);
 
   const unreadCount = notifications.filter(
-    (notification) => !notification.read,
+    (notification) => !notification.read
   ).length;
 
   const markAsRead = async (notificationId: string) => {
@@ -359,14 +359,14 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
           },
           credentials: 'include', // Include cookies
           body: JSON.stringify({ read: true }),
-        },
+        }
       );
 
       if (response.ok) {
         const updatedNotifications = notifications.map((notification) =>
           notification.id === notificationId
             ? { ...notification, read: true }
-            : notification,
+            : notification
         );
         mutate(
           {
@@ -374,17 +374,17 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
             message: 'Updated successfully',
             data: updatedNotifications,
           },
-          false,
+          false
         );
       } else {
         throw new Error(
-          `Failed to mark notification as read: ${response.status}`,
+          `Failed to mark notification as read: ${response.status}`
         );
       }
     } catch (error: unknown) {
       console.error(
         'Error marking notification as read:',
-        getErrorMessage(error),
+        getErrorMessage(error)
       );
       mutate();
     }
@@ -395,12 +395,12 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
 
     try {
       await Promise.all(
-        unreadNotifications.map((notification) => markAsRead(notification.id)),
+        unreadNotifications.map((notification) => markAsRead(notification.id))
       );
     } catch (error: unknown) {
       console.error(
         'Error marking all notifications as read:',
-        getErrorMessage(error),
+        getErrorMessage(error)
       );
     }
   };
@@ -433,7 +433,7 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
       </PopoverTrigger>
 
       <PopoverContent
-        className='w-80 p-0 bg-white/95 backdrop-blur-xl border border-gray-200/50 shadow-xl'
+        className='w-80 p-0 bg-white/95 backdrop-blur border border-light-mint/30 shadow-xl rounded-lg'
         side='bottom'
         align='center'
       >
