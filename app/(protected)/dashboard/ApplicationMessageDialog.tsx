@@ -49,7 +49,7 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
               <Input
                 id='reason'
                 name='reason'
-                placeholder='Dein Text hier'
+                placeholder='Begründung hier eingeben'
                 value={text}
                 onChange={(e) => setText(e.target.value)}
               />

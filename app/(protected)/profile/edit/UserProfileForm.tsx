@@ -269,7 +269,7 @@ const UserEditForm = () => {
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Fehler beim Löschen des Bildes');
+      toast.error('Fehler beim Löschen des Bilds');
     }
   };
 
@@ -336,7 +336,7 @@ const UserEditForm = () => {
                     name='firstName'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vorname</FormLabel>
+                        <FormLabel>Vorname*</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -350,7 +350,7 @@ const UserEditForm = () => {
                     name='lastName'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nachname</FormLabel>
+                        <FormLabel>Nachname*</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -364,7 +364,7 @@ const UserEditForm = () => {
                   name='yearOfBirth'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Geburtsjahr</FormLabel>
+                      <FormLabel>Geburtsjahr*</FormLabel>
                       <FormControl>
                         <Input
                           type='text'
@@ -406,7 +406,7 @@ const UserEditForm = () => {
                   name='skills'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fähigkeiten</FormLabel>
+                      <FormLabel>Fähigkeiten*</FormLabel>
                       <FormControl>
                         {skillOptions.length > 0 ? (
                           <MultiSelect
@@ -447,7 +447,7 @@ const UserEditForm = () => {
                         />
                       </FormControl>
                       <FormDescription>
-                        Optional. Bitte Vereine getrennt von Kommata eingeben
+                        Optional. Bitte Vereine durch Kommata getrennt eingeben
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -507,7 +507,7 @@ const UserEditForm = () => {
                     name='zipCode'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postleitzahl</FormLabel>
+                        <FormLabel>Postleitzahl*</FormLabel>
                         <FormControl>
                           <Input
                             type='text'
@@ -536,7 +536,7 @@ const UserEditForm = () => {
                     name='city'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stadt</FormLabel>
+                        <FormLabel>Stadt*</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -551,7 +551,7 @@ const UserEditForm = () => {
                   name='state'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bundesland</FormLabel>
+                      <FormLabel>Bundesland*</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -563,9 +563,9 @@ const UserEditForm = () => {
 
               {/* Kontoeinstellungen */}
               <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                {/* <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                   Kontoeinstellungen
-                </h3>
+                </h3> */}
 
                 {/* DISABLED */}
                 {/* <FormField

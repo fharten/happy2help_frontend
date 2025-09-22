@@ -209,18 +209,17 @@ const ImageDropzone = ({
         <DropzoneContent>
           {filePreviews.length === 0 && (
             <div className='text-center text-sm text-gray-500'>
-              Drop {isProject ? 'images' : 'an image'} here or click to browse
-              <br />
+              {isProject ? 'Bilder' : 'Bild'} hier her ziehen<br/> oder klicken, um eines auszuwählen.<br/>
               <span className='text-xs text-gray-400'>
-                Max {maxFiles} file{maxFiles > 1 ? 's' : ''}, 5MB each
+                Max. {maxFiles} Datei{maxFiles > 1 ? 'en' : ''}, 5MB pro Bild
               </span>
             </div>
           )}
           {filePreviews.length > 0 && (
             <div className='text-center text-sm text-gray-500'>
-              Drop more {isProject && files.length < maxFiles ? 'images' : ''}{' '}
-              here or click to{' '}
-              {isProject && files.length < maxFiles ? 'add more' : 'replace'}
+              Mehr {isProject && files.length < maxFiles ? 'Bilder' : ''}{' '}
+              hier her ziehen oder hier klicken, um {' '}
+              {isProject && files.length < maxFiles ? 'mehr hinzuzufügen' : 'Bild zu ersetzen'}
             </div>
           )}
         </DropzoneContent>
@@ -239,12 +238,12 @@ const ImageDropzone = ({
             {isUploading ? (
               <>
                 <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
-                Uploading...
+                Lade hoch...
               </>
             ) : (
               <>
                 <Upload className='mr-2 h-4 w-4' />
-                Upload {isProject ? 'Images' : 'Image'}
+                {isProject ? 'Bilder' : 'Bild'} hochladen
               </>
             )}
           </ButtonComponent>

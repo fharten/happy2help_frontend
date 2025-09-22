@@ -64,7 +64,7 @@ const RegistrationFormCard = ({ entity }: { entity: 'user' | 'ngo' }) => {
     <Card>
       <CardHeader>
         <CardTitle>
-          {entity === 'user' ? 'Nutzer registrieren' : 'Verein registrieren'}
+          {entity === 'user' ? 'Registrierung als Nutzer' : 'Registrierung als Verein'}
         </CardTitle>
       </CardHeader>
       <CardContent>

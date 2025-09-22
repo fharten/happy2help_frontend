@@ -137,7 +137,7 @@ const NgoProfile = () => {
                   <div className='flex items-center gap-2'>
                     <AlertCircle size={16} />
                     <span className='font-medium'>
-                      Verein ist vorübergehend deaktiviert
+                      Das Vereinskonto wurde vorübergehend deaktiviert
                     </span>
                   </div>
                 </div>

@@ -45,7 +45,7 @@ export default function Projects() {
           Alle Projekte
         </h1>
         <p className='text-prussian/70 text-sm lg:text-base font-medium'>
-          Entdecke spannende Projekte und finde dein nächstes Engagement.
+          Entdecke spannende Projekte und finde dein nächstes ehrenamtliches Engagement.
         </p>
       </div>
 
