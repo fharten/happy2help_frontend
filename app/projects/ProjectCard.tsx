@@ -17,14 +17,9 @@ interface ProjectProps {
 }
 
 export default function ProjectCard({ project }: ProjectProps) {
-  const availableImages = ['project1_img1.jpg', 'project1_img2.jpg'];
-
   const getImageSrc = () => {
     if (project.images.length > 0 && project.images[0]) {
-      const requestedImage = project.images[0];
-      if (availableImages.includes(requestedImage)) {
-        return `/images/projects/${requestedImage}`;
-      }
+      return project.images[0];
     }
     return '/images/fallback.png';
   };

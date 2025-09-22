@@ -28,7 +28,7 @@ const ProjectDetailPage = () => {
 
   const { data, isLoading, isValidating, error } = useSWR<Project>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
-    swrFetcher,
+    swrFetcher
   );
 
   // get user if logged in
