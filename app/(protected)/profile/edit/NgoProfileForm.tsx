@@ -29,7 +29,6 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ImageDropzone from '@/components/ImageDropzone';
 import { XCircle } from 'lucide-react';
-// import { Switch } from '@/components/ui/switch';
 
 interface Category {
   id: string;
@@ -204,7 +203,7 @@ const NgoEditForm = () => {
     }
 
     if (!ngoId) {
-      toast.error('Benutzer ID nicht gefunden');
+      toast.error('Benutzer-ID nicht gefunden');
       return;
     }
 
@@ -269,7 +268,7 @@ const NgoEditForm = () => {
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Fehler beim Löschen des Bildes');
+      toast.error('Fehler beim Löschen des Bilds');
     }
   };
 
@@ -334,7 +333,7 @@ const NgoEditForm = () => {
                   name='name'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vorname</FormLabel>
+                      <FormLabel>Vereinsname*</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -348,7 +347,7 @@ const NgoEditForm = () => {
                   name='principal'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vorstand</FormLabel>
+                      <FormLabel>Vorstand*</FormLabel>
                       <FormControl>
                         <Input {...field} className='h-11' />
                       </FormControl>
@@ -365,7 +364,7 @@ const NgoEditForm = () => {
                   name='categories'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tätigkeitsfelder</FormLabel>
+                      <FormLabel>Tätigkeitsfelder*</FormLabel>
                       <FormControl>
                         {categoryOptions.length > 0 ? (
                           <MultiSelect
@@ -381,8 +380,8 @@ const NgoEditForm = () => {
                         )}
                       </FormControl>
                       <FormDescription>
-                        Wähle die Bereiche aus, in denen deine Organisation
-                        tätig ist
+                        Wähle die Bereiche aus, in denen dein Verein
+                        tätig ist.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -406,8 +405,7 @@ const NgoEditForm = () => {
                         <Input type='email' {...field} />
                       </FormControl>
                       <FormDescription>
-                        Optional. Falls du nicht unter deiner Login-E-Mail
-                        kontaktiert werden möchtest
+                        Alternative E-Mail-Adresse zur Kontaktaufnahme (optionales Feld)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -441,7 +439,7 @@ const NgoEditForm = () => {
                   name='streetAndNumber'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Straße und Hausnummer</FormLabel>
+                      <FormLabel>Straße und Hausnummer*</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -456,7 +454,7 @@ const NgoEditForm = () => {
                     name='zipCode'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postleitzahl</FormLabel>
+                        <FormLabel>Postleitzahl*</FormLabel>
                         <FormControl>
                           <Input
                             type='text'
@@ -485,7 +483,7 @@ const NgoEditForm = () => {
                     name='city'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stadt</FormLabel>
+                        <FormLabel>Stadt*</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -500,7 +498,7 @@ const NgoEditForm = () => {
                   name='state'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bundesland</FormLabel>
+                      <FormLabel>Bundesland*</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -512,9 +510,9 @@ const NgoEditForm = () => {
 
               {/* Kontoeinstellungen */}
               <div className='space-y-6'>
-                <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
+                {/* <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                   Kontoeinstellungen
-                </h3>
+                </h3> */}
 
                 {/* DISABLED */}
                 {/* <FormField
