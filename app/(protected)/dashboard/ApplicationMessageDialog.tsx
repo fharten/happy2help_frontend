@@ -50,35 +50,35 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Ablehnen</Button>
+        <Button variant='outline'>Ablehnen</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle></DialogTitle>
           <DialogDescription>
             Sende dem Bewerber eine Begründung für die Ablehnung.*
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4" noValidate>
-          <div className="grid gap-3">
-            <Label htmlFor="reason">Begründung:</Label>
+        <form onSubmit={handleSubmit} className='grid gap-4' noValidate>
+          <div className='grid gap-3'>
+            <Label htmlFor='reason'>Begründung:</Label>
             <Input
-              id="reason"
-              name="reason"
-              placeholder="Dein Text hier"
+              id='reason'
+              name='reason'
+              placeholder='Dein Text hier'
               value={text}
               onChange={(event) => setText(event.target.value)}
               required
             />
-            {errorText && <p className="text-sm text-red-600">{errorText}</p>}
+            {errorText && <p className='text-sm text-blue-600'>{errorText}</p>}
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type='button' variant='outline'>
                 Abbrechen
               </Button>
             </DialogClose>
-            <Button type="submit">Absenden</Button>
+            <Button type='submit'>Absenden</Button>
           </DialogFooter>
         </form>
       </DialogContent>
