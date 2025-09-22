@@ -48,31 +48,6 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
   };
 
   return (
-<<<<<<< HEAD
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant='outline'>Ablehnen</Button>
-        </DialogTrigger>
-        <DialogContent className='sm:max-w-[425px]'>
-          <DialogHeader>
-            <DialogTitle></DialogTitle>
-            <DialogDescription>
-              Sende dem Bewerber eine Begründung für die Ablehnung.
-            </DialogDescription>
-          </DialogHeader>
-          <div className='grid gap-4'>
-            <div className='grid gap-3'>
-              <Label htmlFor='reason'>Begründung:</Label>
-              <Input
-                id='reason'
-                name='reason'
-                placeholder='Begründung hier eingeben'
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-              />
-            </div>
-=======
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">Ablehnen</Button>
@@ -90,13 +65,12 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
             <Input
               id="reason"
               name="reason"
-              placeholder="Dein Text hier"
+              placeholder="Begründung hier eingeben"
               value={text}
               onChange={(event) => setText(event.target.value)}
               required
             />
             {errorText && <p className="text-sm text-red-600">{errorText}</p>}
->>>>>>> main
           </div>
           <DialogFooter>
             <DialogClose asChild>
