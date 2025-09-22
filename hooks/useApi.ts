@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { AuthService } from '@/lib/auth-service';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface UseApiOptions {
   onError?: (error: Error) => void;
@@ -30,7 +31,7 @@ export function useApi(options: UseApiOptions = {}) {
           (_newTokens) => {
             void _newTokens;
             // TOKEN REFRESH IS HANDLED BY THE CONTEXTS AUTO REFREASH
-          },
+          }
         );
 
         if (!response.ok) {
@@ -44,13 +45,14 @@ export function useApi(options: UseApiOptions = {}) {
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error');
         setError(error);
+        toast.error(error.message);
         options.onError?.(error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [tokens, options],
+    [tokens, options]
   );
 
   return { request, isLoading, error };
