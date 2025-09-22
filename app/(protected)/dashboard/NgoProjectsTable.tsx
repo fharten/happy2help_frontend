@@ -29,13 +29,18 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
         <p className='text-prussian/70 text-sm lg:text-base mb-8 font-medium'>
           Eine Übersicht deiner aktuellen Projekte und deren Status.
         </p>
+        <Link href={'/projects/add'}>
+          <ButtonComponent variant='primary' size='md'>
+            Projekt hinzufügen
+          </ButtonComponent>
+        </Link>
 
         {/* Mobile Card Layout */}
         <div className='block lg:hidden space-y-4'>
           {projects.map((project) => (
             <div
               key={project.id}
-              className='bg-light-mint/10 border border-light-mint/30 rounded-2xl p-4 hover:bg-light-mint/15 transition-all duration-200'
+              className='bg-light-mint/10 border border-light-mint/30 rounded-2xl p-4 hover:bg-light-mint/15 transition-all duration-200 mt-8'
             >
               <div className='flex justify-between items-start mb-3'>
                 <div className='flex-1'>
@@ -108,7 +113,7 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
 
         {/* Desktop Table Layout */}
         <div className='hidden lg:block overflow-x-auto'>
-          <Table className='min-w-full'>
+          <Table className='min-w-full mt-8'>
             <TableHeader>
               <TableRow className='border-b border-light-mint/30 hover:bg-light-mint/10'>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
