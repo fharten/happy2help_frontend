@@ -13,7 +13,7 @@ const fetcher = (url: string | URL | Request) =>
 export default function Projects() {
   const { data, error, isLoading } = useSWR(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects`,
-    fetcher,
+    fetcher
   );
 
   if (isLoading)

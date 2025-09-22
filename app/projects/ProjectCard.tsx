@@ -17,14 +17,9 @@ interface ProjectProps {
 }
 
 export default function ProjectCard({ project }: ProjectProps) {
-  const availableImages = ['project1_img1.jpg', 'project1_img2.jpg'];
-
   const getImageSrc = () => {
     if (project.images.length > 0 && project.images[0]) {
-      const requestedImage = project.images[0];
-      if (availableImages.includes(requestedImage)) {
-        return `/images/projects/${requestedImage}`;
-      }
+      return project.images[0];
     }
     return '/images/fallback.png';
   };
@@ -53,26 +48,53 @@ export default function ProjectCard({ project }: ProjectProps) {
           {/* Header */}
           <div>
             <CardHeader className='p-0 mb-4 lg:mb-6'>
-              <div className='flex flex-row items-start justify-between gap-3'>
+              {/* Desktop Layout */}
+              <div className='hidden lg:flex lg:flex-row lg:items-start lg:gap-3 mb-4'>
                 <Link
                   href={`/projects/${project.id}`}
                   className='flex-1 min-w-0 group'
                 >
-                  <CardTitle className='text-xl lg:text-2xl font-bold text-prussian group-hover:text-prussian/80 transition-colors duration-200 mb-2 leading-tight'>
+                  <CardTitle className='text-xl lg:text-2xl font-bold text-prussian group-hover:text-prussian/80 transition-colors duration-200 mb-2 leading-tight line-clamp-2 pr-2 break-words'>
                     {project.name}
                   </CardTitle>
                 </Link>
-                <Link
-                  href={`/ngos/${project.ngo.id}`}
-                  className='inline-flex items-center gap-1.5 text-prussian/70 hover:text-prussian group transition-colors text-sm font-medium whitespace-nowrap'
-                >
-                  <ButtonComponent variant='secondary' size='sm'>
-                    <LucideLink size={12} className='mr-1' />
-                    <span className='truncate max-w-[120px]'>
-                      {project.ngo.name}
-                    </span>
-                  </ButtonComponent>
-                </Link>
+                <div>
+                  <Link
+                    href={`/ngos/${project.ngo.id}`}
+                    className='inline-flex items-center gap-1.5 text-prussian/70 hover:text-prussian group transition-colors text-sm font-medium w-full'
+                  >
+                    <ButtonComponent
+                      variant='secondary'
+                      size='sm'
+                      className='w-full'
+                    >
+                      <LucideLink size={12} className='mr-1 flex-shrink-0' />
+                      <span className='truncate'>{project.ngo.name}</span>
+                    </ButtonComponent>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Mobile Layout */}
+              <div className='lg:hidden'>
+                <div className='mb-3'>
+                  <Link href={`/projects/${project.id}`} className='group'>
+                    <CardTitle className='text-xl font-bold text-prussian group-hover:text-prussian/80 transition-colors duration-200 leading-tight line-clamp-3'>
+                      {project.name}
+                    </CardTitle>
+                  </Link>
+                </div>
+                <div className='mb-4'>
+                  <Link
+                    href={`/ngos/${project.ngo.id}`}
+                    className='inline-flex items-center gap-1.5 text-prussian/70 hover:text-prussian group transition-colors text-sm font-medium'
+                  >
+                    <ButtonComponent variant='secondary' size='sm'>
+                      <LucideLink size={12} className='mr-1' />
+                      <span className='truncate'>{project.ngo.name}</span>
+                    </ButtonComponent>
+                  </Link>
+                </div>
               </div>
 
               {/* Location & Date */}
