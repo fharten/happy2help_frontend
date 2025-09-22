@@ -17,7 +17,7 @@ import { Project } from '@/types/project.d';
 import { Skill } from '@/types/skill.d';
 import ButtonComponent from '@/components/ButtonComponent';
 import BadgeComponent from '@/components/BadgeComponent';
-import { swrFetcher, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import ApplyButton from './ApplyButton';
 import { getUserEntityType } from '@/lib/user-utils';
 
@@ -26,9 +26,12 @@ const ProjectDetailPage = () => {
   const pathname = usePathname();
   const parentUrl = pathname?.split('/').slice(0, -1).join('/') || '/';
 
-  const { data, isLoading, isValidating, error } = useSWR<Project>(
+  const fetcher = (url: string | URL | Request) =>
+    fetch(url).then((r) => r.json());
+
+  const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
-    swrFetcher
+    fetcher,
   );
 
   // get user if logged in
@@ -36,7 +39,7 @@ const ProjectDetailPage = () => {
   let entityType = 'unknown';
   if (user) entityType = getUserEntityType(user!);
 
-  if (isLoading || isUserLoading || !data)
+  if (isLoading || isUserLoading || !data) {
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -44,7 +47,7 @@ const ProjectDetailPage = () => {
         </div>
       </div>
     );
-
+  }
   if (error)
     return (
       <div className='container-site'>
@@ -56,7 +59,7 @@ const ProjectDetailPage = () => {
       </div>
     );
 
-  const project = data;
+  const project = data.data;
 
   return (
     <div className='container-site'>

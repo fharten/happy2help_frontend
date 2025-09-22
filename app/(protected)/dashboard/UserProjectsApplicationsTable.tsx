@@ -35,7 +35,7 @@ const UserProjectsApplicationsTable = ({
           Deine Bewerbungen
         </h3>
         <p className='text-prussian/70 text-sm lg:text-base mb-8 font-medium'>
-          Übersicht aller deiner Projektbewerbungen und deren Status.
+          Übersicht all deiner Projektbewerbungen und deren Status.
         </p>
 
         {/* Mobile Card Layout */}
@@ -86,7 +86,7 @@ const UserProjectsApplicationsTable = ({
                         <ApplicationWithdrawButtonMobile
                           applicationId={application.id}
                         >
-                          Bewerbung zurückziehen
+                          Abbrechen
                         </ApplicationWithdrawButtonMobile>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -255,7 +255,7 @@ const UserProjectsApplicationsTable = ({
                         <ApplicationWithdrawButton
                           applicationId={application.id}
                         >
-                          Bewerbung zurückziehen
+                          Abbrechen
                         </ApplicationWithdrawButton>
                       </div>
                     </TableCell>

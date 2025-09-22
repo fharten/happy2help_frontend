@@ -30,7 +30,6 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageDropzone from '@/components/ImageDropzone';
 import { XCircle } from 'lucide-react';
-// import { Switch } from '@/components/ui/switch';
 
 interface Category {
   id: string;
@@ -205,7 +204,7 @@ const NgoEditForm = () => {
     }
 
     if (!ngoId) {
-      toast.error('Benutzer ID nicht gefunden');
+      toast.error('Benutzer-ID nicht gefunden');
       return;
     }
 
@@ -270,7 +269,7 @@ const NgoEditForm = () => {
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Fehler beim Löschen des Bildes');
+      toast.error('Fehler beim Löschen des Bilds');
     }
   };
 
@@ -359,7 +358,6 @@ const NgoEditForm = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name='categories'
@@ -395,7 +393,6 @@ const NgoEditForm = () => {
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Kontaktinformationen
                   </h3>
-
                   <FormField
                     control={form.control}
                     name='contactEmail'
@@ -430,12 +427,12 @@ const NgoEditForm = () => {
                   />
                 </div>
 
+
                 {/* Adressinformationen */}
                 <div className='space-y-6'>
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Adresse
                   </h3>
-
                   <FormField
                     control={form.control}
                     name='streetAndNumber'

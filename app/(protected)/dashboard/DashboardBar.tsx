@@ -35,7 +35,7 @@ const DashboardBar = () => {
       return user.firstName || 'Benutzer';
     } else {
       const ngo = data.data as Ngo;
-      return ngo.name || 'Organisation';
+      return ngo.name || 'Verein';
     }
   };
 

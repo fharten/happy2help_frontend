@@ -270,7 +270,7 @@ const UserEditForm = () => {
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Fehler beim Löschen des Bildes');
+      toast.error('Fehler beim Löschen des Bilds');
     }
   };
 
@@ -341,7 +341,10 @@ const UserEditForm = () => {
                       name='firstName'
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Vorname</FormLabel>
+                          <FormLabel>
+                          
+                          
+                          </FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -433,7 +436,6 @@ const UserEditForm = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name='ngoMemberships'
@@ -574,7 +576,6 @@ const UserEditForm = () => {
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Kontoeinstellungen
                   </h3>
-
                   {/* DISABLED */}
                   {/* <FormField
                   control={form.control}

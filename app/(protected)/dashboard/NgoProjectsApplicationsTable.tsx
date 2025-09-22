@@ -32,7 +32,7 @@ const NgoProjectsApplicationsTable = ({
           Bewerbungen
         </h3>
         <p className='text-prussian/70 text-sm lg:text-base mb-8 font-medium'>
-          Übersicht aller Bewerbungen für deine Projekte.
+          Übersicht aller Bewerbungen auf deine Projekte.
         </p>
 
         {/* Mobile Card Layout */}
@@ -254,7 +254,7 @@ const NgoProjectsApplicationsTable = ({
                           Akzeptieren
                         </ApplicationAcceptButton>
                         <ApplicationRejectButton application={application}>
-                          Bewerbung ablehnen
+                          Ablehnen
                         </ApplicationRejectButton>
                       </div>
                     )}

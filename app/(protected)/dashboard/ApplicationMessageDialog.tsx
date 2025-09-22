@@ -63,9 +63,9 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
           <div className='grid gap-3'>
             <Label htmlFor='reason'>Begründung:</Label>
             <Input
-              id='reason'
-              name='reason'
-              placeholder='Dein Text hier'
+              id="reason"
+              name="reason"
+              placeholder="Begründung hier eingeben"
               value={text}
               onChange={(event) => setText(event.target.value)}
               required
