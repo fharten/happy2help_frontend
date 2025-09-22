@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import MessageDialog from './ApplicationMessageDialog';
 import { updateApplicationStatus } from './NgoApplicationAcceptButton';
 import { Application } from '@/types/application';
+import { mutate } from 'swr';
 
 enum ApplicationStatus {
   PENDING = 'pending',
@@ -19,29 +20,45 @@ interface PropsType {
 
 const ApplicationRejectButton = ({ children, application }: PropsType) => {
   const [submittedText, setSubmittedText] = useState<string | null>(null);
-
   const { tokens } = useAuth();
 
-  const handleTextSubmit = async (text: string) => {
-    console.log('Empfangener Text:', text);
+  const handleTextSubmit = (text: string): void => {
     setSubmittedText(text);
+    if (!text) return;
 
-    if (text) {
-      application.status = ApplicationStatus.REJECTED;
-      application.message = text;
+    void (async () => {
+      if (!tokens?.accessToken) return;
 
-      const httpStatusCode = await updateApplicationStatus(
-        application,
-        tokens!.accessToken
+      const updatedApplication: Application = {
+        ...application,
+        status: ApplicationStatus.REJECTED,
+        message: text,
+      };
+
+      const detailEndpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`;
+
+      await mutate(
+        detailEndpoint,
+        (currentApplication: Application | undefined) =>
+          currentApplication
+            ? { ...currentApplication, status: ApplicationStatus.REJECTED, message: text }
+            : currentApplication,
+        { revalidate: false }
       );
-    }
+
+      await updateApplicationStatus(updatedApplication, tokens.accessToken);
+
+      mutate(detailEndpoint);
+
+      if (application?.project?.ngoId) {
+        mutate(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${application.project.ngoId}/applications`
+        );
+      }
+    })();
   };
 
-  return (
-    <div>
-      <MessageDialog onSubmit={handleTextSubmit} />
-    </div>
-  );
+  return <MessageDialog onSubmit={handleTextSubmit} />;
 };
 
 export default ApplicationRejectButton;

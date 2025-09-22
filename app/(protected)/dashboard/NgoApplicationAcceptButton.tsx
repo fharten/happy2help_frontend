@@ -1,8 +1,10 @@
 'use client';
 
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import ButtonComponent from '@/components/ButtonComponent';
 import { Application } from '@/types/application';
+import { mutate } from 'swr';
 
 enum ApplicationStatus {
   PENDING = 'pending',
@@ -19,7 +21,7 @@ export async function updateApplicationStatus(
   application: Application,
   accessToken: string
 ) {
-  const res = await fetch(
+  const response = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`,
     {
       method: 'PUT',
@@ -27,32 +29,56 @@ export async function updateApplicationStatus(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(application),
+      body: JSON.stringify({
+        id: application.id,
+        status: application.status,
+        message: application.message,
+      }),
     }
   );
-  console.log('Response from server: ', res);
 
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || 'Failed to update application status');
+  if (!response.ok) {
+    let message = 'Failed to update application status';
+    try {
+      const errorPayload = await response.json();
+      message = errorPayload?.message ?? message;
+    } catch {}
+    throw new Error(message);
   }
 
-  // todo: replace by mutate
-  location.reload();
-
-  return res.status;
+  return response.status;
 }
 
 export function ApplicationAcceptButton({ children, application }: PropsType) {
   const { tokens } = useAuth();
-  application.status = ApplicationStatus.ACCEPTED;
 
-  const handleClick = () => {
-    updateApplicationStatus(application, tokens!.accessToken);
-  };
+const handleClick = (): void => {
+  void (async () => {
+    if (!tokens?.accessToken) return;
+
+    const updatedApplication = { ...application, status: ApplicationStatus.ACCEPTED };
+    const detailEndpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`;
+
+    await mutate(
+      detailEndpoint,
+      (currentApplication: Application | undefined) =>
+        currentApplication ? { ...currentApplication, status: ApplicationStatus.ACCEPTED } : currentApplication,
+      { revalidate: false }
+    );
+
+    await updateApplicationStatus(updatedApplication, tokens.accessToken);
+
+    mutate(detailEndpoint);
+
+    if (application?.project?.ngoId) {
+      mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${application.project.ngoId}/applications`);
+    }
+  })();
+};
+
 
   return (
-    <ButtonComponent size='sm' onClick={handleClick}>
+    <ButtonComponent size="sm" onClick={handleClick} type="button">
       {children}
     </ButtonComponent>
   );
