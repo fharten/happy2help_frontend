@@ -60,7 +60,7 @@ const Header = () => {
       {/* DESKTOP & MOBILE TOP BAR */}
       <header className='bg-white pt-4 pb-3 lg:pt-6 lg:pb-4'>
         <nav aria-label='Main navigation' className='px-4 lg:px-8'>
-          <div className='flex justify-center items-center relative'>
+          <div className='flex mt-[28.5px] xl:mt-0 justify-center items-center relative'>
             {/* LOGO TEXT */}
             <div className='absolute left-0 flex items-center gap-3 lg:gap-6'>
               <Link
