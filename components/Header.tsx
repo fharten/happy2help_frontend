@@ -60,9 +60,9 @@ const Header = () => {
       {/* DESKTOP & MOBILE TOP BAR */}
       <header className='bg-white pt-4 pb-3 lg:pt-6 lg:pb-4'>
         <nav aria-label='Main navigation' className='px-4 lg:px-8'>
-          <div className='flex justify-between items-center'>
+          <div className='flex mt-[28.5px] xl:mt-0 justify-center items-center relative'>
             {/* LOGO TEXT */}
-            <div className='flex items-center gap-3 lg:gap-6'>
+            <div className='absolute left-0 flex items-center gap-3 lg:gap-6'>
               <Link
                 href='/'
                 className='text-xl lg:text-3xl font-bold text-black select-none tracking-tight'
@@ -104,15 +104,15 @@ const Header = () => {
                 }`}
               >
                 <Scroll size={18} strokeWidth={2.5} />
-                Projects
+                Projekte
               </Link>
             </div>
 
             {/* LOGIN/LOGOUT & NOTIFICATION ICON & GREETING */}
-            <div className='flex items-center gap-2 lg:gap-3'>
+            <div className='absolute right-0 flex items-center gap-2 lg:gap-3'>
               {/* GREETING */}
               {isAuthenticated && !showLoadingState && (
-                <div className='flex items-center gap-x-2'>
+                <Link href={'/profile'} className='flex items-center gap-x-2'>
                   {user?.image && (
                     <div className='relative size-10 rounded-full overflow-hidden'>
                       <Image
@@ -123,10 +123,7 @@ const Header = () => {
                       />
                     </div>
                   )}
-                  <p className='hidden md:inline text-sm text-prussian font-medium'>
-                    Hallo, <span className='font-bold'>{displayName}</span>
-                  </p>
-                </div>
+                </Link>
               )}
               {/* NOTIFICATION BELL - only show when authenticated */}
               {isAuthenticated && !showLoadingState && user && (
