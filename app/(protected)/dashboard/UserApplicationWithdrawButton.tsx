@@ -3,8 +3,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import ButtonComponent from '@/components/ButtonComponent';
 import { toast } from 'sonner';
+import { mutate } from 'swr';
 
-async function deleteApplication(applicationId: string, accessToken: string) {
+async function deleteApplication(
+  applicationId: string,
+  accessToken: string,
+  userId: string
+) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${applicationId}`,
     {
@@ -24,9 +29,9 @@ async function deleteApplication(applicationId: string, accessToken: string) {
 
   if (res.status == 204) {
     toast.success('Du hast deine Bewerbung für das Projekt zurückgezogen.');
-    setTimeout(() => {
-      location.reload();
-    }, 1200);
+    mutate(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}/applications`
+    );
     return;
   }
 
@@ -42,10 +47,10 @@ export function ApplicationWithdrawButton({
   children,
   applicationId,
 }: PropsType) {
-  const { tokens } = useAuth();
+  const { user, tokens } = useAuth();
 
   const handleClick = () => {
-    deleteApplication(applicationId, tokens!.accessToken);
+    deleteApplication(applicationId, tokens!.accessToken, user!.id);
   };
 
   return (
@@ -64,10 +69,10 @@ export function ApplicationWithdrawButtonMobile({
   children,
   applicationId,
 }: PropsType) {
-  const { tokens } = useAuth();
+  const { user, tokens } = useAuth();
 
   const handleClick = () => {
-    deleteApplication(applicationId, tokens!.accessToken);
+    deleteApplication(applicationId, tokens!.accessToken, user!.id);
   };
 
   return (
