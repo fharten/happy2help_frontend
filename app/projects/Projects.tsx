@@ -6,8 +6,9 @@ import ProjectCard from './ProjectCard';
 import { Project } from '@/types/project.d';
 
 // Fetcher function
-const fetcher = async (url: string) =>
-  await fetch(url).then((res) => res.json());
+
+const fetcher = (url: string | URL | Request) =>
+  fetch(url).then((r) => r.json());
 
 export default function Projects() {
   const { data, error, isLoading } = useSWR(

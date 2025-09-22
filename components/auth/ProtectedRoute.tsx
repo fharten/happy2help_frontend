@@ -63,6 +63,7 @@ export function ProtectedRoute({
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 
+  console.log('triggered');
   useEffect(() => {
     if (isLoading) {
       return;
