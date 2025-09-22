@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Projects } from '@/types/project';
-import { EllipsisVertical } from 'lucide-react';
+import { EllipsisVertical, Edit } from 'lucide-react';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
 
@@ -59,21 +59,26 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
                       .toFormat('dd.LL.yyyy')}
                   </div>
                 </div>
-                <DropdownMenu>
+                <div>
+                  <Link
+                    href={`/projects/${project.id}/edit`}
+                    className='text-prussian hover:text-prussian/60 transition-colors duration-200'
+                  >
+                    <Edit size={18} strokeWidth={2.5} />
+                  </Link>
+                </div>
+                {/*<DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <ButtonComponent variant='action' size='sm'>
                       <EllipsisVertical size={16} />
                     </ButtonComponent>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
-                    <DropdownMenuItem className='text-prussian hover:bg-light-mint/10 rounded-xl transition-colors duration-200 p-3'>
-                      Bearbeiten
-                    </DropdownMenuItem>
                     <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
                       Löschen
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu>*/}
               </div>
 
               <div className='space-y-3'>
@@ -128,7 +133,10 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
                   Anfragen
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
+                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
+                  Projekt
+                </TableHead>
+                {/*<TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>*/}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -181,6 +189,13 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
                     </div>
                   </TableCell>
                   <TableCell className='px-6 py-5 whitespace-nowrap'>
+                    <Link href={`/projects/${project.id}/edit`}>
+                      <ButtonComponent variant='primary' size='md'>
+                        Bearbeiten
+                      </ButtonComponent>
+                    </Link>
+                  </TableCell>
+                  {/*<TableCell className='px-6 py-5 whitespace-nowrap'>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <ButtonComponent variant='action' size='sm'>
@@ -188,15 +203,12 @@ const NgoProjectsTable = ({ projects }: { projects: Projects }) => {
                         </ButtonComponent>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
-                        <DropdownMenuItem className='text-prussian hover:bg-light-mint/10 rounded-xl transition-colors duration-200 p-3'>
-                          Bearbeiten
-                        </DropdownMenuItem>
                         <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
                           Löschen
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
+                  </TableCell>*/}
                 </TableRow>
               ))}
             </TableBody>

@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import ButtonComponent from './ButtonComponent';
+import { toast } from 'sonner';
 
 interface ImageDropzoneProps {
   resourceType: 'projects' | 'ngos' | 'users';
@@ -99,7 +100,7 @@ const ImageDropzone = ({
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -107,7 +108,7 @@ const ImageDropzone = ({
           .json()
           .catch(() => ({ message: 'Upload failed' }));
         throw new Error(
-          errorData.message || `HTTP ${response.status}: Upload failed`,
+          errorData.message || `HTTP ${response.status}: Upload failed`
         );
       }
 
@@ -123,6 +124,7 @@ const ImageDropzone = ({
       const errorMessage =
         error instanceof Error ? error.message : 'Upload failed';
       onUploadError?.(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }

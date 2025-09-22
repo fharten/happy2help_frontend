@@ -59,8 +59,6 @@ const NgoProfile = () => {
     swrFetcher,
   );
 
-  console.log('loading:', isLoading);
-
   if (isLoading || !ngo)
     return (
       <div className='container-site'>
