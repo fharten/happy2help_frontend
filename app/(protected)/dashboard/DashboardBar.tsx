@@ -20,6 +20,18 @@ const DashboardBar = () => {
   const { user: userLoggedIn } = useAuth();
   const entityType = getUserEntityType(userLoggedIn!);
 
+  // Get display name based on user type
+  const getDisplayName = () => {
+    if (entityType === 'user') {
+      if (userLoggedIn?.firstName && userLoggedIn?.lastName) {
+        return `${userLoggedIn?.firstName} ${userLoggedIn?.lastName}`;
+      } else return 'User';
+    } else {
+      // NGO
+      return userLoggedIn?.name || 'Verein';
+    }
+  };
+
   const userId = getUserId();
   const userType = getUserType();
 
@@ -38,11 +50,7 @@ const DashboardBar = () => {
         <div className='flex flex-col space-y-4 lg:hidden'>
           <div>
             <h2 className='text-xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading
-                ? 'Dashboard'
-                : entityType === 'user'
-                ? `Hallo ${userLoggedIn?.firstName} ${userLoggedIn?.lastName}!`
-                : `Hallo ${userLoggedIn?.name}!`}
+              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}!`}
             </h2>
             <p className='text-prussian/70 text-sm font-medium'>
               Verwalte dein Profil und deine Einstellungen
@@ -70,11 +78,7 @@ const DashboardBar = () => {
         <div className='hidden lg:flex items-center justify-between'>
           <div>
             <h2 className='text-2xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading
-                ? 'Dashboard'
-                : entityType === 'user'
-                ? `Hallo ${userLoggedIn?.firstName} ${userLoggedIn?.lastName}!`
-                : `Hallo ${userLoggedIn?.name}!`}
+              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}!`}
             </h2>
             <p className='text-prussian/70 text-base font-medium'>
               Verwalte dein Profil und deine Einstellungen
