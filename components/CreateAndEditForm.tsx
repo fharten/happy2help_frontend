@@ -798,7 +798,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                   >
                     Speichern
                   </ButtonComponent>
-                  <Link href='./../dashboard'>
+                  <Link href='/dashboard'>
                     <ButtonComponent
                       variant='secondary'
                       size='md'
