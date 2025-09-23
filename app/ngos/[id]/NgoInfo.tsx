@@ -311,14 +311,18 @@ export default function NgoInfo() {
             <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
               Projekte
             </h3>
-            <div className='font-medium text-prussian'>
-              <ul>
-                {projects.map((project) => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
+            <div className='flex flex-wrap gap-2'>
+              {projects.map((project) => (
+                <Link key={project.id} href={`/projects/${project.id}`}>
+                  <Badge
+                    key={project.id}
+                    variant='secondary'
+                    className='bg-light-mint/20 text-prussian border-light-mint/30 hover:bg-light-mint/30'
+                  >
                     {project.name}
-                  </Link>
-                ))}
-              </ul>
+                  </Badge>
+                </Link>
+              ))}
             </div>
           </div>
         </CardContent>

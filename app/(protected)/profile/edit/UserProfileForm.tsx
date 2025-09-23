@@ -585,12 +585,12 @@ const UserEditForm = () => {
                 </div>
 
                 {/* Kontoeinstellungen */}
-                <div className='space-y-6'>
+                {/* <div className='space-y-6'>
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Kontoeinstellungen
-                  </h3>
-                  {/* DISABLED */}
-                  {/* <FormField
+                  </h3> */}
+                {/* DISABLED */}
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -612,8 +612,8 @@ const UserEditForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                /> */}
-                </div>
+                /> 
+                </div>*/}
 
                 <div className='flex gap-4'>
                   <ButtonComponent variant='primary' size='md' type='submit'>

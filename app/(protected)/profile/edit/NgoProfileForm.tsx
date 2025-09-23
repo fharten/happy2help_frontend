@@ -332,7 +332,7 @@ const NgoEditForm = () => {
                     name='name'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vorname</FormLabel>
+                        <FormLabel>Vereinsname</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -528,13 +528,13 @@ const NgoEditForm = () => {
                 </div>
 
                 {/* Kontoeinstellungen */}
-                <div className='space-y-6'>
+                {/* <div className='space-y-6'>
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Kontoeinstellungen
-                  </h3>
+                  </h3>  */}
 
-                  {/* DISABLED */}
-                  {/* <FormField
+                {/* DISABLED */}
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -557,8 +557,8 @@ const NgoEditForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                /> */}
-                </div>
+                /> 
+                </div> */}
 
                 <div className='flex gap-4'>
                   <ButtonComponent variant='primary' size='md' type='submit'>
