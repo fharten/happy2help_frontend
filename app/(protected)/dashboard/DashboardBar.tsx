@@ -1,47 +1,44 @@
 'use client';
 
 import ButtonComponent from '@/components/ButtonComponent';
-import { Moon, Sun } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import useSWR from 'swr';
-import { getUserId, getUserType } from '@/lib/auth';
-import { User } from '@/types/user.d';
-import { Ngo } from '@/types/ngo.d';
-import { swrFetcher } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserEntityType } from '@/lib/user-utils';
+import { getUserDisplayName } from '@/lib/user-utils';
 
 const DashboardBar = () => {
-  const [themeIsDark, setThemeIsDark] = useState(false);
   const router = useRouter();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
-  // Get user info for personalized greeting
-  const { user: userLoggedIn } = useAuth();
-  const entityType = getUserEntityType(userLoggedIn!);
+  const [displayName, setDisplayName] = useState<string>('Account');
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Get display name based on user type
-  const getDisplayName = () => {
-    if (entityType === 'user') {
-      if (userLoggedIn?.firstName && userLoggedIn?.lastName) {
-        return `${userLoggedIn?.firstName} ${userLoggedIn?.lastName}`;
-      } else return 'User';
-    } else {
-      // NGO
-      return userLoggedIn?.name || 'Verein';
-    }
-  };
+  // HYDRATION
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
-  const userId = getUserId();
-  const userType = getUserType();
+  // UPDATE DISPLAY NAME WHEN USER CHANGES
+  useEffect(() => {
+    const loadUserName = async () => {
+      if (isHydrated && (!isAuthenticated || !user)) {
+        setDisplayName('Account');
+        return;
+      }
 
-  // Fetch user or NGO data based on user type
-  const { data, isLoading } = useSWR<{ data: User | Ngo }>(
-    userId && userType
-      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/${userType}/${userId}`
-      : null,
-    swrFetcher
-  );
+      try {
+        const displayName = await getUserDisplayName({
+          user,
+        });
+        setDisplayName(displayName);
+      } catch (error) {
+        console.warn('Error loading user display name:', error);
+        setDisplayName('Account');
+      }
+    };
+
+    loadUserName();
+  }, [isAuthenticated, isHydrated, user]);
 
   return (
     <div className='w-full mb-6 container-site'>
@@ -50,7 +47,7 @@ const DashboardBar = () => {
         <div className='flex flex-col space-y-4 lg:hidden'>
           <div>
             <h2 className='text-xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}!`}
+              {isLoading ? 'Dashboard' : `Hallo, ${displayName}!`}
             </h2>
             <p className='text-prussian/70 text-sm font-medium'>
               Verwalte dein Profil und deine Einstellungen
@@ -64,13 +61,6 @@ const DashboardBar = () => {
             >
               Profil bearbeiten
             </ButtonComponent>
-            <ButtonComponent
-              onClick={() => setThemeIsDark(!themeIsDark)}
-              variant='action'
-              size='sm'
-            >
-              {themeIsDark ? <Moon size={16} /> : <Sun size={16} />}
-            </ButtonComponent>
           </div>
         </div>
 
@@ -78,7 +68,7 @@ const DashboardBar = () => {
         <div className='hidden lg:flex items-center justify-between'>
           <div>
             <h2 className='text-2xl font-bold text-prussian mb-1 tracking-tight'>
-              {isLoading ? 'Dashboard' : `Hallo ${getDisplayName()}!`}
+              {isLoading ? 'Dashboard' : `Hallo, ${displayName}!`}
             </h2>
             <p className='text-prussian/70 text-base font-medium'>
               Verwalte dein Profil und deine Einstellungen
@@ -91,12 +81,6 @@ const DashboardBar = () => {
               size='md'
             >
               Profil bearbeiten
-            </ButtonComponent>
-            <ButtonComponent
-              onClick={() => setThemeIsDark(!themeIsDark)}
-              variant='action'
-            >
-              {themeIsDark ? <Moon size={18} /> : <Sun size={18} />}
             </ButtonComponent>
           </div>
         </div>
