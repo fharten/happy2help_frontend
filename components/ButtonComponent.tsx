@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface ButtonComponentProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'action' | 'accent';
+  variant?: 'primary' | 'secondary' | 'action' | 'accent' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   className?: string;
@@ -39,6 +39,8 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
         'bg-white/80 hover:bg-light-mint/10 text-prussian border-light-mint/30 rounded-full',
       accent:
         'bg-flax hover:bg-flax/80 text-prussian border-flax/80 hover:border-flax rounded-2xl',
+      danger:
+        'bg-destructive/50 hover:bg-destructive/80 text-prussian/80 border-black/30 rounded-full',
     };
 
     const sizes = {
