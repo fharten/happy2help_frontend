@@ -49,16 +49,12 @@ export default function ProjectCard({ project }: ProjectProps) {
             <div>
               <CardHeader className='p-0 mb-4 lg:mb-6'>
                 {/* Desktop Layout */}
-                <div className='hidden lg:flex lg:flex-row lg:items-start lg:gap-3 mb-4'>
-                  <CardTitle className='text-xl lg:text-2xl font-bold text-prussian group-hover:text-prussian/80 transition-colors duration-200 mb-2 leading-tight line-clamp-2 pr-2 break-words'>
+                <div className='hidden lg:flex lg:flex-row lg:items-center lg:justify-between mb-4'>
+                  <CardTitle className='text-xl lg:text-2xl font-bold text-prussian group-hover:text-prussian/80 transition-colors duration-200 leading-tight line-clamp-2 break-words flex-1 mr-3'>
                     {project.name}
                   </CardTitle>
-                  <div>
-                    <ButtonComponent
-                      variant='plain'
-                      size='sm'
-                      className='w-full'
-                    >
+                  <div className='flex-shrink-0'>
+                    <ButtonComponent variant='plain' size='sm'>
                       <span className='truncate'>{project.ngo.name}</span>
                     </ButtonComponent>
                   </div>
