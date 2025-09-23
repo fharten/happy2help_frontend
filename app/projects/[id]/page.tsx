@@ -62,7 +62,7 @@ const ProjectDetailPage = () => {
   let entityType = 'unknown';
   if (user) entityType = getUserEntityType(user!);
 
-  if (isLoading || isUserLoading || !project || !data) {
+  if (isLoading || isUserLoading || !project) {
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -179,10 +179,10 @@ const ProjectDetailPage = () => {
               entityType === 'user' &&
               !isLoadingHasApplied &&
               !errorHasApplied &&
-              !data.hasApplied && (
+              !data?.hasApplied && (
                 <ApplyButton projectId={project.id}>Jetzt bewerben</ApplyButton>
               )}
-            {!isLoadingHasApplied && data.hasApplied && (
+            {!isLoadingHasApplied && data?.hasApplied && (
               <ButtonComponent
                 variant='danger'
                 className='w-full lg:w-auto hover:cursor-not-allowed'
