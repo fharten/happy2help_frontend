@@ -51,7 +51,9 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{entity === 'users' ? 'Benutzerlogin' : 'Vereinslogin'}</CardTitle>
+        <CardTitle>
+          {entity === 'users' ? 'Benutzerlogin' : 'Vereinslogin'}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
@@ -99,9 +101,6 @@ const LoginFormCard = ({ entity }: { entity: string }) => {
                 className='w-full'
               >
                 {isLoading ? 'Logge Dich ein...' : 'Login'}
-              </ButtonComponent>
-              <ButtonComponent variant='secondary' size='md' className='w-full'>
-                Login mit Google
               </ButtonComponent>
             </div>
           </div>
