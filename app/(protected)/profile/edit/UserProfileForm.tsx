@@ -281,11 +281,6 @@ const UserEditForm = () => {
 
   return (
     <>
-      <MainHeadline variant='page'>
-        <span className='font-extralight'>Profil </span>
-        <strong className='font-bold'>bearbeiten</strong>
-      </MainHeadline>
-
       <div className='container-site'>
         <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
           <CardContent className='p-8'>
