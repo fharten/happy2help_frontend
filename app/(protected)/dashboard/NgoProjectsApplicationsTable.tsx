@@ -67,7 +67,9 @@ const NgoProjectsApplicationsTable = ({
                     <DropdownMenuItem className='text-prussian hover:bg-light-mint/10 rounded-xl transition-colors duration-200 p-3'>
                       Details ansehen
                     </DropdownMenuItem>
-                    <DropdownMenuItem className='text-green-600 hover:bg-green-50 rounded-xl transition-colors duration-200 p-3'></DropdownMenuItem>
+                    <DropdownMenuItem className='text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
+                      Abbrechen
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu> */}
               </div>
@@ -103,7 +105,7 @@ const NgoProjectsApplicationsTable = ({
                           ? 'error'
                           : 'warning'
                       }
-                      className='px-3 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit'
+                      className='px-2 py-1 rounded-full font-medium text-xs flex items-center gap-1 w-fit'
                     >
                       {application.status === 'accepted' ? (
                         <CircleCheck size={14} className='fill-green-500' />
@@ -124,12 +126,12 @@ const NgoProjectsApplicationsTable = ({
                   <div className='flex flex-row gap-2 items-stretch w-auto'>
                     {application.status === 'pending' ? (
                       <>
-                        <ApplicationRejectButton application={application}>
-                          Ablehnen
-                        </ApplicationRejectButton>
                         <ApplicationAcceptButton application={application}>
                           Akzeptieren
                         </ApplicationAcceptButton>
+                        <ApplicationRejectButton application={application}>
+                          Ablehnen
+                        </ApplicationRejectButton>
                       </>
                     ) : application.status === 'rejected' ? (
                       <ApplicationAcceptButton application={application}>
@@ -148,24 +150,25 @@ const NgoProjectsApplicationsTable = ({
         </div>
 
         {/* Desktop Table Layout */}
-        <div className='hidden lg:block overflow-x-auto'>
-          <Table className='w-full'>
+        <div className='hidden lg:block'>
+          <Table className='w-full table-fixed'>
             <TableHeader>
               <TableRow className='border-b border-light-mint/30 hover:bg-light-mint/10'>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[16%]'>
                   Nutzer
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[22%]'>
                   Fähigkeiten
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[18%]'>
                   Projekt
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[18%]'>
                   Status
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left'></TableHead>
-                <TableHead className='px-6 py-5 text-left'></TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[26%]'>
+                  Aktionen
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -174,17 +177,18 @@ const NgoProjectsApplicationsTable = ({
                   key={application.id}
                   className='border-b border-light-mint/20 hover:bg-light-mint/5 transition-all duration-200'
                 >
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
+                  <TableCell className='px-4 py-5 w-[16%]'>
                     <Link
                       href={`/users/${application.userId}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 max-w-[120px] truncate block break-words'
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 block truncate text-sm'
+                      title={`${application.user.firstName} ${application.user.lastName}`}
                     >
                       {application.user.firstName} {application.user.lastName}
                     </Link>
                   </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <div className='flex flex-wrap gap-1 '>
-                      {application.skills.slice(0, 3).map((skill) => (
+                  <TableCell className='px-4 py-5 w-[22%]'>
+                    <div className='flex flex-wrap gap-1'>
+                      {application.skills.slice(0, 2).map((skill) => (
                         <BadgeComponent
                           key={skill.id}
                           variant='skill'
@@ -193,89 +197,87 @@ const NgoProjectsApplicationsTable = ({
                           {skill.name}
                         </BadgeComponent>
                       ))}
-                      {application.skills.length > 3 && (
+                      {application.skills.length > 2 && (
                         <BadgeComponent variant='count' size='sm'>
-                          +{application.skills.length - 3}
+                          +{application.skills.length - 2}
                         </BadgeComponent>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
+                  <TableCell className='px-4 py-5 w-[18%]'>
                     <Link
                       href={`/projects/${application.projectId}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 max-w-[120px] truncate block break-words'
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 block truncate text-sm'
+                      title={application.project.name}
                     >
                       {application.project.name}
                     </Link>
                   </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <BadgeComponent
-                      variant={
+                  <TableCell className='px-4 py-5 w-[18%]'>
+                    <div
+                      title={
                         application.status === 'accepted'
-                          ? 'success'
+                          ? 'Akzeptiert'
                           : application.status === 'rejected'
-                          ? 'error'
-                          : 'warning'
+                          ? 'Abgelehnt'
+                          : 'Ausstehend'
                       }
-                      className='px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit break-words'
                     >
-                      {application.status === 'accepted' ? (
-                        <CircleCheck size={16} className='fill-green-500' />
-                      ) : application.status === 'rejected' ? (
-                        <CircleX size={16} className='fill-red-500' />
-                      ) : (
-                        <Loader size={16} />
-                      )}
-                      {application.status === 'accepted' ? (
-                        <span>Akzeptiert</span>
-                      ) : application.status === 'rejected' ? (
-                        <span>Abgelehnt</span>
-                      ) : (
-                        <span>Ausstehend</span>
-                      )}
-                    </BadgeComponent>
+                      <BadgeComponent
+                        variant={
+                          application.status === 'accepted'
+                            ? 'success'
+                            : application.status === 'rejected'
+                            ? 'error'
+                            : 'warning'
+                        }
+                        className='px-2 py-1 rounded-full font-medium text-xs flex items-center gap-1 w-fit'
+                      >
+                        {application.status === 'accepted' ? (
+                          <CircleCheck size={14} className='fill-green-500' />
+                        ) : application.status === 'rejected' ? (
+                          <CircleX size={14} className='fill-red-500' />
+                        ) : (
+                          <Loader size={14} />
+                        )}
+                        <span className='hidden lg:inline text-xs'>
+                          {application.status === 'accepted'
+                            ? 'Akzeptiert'
+                            : application.status === 'rejected'
+                            ? 'Abgelehnt'
+                            : 'Ausstehend'}
+                        </span>
+                      </BadgeComponent>
+                    </div>
                   </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <div className='flex items-center h-full break-words'>
-                      {application.status === 'accepted' ? (
-                        <div className='flex items-center h-full'>
+                  <TableCell className='px-4 py-5 w-[26%]'>
+                    <div className='flex gap-2 items-center'>
+                      {application.status === 'pending' ? (
+                        <>
+                          <ApplicationAcceptButton application={application}>
+                            <span className='hidden xl:inline'>
+                              Akzeptieren
+                            </span>
+                            <span className='xl:hidden'>✓</span>
+                          </ApplicationAcceptButton>
                           <ApplicationRejectButton application={application}>
-                            Ablehnen
+                            <span className='hidden xl:inline'>Ablehnen</span>
+                            <span className='xl:hidden'>×</span>
                           </ApplicationRejectButton>
-                        </div>
+                        </>
                       ) : application.status === 'rejected' ? (
-                        <div className='flex items-center h-full'>
-                          <ApplicationAcceptButton application={application}>
-                            Akzeptieren
-                          </ApplicationAcceptButton>
-                        </div>
+                        <ApplicationAcceptButton application={application}>
+                          <span className='hidden xl:inline'>Akzeptieren</span>
+                          <span className='xl:hidden'>✓</span>
+                        </ApplicationAcceptButton>
                       ) : (
-                        <div className='flex gap-5 lg:gap-2 items-center h-full'>
-                          <ApplicationAcceptButton application={application}>
-                            Akzeptieren
-                          </ApplicationAcceptButton>
-                          <ApplicationRejectButton application={application}>
-                            Ablehnen
-                          </ApplicationRejectButton>
-                        </div>
+                        <ApplicationRejectButton application={application}>
+                          <span className='hidden xl:inline'>Ablehnen</span>
+                          <span className='xl:hidden'>×</span>
+                        </ApplicationRejectButton>
                       )}
                     </div>
                   </TableCell>
-                  {/* <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <ButtonComponent variant='action' size='sm'>
-                          <EllipsisVertical size={16} />
-                        </ButtonComponent>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
-                        <DropdownMenuItem className='text-prussian hover:bg-light-mint/10 rounded-xl transition-colors duration-200 p-3'>
-                          Details ansehen
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell> */}
-                  <TableCell className='w-full bg-transparent border-none'></TableCell>
                 </TableRow>
               ))}
             </TableBody>

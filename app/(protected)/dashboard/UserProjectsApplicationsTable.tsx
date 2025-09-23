@@ -73,25 +73,6 @@ const UserProjectsApplicationsTable = ({
                     {application.ngo.name}
                   </Link>
                 </div>
-                {application.status !== 'rejected' && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <ButtonComponent variant='action' size='sm'>
-                        <EllipsisVertical size={16} />
-                      </ButtonComponent>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
-                      <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
-                        {/* Withdraw Button */}
-                        <ApplicationWithdrawButtonMobile
-                          applicationId={application.id}
-                        >
-                          Abbrechen
-                        </ApplicationWithdrawButtonMobile>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
               </div>
 
               <div className='space-y-3'>
@@ -113,114 +94,11 @@ const UserProjectsApplicationsTable = ({
                   </div>
                 </div>
 
-                <div className='flex justify-between items-center pt-2 border-t border-light-mint/20'>
-                  <div className='text-prussian/60 text-xs font-medium uppercase tracking-wide'>
-                    Status
-                  </div>
-                  <BadgeComponent
-                    variant={
-                      application.status === 'accepted'
-                        ? 'success'
-                        : application.status === 'rejected'
-                        ? 'error'
-                        : 'warning'
-                    }
-                    size='md'
-                    className={`flex items-center gap-2 w-fit`}
-                  >
-                    {application.status === 'accepted' ? (
-                      <CircleCheck size={14} className='fill-green-500' />
-                    ) : application.status === 'rejected' ? (
-                      <CircleX size={14} className='fill-red-500' />
-                    ) : (
-                      <Loader size={14} className='animate-spin' />
-                    )}
-                    {application.status === 'accepted' ? (
-                      <span>Akzeptiert</span>
-                    ) : application.status === 'rejected' ? (
-                      <span>Abgelehnt</span>
-                    ) : (
-                      <span>Ausstehend</span>
-                    )}
-                  </BadgeComponent>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop Table Layout */}
-        <div className='hidden lg:block overflow-x-auto'>
-          <Table className='min-w-full'>
-            <TableHeader>
-              <TableRow className='border-b border-light-mint/30 hover:bg-light-mint/10'>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Start
-                </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Verein
-                </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Fähigkeiten
-                </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Projekt
-                </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
-                  Status
-                </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {applications.map((application) => (
-                <TableRow
-                  key={application.id}
-                  className='border-b border-light-mint/20 hover:bg-light-mint/5 transition-all duration-200'
-                >
-                  <TableCell className='px-6 py-5 whitespace-nowrap text-prussian font-medium'>
-                    {DateTime.fromISO(String(application.project.startingAt), {
-                      zone: 'utc',
-                    })
-                      .setZone('Europe/Berlin')
-                      .toFormat('dd.LL.yyyy')}
-                  </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <Link
-                      href={`/ngos/${application.ngo.id}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200'
-                    >
-                      {application.ngo.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <div className='flex flex-wrap gap-1'>
-                      {application.skills.slice(0, 3).map((skill) => (
-                        <BadgeComponent
-                          key={skill.id}
-                          variant='skill'
-                          size='sm'
-                        >
-                          {skill.name}
-                        </BadgeComponent>
-                      ))}
-                      {application.skills.length > 3 && (
-                        <BadgeComponent variant='count' size='sm'>
-                          +{application.skills.length - 3}
-                        </BadgeComponent>
-                      )}
+                <div className='flex flex-col gap-3 pt-2 border-t border-light-mint/20'>
+                  <div className='flex flex-col gap-2'>
+                    <div className='text-prussian/60 text-xs font-medium uppercase tracking-wide'>
+                      Status
                     </div>
-                  </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <Link
-                      href={`/projects/${application.projectId}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200'
-                    >
-                      {application.project.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap'>
                     <BadgeComponent
                       variant={
                         application.status === 'accepted'
@@ -229,15 +107,14 @@ const UserProjectsApplicationsTable = ({
                           ? 'error'
                           : 'warning'
                       }
-                      size='md'
-                      className={`flex items-center gap-2 w-fit`}
+                      className='px-2 py-1 rounded-full font-medium text-xs flex items-center gap-1 w-fit'
                     >
                       {application.status === 'accepted' ? (
-                        <CircleCheck size={16} className='fill-green-500' />
+                        <CircleCheck size={14} className='fill-green-500' />
                       ) : application.status === 'rejected' ? (
-                        <CircleX size={16} className='fill-red-500' />
+                        <CircleX size={14} className='fill-red-500' />
                       ) : (
-                        <Loader size={16} className='animate-spin' />
+                        <Loader size={14} />
                       )}
                       {application.status === 'accepted' ? (
                         <span>Akzeptiert</span>
@@ -247,35 +124,146 @@ const UserProjectsApplicationsTable = ({
                         <span>Ausstehend</span>
                       )}
                     </BadgeComponent>
+                  </div>
+                  {application.status !== 'rejected' && (
+                    <div className='flex justify-start'>
+                      <ApplicationWithdrawButtonMobile
+                        applicationId={application.id}
+                      >
+                        Abbrechen
+                      </ApplicationWithdrawButtonMobile>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table Layout */}
+        <div className='hidden lg:block'>
+          <Table className='w-full table-fixed'>
+            <TableHeader>
+              <TableRow className='border-b border-light-mint/30 hover:bg-light-mint/10'>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[10%]'>
+                  Start
+                </TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[16%]'>
+                  Verein
+                </TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[22%]'>
+                  Fähigkeiten
+                </TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[18%]'>
+                  Projekt
+                </TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[18%]'>
+                  Status
+                </TableHead>
+                <TableHead className='px-4 py-5 text-left text-prussian font-semibold text-sm w-[16%]'>
+                  Aktionen
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {applications.map((application) => (
+                <TableRow
+                  key={application.id}
+                  className='border-b border-light-mint/20 hover:bg-light-mint/5 transition-all duration-200'
+                >
+                  <TableCell className='px-4 py-5 w-[10%]'>
+                    <span className='text-prussian font-medium block text-sm'>
+                      {DateTime.fromISO(
+                        String(application.project.startingAt),
+                        {
+                          zone: 'utc',
+                        }
+                      )
+                        .setZone('Europe/Berlin')
+                        .toFormat('dd.LL.yyyy')}
+                    </span>
                   </TableCell>
-                  {application.status !== 'rejected' && (
-                    <TableCell className='px-6 py-5 whitespace-nowrap'>
-                      {/* Withdraw Button */}
-                      <div className='lg:mt-0 mt-4'>
-                        <ApplicationWithdrawButton
-                          applicationId={application.id}
+                  <TableCell className='px-4 py-5 w-[16%]'>
+                    <Link
+                      href={`/ngos/${application.ngo.id}`}
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 block truncate text-sm'
+                      title={application.ngo.name}
+                    >
+                      {application.ngo.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className='px-4 py-5 w-[22%]'>
+                    <div className='flex flex-wrap gap-1'>
+                      {application.skills.slice(0, 2).map((skill) => (
+                        <BadgeComponent
+                          key={skill.id}
+                          variant='skill'
+                          size='sm'
                         >
-                          Abbrechen
-                        </ApplicationWithdrawButton>
-                      </div>
-                    </TableCell>
-                  )}
-                  {application.status !== 'rejected' && (
-                    <TableCell className='px-6 py-5 whitespace-nowrap'>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <ButtonComponent variant='action' size='sm'>
-                            <EllipsisVertical size={16} />
-                          </ButtonComponent>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className='bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl p-2'>
-                          <DropdownMenuItem className='text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-200 p-3'>
-                            Für zukünftige Erweiterungen
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  )}
+                          {skill.name}
+                        </BadgeComponent>
+                      ))}
+                      {application.skills.length > 2 && (
+                        <BadgeComponent variant='count' size='sm'>
+                          +{application.skills.length - 2}
+                        </BadgeComponent>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className='px-4 py-5 w-[18%]'>
+                    <Link
+                      href={`/projects/${application.projectId}`}
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 block truncate text-sm'
+                      title={application.project.name}
+                    >
+                      {application.project.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className='px-4 py-5 w-[18%]'>
+                    <div
+                      title={
+                        application.status === 'accepted'
+                          ? 'Akzeptiert'
+                          : application.status === 'rejected'
+                          ? 'Abgelehnt'
+                          : 'Ausstehend'
+                      }
+                    >
+                      <BadgeComponent
+                        variant={
+                          application.status === 'accepted'
+                            ? 'success'
+                            : application.status === 'rejected'
+                            ? 'error'
+                            : 'warning'
+                        }
+                        className='px-2 py-1 rounded-full font-medium text-xs flex items-center gap-1 w-fit'
+                      >
+                        {application.status === 'accepted' ? (
+                          <CircleCheck size={14} className='fill-green-500' />
+                        ) : application.status === 'rejected' ? (
+                          <CircleX size={14} className='fill-red-500' />
+                        ) : (
+                          <Loader size={14} />
+                        )}
+                        <span className='hidden lg:inline text-xs'>
+                          {application.status === 'accepted'
+                            ? 'Akzeptiert'
+                            : application.status === 'rejected'
+                            ? 'Abgelehnt'
+                            : 'Ausstehend'}
+                        </span>
+                      </BadgeComponent>
+                    </div>
+                  </TableCell>
+                  <TableCell className='px-4 py-5 w-[16%]'>
+                    {application.status !== 'rejected' && (
+                      <ApplicationWithdrawButton applicationId={application.id}>
+                        <span className='hidden 2xl:inline'>Abbrechen</span>
+                        <span className='2xl:hidden'>×</span>
+                      </ApplicationWithdrawButton>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
