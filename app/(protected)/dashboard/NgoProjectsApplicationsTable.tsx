@@ -40,24 +40,24 @@ const NgoProjectsApplicationsTable = ({
           {applications.map((application) => (
             <div
               key={application.id}
-              className='bg-light-mint/10 border border-light-mint/30 rounded-2xl p-4 hover:bg-light-mint/15 transition-all duration-200'
+              className='bg-light-mint/10 border border-light-mint/30 rounded-2xl p-4 hover:bg-light-mint/15 transition-all duration-200 overflow-hidden'
             >
               <div className='flex justify-between items-start mb-3'>
                 <div className='flex-1'>
                   <Link
                     href={`/users/${application.userId}`}
-                    className='text-prussian hover:text-prussian/80 font-semibold text-lg transition-colors duration-200 block mb-1'
+                    className='text-prussian hover:text-prussian/80 font-semibold text-lg transition-colors duration-200 block mb-1 truncate'
                   >
                     {application.user.firstName} {application.user.lastName}
                   </Link>
                   <Link
                     href={`/projects/${application.projectId}`}
-                    className='text-prussian/70 hover:text-prussian text-sm transition-colors duration-200'
+                    className='text-prussian/70 hover:text-prussian text-sm transition-colors duration-200 truncate'
                   >
                     {application.project.name}
                   </Link>
                 </div>
-                <DropdownMenu>
+                {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <ButtonComponent variant='action' size='sm'>
                       <EllipsisVertical size={16} />
@@ -69,7 +69,7 @@ const NgoProjectsApplicationsTable = ({
                     </DropdownMenuItem>
                     <DropdownMenuItem className='text-green-600 hover:bg-green-50 rounded-xl transition-colors duration-200 p-3'></DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
               </div>
               <div className='space-y-3'>
                 <div>
@@ -90,57 +90,57 @@ const NgoProjectsApplicationsTable = ({
                   </div>
                 </div>
 
-                <div className='flex justify-between items-center pt-2 border-t border-light-mint/20'>
-                  <div className='text-prussian/60 text-xs font-medium uppercase tracking-wide'>
-                    Status
+                <div className='flex flex-col gap-2 lg:gap-0 justify-between items-start pt-2 border-t border-light-mint/20'>
+                  <div className='flex flex-col items-start gap-2'>
+                    <div className='text-prussian/60 text-xs font-medium uppercase tracking-wide'>
+                      Status
+                    </div>
+                    <BadgeComponent
+                      variant={
+                        application.status === 'accepted'
+                          ? 'success'
+                          : application.status === 'rejected'
+                          ? 'error'
+                          : 'warning'
+                      }
+                      className='px-3 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit'
+                    >
+                      {application.status === 'accepted' ? (
+                        <CircleCheck size={14} className='fill-green-500' />
+                      ) : application.status === 'rejected' ? (
+                        <CircleX size={14} className='fill-red-500' />
+                      ) : (
+                        <Loader size={14} />
+                      )}
+                      {application.status === 'accepted' ? (
+                        <span>Akzeptiert</span>
+                      ) : application.status === 'rejected' ? (
+                        <span>Abgelehnt</span>
+                      ) : (
+                        <span>Ausstehend</span>
+                      )}
+                    </BadgeComponent>
                   </div>
-                  <BadgeComponent
-                    variant={
-                      application.status === 'accepted'
-                        ? 'success'
-                        : application.status === 'rejected'
-                        ? 'error'
-                        : 'warning'
-                    }
-                    className='px-3 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit'
-                  >
-                    {application.status === 'accepted' ? (
-                      <CircleCheck size={14} className='fill-green-500' />
+                  <div className='flex flex-row gap-2 items-stretch w-auto'>
+                    {application.status === 'pending' ? (
+                      <>
+                        <ApplicationRejectButton application={application}>
+                          Ablehnen
+                        </ApplicationRejectButton>
+                        <ApplicationAcceptButton application={application}>
+                          Akzeptieren
+                        </ApplicationAcceptButton>
+                      </>
                     ) : application.status === 'rejected' ? (
-                      <CircleX size={14} className='fill-red-500' />
-                    ) : (
-                      <Loader size={14} className='animate-spin' />
-                    )}
-                    {application.status === 'accepted' ? (
-                      <span>Akzeptiert</span>
-                    ) : application.status === 'rejected' ? (
-                      <span>Abgelehnt</span>
-                    ) : (
-                      <span>Ausstehend</span>
-                    )}
-                  </BadgeComponent>
-                  {application.status === 'pending' ? (
-                    <div className='flex gap-2'>
                       <ApplicationAcceptButton application={application}>
                         Akzeptieren
                       </ApplicationAcceptButton>
-                      <ApplicationRejectButton application={application}>
-                        Ablehnen
-                      </ApplicationRejectButton>{' '}
-                    </div>
-                  ) : application.status === 'rejected' ? (
-                    <div>
-                      <ApplicationAcceptButton application={application}>
-                        Akzeptieren
-                      </ApplicationAcceptButton>
-                    </div>
-                  ) : (
-                    <div>
+                    ) : (
                       <ApplicationRejectButton application={application}>
                         Ablehnen
                       </ApplicationRejectButton>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -149,7 +149,7 @@ const NgoProjectsApplicationsTable = ({
 
         {/* Desktop Table Layout */}
         <div className='hidden lg:block overflow-x-auto'>
-          <Table className='min-w-full'>
+          <Table className='w-full'>
             <TableHeader>
               <TableRow className='border-b border-light-mint/30 hover:bg-light-mint/10'>
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
@@ -164,8 +164,8 @@ const NgoProjectsApplicationsTable = ({
                 <TableHead className='px-6 py-5 text-left whitespace-nowrap text-prussian font-semibold text-sm'>
                   Status
                 </TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
-                <TableHead className='px-6 py-5 text-left whitespace-nowrap'></TableHead>
+                <TableHead className='px-6 py-5 text-left'></TableHead>
+                <TableHead className='px-6 py-5 text-left'></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -177,13 +177,13 @@ const NgoProjectsApplicationsTable = ({
                   <TableCell className='px-6 py-5 whitespace-nowrap'>
                     <Link
                       href={`/users/${application.userId}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200'
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 max-w-[120px] truncate block break-words'
                     >
                       {application.user.firstName} {application.user.lastName}
                     </Link>
                   </TableCell>
                   <TableCell className='px-6 py-5 whitespace-nowrap'>
-                    <div className='flex flex-wrap gap-1'>
+                    <div className='flex flex-wrap gap-1 '>
                       {application.skills.slice(0, 3).map((skill) => (
                         <BadgeComponent
                           key={skill.id}
@@ -203,7 +203,7 @@ const NgoProjectsApplicationsTable = ({
                   <TableCell className='px-6 py-5 whitespace-nowrap'>
                     <Link
                       href={`/projects/${application.projectId}`}
-                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200'
+                      className='text-prussian hover:text-prussian/80 font-semibold transition-colors duration-200 max-w-[120px] truncate block break-words'
                     >
                       {application.project.name}
                     </Link>
@@ -217,14 +217,14 @@ const NgoProjectsApplicationsTable = ({
                           ? 'error'
                           : 'warning'
                       }
-                      className='px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit'
+                      className='px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 w-fit break-words'
                     >
                       {application.status === 'accepted' ? (
                         <CircleCheck size={16} className='fill-green-500' />
                       ) : application.status === 'rejected' ? (
                         <CircleX size={16} className='fill-red-500' />
                       ) : (
-                        <Loader size={16} className='animate-spin' />
+                        <Loader size={16} />
                       )}
                       {application.status === 'accepted' ? (
                         <span>Akzeptiert</span>
@@ -235,31 +235,33 @@ const NgoProjectsApplicationsTable = ({
                       )}
                     </BadgeComponent>
                   </TableCell>
-                  <TableCell className='px-6 py-5 whitespace-nowrap flex'>
-                    {application.status === 'accepted' ? (
-                      <div>
-                        <ApplicationRejectButton application={application}>
-                          Ablehnen
-                        </ApplicationRejectButton>
-                      </div>
-                    ) : application.status === 'rejected' ? (
-                      <div>
-                        <ApplicationAcceptButton application={application}>
-                          Akzeptieren
-                        </ApplicationAcceptButton>
-                      </div>
-                    ) : (
-                      <div className='flex gap-5'>
-                        <ApplicationAcceptButton application={application}>
-                          Akzeptieren
-                        </ApplicationAcceptButton>
-                        <ApplicationRejectButton application={application}>
-                          Ablehnen
-                        </ApplicationRejectButton>
-                      </div>
-                    )}
-                  </TableCell>
                   <TableCell className='px-6 py-5 whitespace-nowrap'>
+                    <div className='flex items-center h-full break-words'>
+                      {application.status === 'accepted' ? (
+                        <div className='flex items-center h-full'>
+                          <ApplicationRejectButton application={application}>
+                            Ablehnen
+                          </ApplicationRejectButton>
+                        </div>
+                      ) : application.status === 'rejected' ? (
+                        <div className='flex items-center h-full'>
+                          <ApplicationAcceptButton application={application}>
+                            Akzeptieren
+                          </ApplicationAcceptButton>
+                        </div>
+                      ) : (
+                        <div className='flex gap-5 lg:gap-2 items-center h-full'>
+                          <ApplicationAcceptButton application={application}>
+                            Akzeptieren
+                          </ApplicationAcceptButton>
+                          <ApplicationRejectButton application={application}>
+                            Ablehnen
+                          </ApplicationRejectButton>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  {/* <TableCell className='px-6 py-5 whitespace-nowrap'>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <ButtonComponent variant='action' size='sm'>
@@ -272,7 +274,8 @@ const NgoProjectsApplicationsTable = ({
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
+                  </TableCell> */}
+                  <TableCell className='w-full bg-transparent border-none'></TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import MessageDialog from './ApplicationMessageDialog';
 import { updateApplicationStatus } from './NgoApplicationAcceptButton';
@@ -19,11 +19,9 @@ interface PropsType {
 }
 
 const ApplicationRejectButton = ({ children, application }: PropsType) => {
-  const [submittedText, setSubmittedText] = useState<string | null>(null);
   const { tokens } = useAuth();
 
   const handleTextSubmit = (text: string): void => {
-    setSubmittedText(text);
     if (!text) return;
 
     void (async () => {
@@ -41,7 +39,11 @@ const ApplicationRejectButton = ({ children, application }: PropsType) => {
         detailEndpoint,
         (currentApplication: Application | undefined) =>
           currentApplication
-            ? { ...currentApplication, status: ApplicationStatus.REJECTED, message: text }
+            ? {
+                ...currentApplication,
+                status: ApplicationStatus.REJECTED,
+                message: text,
+              }
             : currentApplication,
         { revalidate: false }
       );
@@ -58,7 +60,12 @@ const ApplicationRejectButton = ({ children, application }: PropsType) => {
     })();
   };
 
-  return <MessageDialog onSubmit={handleTextSubmit} />;
+  return (
+    <MessageDialog
+      onSubmit={handleTextSubmit}
+      triggerText={children as string}
+    />
+  );
 };
 
 export default ApplicationRejectButton;

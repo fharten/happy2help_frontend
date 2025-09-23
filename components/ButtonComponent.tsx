@@ -5,7 +5,14 @@ import { cn } from '@/lib/utils';
 interface ButtonComponentProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'action' | 'accent' | 'danger' | 'plain';
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'action'
+    | 'accent'
+    | 'danger'
+    | 'solidanger'
+    | 'plain';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   className?: string;
@@ -25,7 +32,7 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
       className = '',
       ...props
     },
-    ref,
+    ref
   ) => {
     const baseStyles = 'font-semibold border cursor-pointer';
 
@@ -36,12 +43,13 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
         'bg-white/60 hover:bg-white/80 text-prussian border-light-mint/30 hover:border-light-mint/50 rounded-2xl',
       action:
         'bg-white/80 hover:bg-light-mint/10 text-prussian border-light-mint/30 rounded-full',
-      plain: 
-        'bg-white/80 text-prussian border-light-mint/30 rounded-2xl',
+      plain: 'bg-white/80 text-prussian border-light-mint/30 rounded-2xl',
       accent:
         'bg-flax hover:bg-flax/80 text-prussian border-flax/80 hover:border-flax rounded-2xl',
       danger:
-        'bg-destructive/50 hover:bg-destructive/80 text-prussian/80 border-black/30 rounded-full',
+        'bg-white/80 hover:bg-red-50/80 text-red-700 border-red-200 hover:border-red-300 rounded-2xl',
+      solidanger:
+        'bg-red-700 hover:bg-red-700 text-white border-red-700 rounded-2xl',
     };
 
     const sizes = {
@@ -80,7 +88,7 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
         {children}
       </Button>
     );
-  },
+  }
 );
 
 ButtonComponent.displayName = 'ButtonComponent';

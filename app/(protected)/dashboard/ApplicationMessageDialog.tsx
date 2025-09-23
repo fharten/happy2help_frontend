@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import ButtonComponent from '@/components/ButtonComponent';
 import {
   Dialog,
   DialogClose,
@@ -18,13 +18,17 @@ import { z } from 'zod';
 
 type MessageDialogProps = {
   onSubmit: (text: string) => void;
+  triggerText?: string;
 };
 
 const messageSchema = z.object({
   reason: z.string().trim().min(10, 'Bitte gib mindestens 10 Zeichen ein.'),
 });
 
-const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
+const MessageDialog: React.FC<MessageDialogProps> = ({
+  onSubmit,
+  triggerText = 'Ablehnen',
+}) => {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -50,35 +54,46 @@ const MessageDialog: React.FC<MessageDialogProps> = ({ onSubmit }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline'>Ablehnen</Button>
+        <ButtonComponent variant='danger' size='sm'>
+          {triggerText}
+        </ButtonComponent>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='sm:max-w-[425px] bg-white/95 backdrop-blur-xl border-light-mint/30 shadow-2xl rounded-2xl'>
         <DialogHeader>
-          <DialogTitle></DialogTitle>
-          <DialogDescription>
+          <DialogTitle className='text-lg font-bold text-prussian'>
+            Bewerbung ablehnen
+          </DialogTitle>
+          <DialogDescription className='text-prussian/70'>
             Sende dem Bewerber eine Begründung für die Ablehnung.*
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className='grid gap-4' noValidate>
+        <form onSubmit={handleSubmit} className='grid gap-6' noValidate>
           <div className='grid gap-3'>
-            <Label htmlFor='reason'>Begründung:</Label>
+            <Label htmlFor='reason' className='text-prussian font-medium'>
+              Begründung:
+            </Label>
             <Input
-              id="reason"
-              name="reason"
-              placeholder="Begründung hier eingeben"
+              id='reason'
+              name='reason'
+              placeholder='Begründung hier eingeben'
               value={text}
               onChange={(event) => setText(event.target.value)}
               required
+              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
             />
-            {errorText && <p className='text-sm text-blue-600'>{errorText}</p>}
+            {errorText && (
+              <p className='text-sm text-red-600 font-medium'>{errorText}</p>
+            )}
           </div>
-          <DialogFooter>
+          <DialogFooter className='flex gap-3'>
             <DialogClose asChild>
-              <Button type='button' variant='outline'>
+              <ButtonComponent variant='secondary' size='md'>
                 Abbrechen
-              </Button>
+              </ButtonComponent>
             </DialogClose>
-            <Button type='submit'>Absenden</Button>
+            <ButtonComponent variant='solidanger' size='md' type='submit'>
+              Absenden
+            </ButtonComponent>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -52,33 +52,44 @@ export async function updateApplicationStatus(
 export function ApplicationAcceptButton({ children, application }: PropsType) {
   const { tokens } = useAuth();
 
-const handleClick = (): void => {
-  void (async () => {
-    if (!tokens?.accessToken) return;
+  const handleClick = (): void => {
+    void (async () => {
+      if (!tokens?.accessToken) return;
 
-    const updatedApplication = { ...application, status: ApplicationStatus.ACCEPTED };
-    const detailEndpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`;
+      const updatedApplication = {
+        ...application,
+        status: ApplicationStatus.ACCEPTED,
+      };
+      const detailEndpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/${application.id}`;
 
-    await mutate(
-      detailEndpoint,
-      (currentApplication: Application | undefined) =>
-        currentApplication ? { ...currentApplication, status: ApplicationStatus.ACCEPTED } : currentApplication,
-      { revalidate: false }
-    );
+      await mutate(
+        detailEndpoint,
+        (currentApplication: Application | undefined) =>
+          currentApplication
+            ? { ...currentApplication, status: ApplicationStatus.ACCEPTED }
+            : currentApplication,
+        { revalidate: false }
+      );
 
-    await updateApplicationStatus(updatedApplication, tokens.accessToken);
+      await updateApplicationStatus(updatedApplication, tokens.accessToken);
 
-    mutate(detailEndpoint);
+      mutate(detailEndpoint);
 
-    if (application?.project?.ngoId) {
-      mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${application.project.ngoId}/applications`);
-    }
-  })();
-};
-
+      if (application?.project?.ngoId) {
+        mutate(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${application.project.ngoId}/applications`
+        );
+      }
+    })();
+  };
 
   return (
-    <ButtonComponent size="sm" onClick={handleClick} type="button">
+    <ButtonComponent
+      variant='primary'
+      size='sm'
+      onClick={handleClick}
+      type='button'
+    >
       {children}
     </ButtonComponent>
   );
