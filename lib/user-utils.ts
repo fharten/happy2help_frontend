@@ -135,7 +135,7 @@ export async function getUserDisplayName(
         : user.loginEmail.split('@')[0];
     }
     // NGO: wir prüfen erst ob principal existiert (property und truthy value check)
-    else if ('principal' in user && user.principal) return user.principal;
+    // else if ('principal' in user && user.principal) return user.principal;
     // NGO: als fallbacken prüfen wir ob name existiert (property und truthy value check)
     else if ('name' in user && user.name) return user.name;
   }
