@@ -66,7 +66,7 @@ type UserDetailResponse = Omit<UserProfile, 'skills' | 'ngoMemberships'> & {
 
 function useSkills() {
   const { data, error, isLoading, mutate } = useSWR<Skill[]>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`,
   );
 
   return {
@@ -88,7 +88,7 @@ async function updateUser(id: string, user: UserProfile, accessToken: string) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(user),
-    }
+    },
   );
 
   if (!res.ok) {
@@ -158,7 +158,7 @@ const UserEditForm = () => {
 
   const { data: userDetailData, mutate } = useSWR<UserDetailResponse>(
     userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
-    swrFetcher
+    swrFetcher,
   );
 
   useEffect(() => {
@@ -168,14 +168,14 @@ const UserEditForm = () => {
     let skillIds: string[] = [];
     if (Array.isArray(userDetailData.skills)) {
       skillIds = userDetailData.skills.map((skill) =>
-        typeof skill === 'string' ? skill : skill.id
+        typeof skill === 'string' ? skill : skill.id,
       );
     }
 
     let membershipIds: string[] = [];
     if (Array.isArray(userDetailData.ngoMemberships)) {
       membershipIds = userDetailData.ngoMemberships.map((ngoMembership) =>
-        typeof ngoMembership === 'string' ? ngoMembership : ngoMembership.id
+        typeof ngoMembership === 'string' ? ngoMembership : ngoMembership.id,
       );
     }
 
@@ -193,7 +193,7 @@ const UserEditForm = () => {
         state: userDetailData.state ?? '',
         // isDisabled: userDetailData.isDisabled ?? false,
       },
-      { keepDirty: false, keepTouched: true }
+      { keepDirty: false, keepTouched: true },
     );
   }, [userDetailData, form]);
 
@@ -255,7 +255,7 @@ const UserEditForm = () => {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -343,7 +343,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Vorname</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -357,7 +360,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Nachname</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -376,7 +382,7 @@ const UserEditForm = () => {
                             inputMode='numeric'
                             placeholder='1900'
                             maxLength={4}
-                            className='h-11'
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             value={field.value ?? ''}
                             onChange={(e) => {
                               const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
@@ -423,7 +429,7 @@ const UserEditForm = () => {
                               onChange={field.onChange}
                               placeholder='Fähigkeiten auswählen'
                               searchPlaceholder='Suchen…'
-                              className='bg-light-mint/0'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             />
                           ) : (
                             <div>Lade Fähigkeiten...</div>
@@ -475,7 +481,11 @@ const UserEditForm = () => {
                       <FormItem>
                         <FormLabel>Kontakt E-Mail</FormLabel>
                         <FormControl>
-                          <Input type='email' {...field} />
+                          <Input
+                            type='email'
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>
                           Optional. Falls du nicht unter deiner Login-E-Mail
@@ -521,7 +531,7 @@ const UserEditForm = () => {
                               inputMode='numeric'
                               placeholder='12345'
                               maxLength={5}
-                              className='h-11'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                               value={field.value ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
@@ -545,7 +555,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Stadt</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -560,7 +573,10 @@ const UserEditForm = () => {
                       <FormItem>
                         <FormLabel>Bundesland</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
