@@ -281,11 +281,6 @@ const UserEditForm = () => {
 
   return (
     <>
-      <MainHeadline variant='page'>
-        <span className='font-extralight'>Profil </span>
-        <strong className='font-bold'>bearbeiten</strong>
-      </MainHeadline>
-
       <div className='container-site'>
         <Card className='bg-light-mint/10 backdrop-blur-xl border-light-mint/20 shadow-xl'>
           <CardContent className='p-8'>
@@ -447,7 +442,7 @@ const UserEditForm = () => {
                         <FormLabel>Mitgliedschaften bei Vereinen</FormLabel>
                         <FormControl>
                           <Input
-                            className='h-11'
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             value={field.value?.join(', ') ?? ''}
                             onChange={(e) => {
                               const raw = e.target.value;
@@ -503,7 +498,10 @@ const UserEditForm = () => {
                       <FormItem>
                         <FormLabel>Telefonnummer</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>Optional</FormDescription>
                         <FormMessage />
