@@ -40,7 +40,7 @@ const ProjectDetailPage = () => {
     error,
   } = useSWR<Project>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
-    fetcher,
+    fetcher
   );
 
   const {
@@ -54,7 +54,7 @@ const ProjectDetailPage = () => {
     !userLoggedInLoading && userLoggedIn && id
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/check/${userLoggedIn.id}/${id}`
       : null,
-    swrFetcher,
+    swrFetcher
   );
 
   // get user if logged in
@@ -100,14 +100,11 @@ const ProjectDetailPage = () => {
 
       {/* Image Carousel */}
       <div className='mb-8'>
-        <Carousel className='w-full rounded-2xl overflow-hidden max-h-[400px] lg:max-h-[500px] shadow-xl bg-gray-100 flex items-center justify-center'>
-          <CarouselContent className='h-full'>
+        <Carousel className='w-full rounded-2xl overflow-hidden h-[250px] lg:h-[500px] shadow-xl bg-gray-100'>
+          <CarouselContent className='h-[250px] lg:h-[500px]'>
             {project.images && project.images.length > 0 ? (
               project.images.map((image: string, index: number) => (
-                <CarouselItem
-                  key={index}
-                  className='h-full flex items-center justify-center'
-                >
+                <CarouselItem key={index} className='h-full'>
                   <Image
                     src={image}
                     alt={`Projektbild ${index + 1}`}
