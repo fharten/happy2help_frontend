@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface ButtonComponentProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'action';
+  variant?: 'primary' | 'secondary' | 'action' | 'plain';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   className?: string;
@@ -27,8 +27,7 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
     },
     ref
   ) => {
-    const baseStyles =
-      'font-semibold transition-all duration-200 hover:scale-105 cursor-pointer border';
+    const baseStyles = 'font-semibold border cursor-pointer';
 
     const variants = {
       primary:
@@ -37,6 +36,7 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
         'bg-white/60 hover:bg-white/80 text-prussian border-light-mint/30 hover:border-light-mint/50 rounded-2xl',
       action:
         'bg-white/80 hover:bg-light-mint/10 text-prussian border-light-mint/30 rounded-full',
+      plain: 'bg-white/80 text-prussian border-light-mint/30 rounded-2xl',
     };
 
     const sizes = {
@@ -61,7 +61,15 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
         ref={ref}
         onClick={onClick}
         disabled={disabled}
-        className={cn(baseStyles, variants[variant], getSize(), className)}
+        className={cn(
+          baseStyles,
+          variants[variant],
+          getSize(),
+          className,
+          variant === 'plain'
+            ? ''
+            : 'transition-all duration-200 hover:scale-105'
+        )}
         {...props}
       >
         {children}
