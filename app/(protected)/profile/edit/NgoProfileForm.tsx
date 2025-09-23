@@ -14,7 +14,6 @@ import ButtonComponent from '@/components/ButtonComponent';
 import useSWR from 'swr';
 import { toast, Toaster } from 'sonner';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
-import MainHeadline from '@/components/MainHeadline';
 
 import {
   Form,
@@ -335,7 +334,10 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Vereinsname</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -349,7 +351,10 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Vorstand</FormLabel>
                         <FormControl>
-                          <Input {...field} className='h-11' />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>
                           Vor- und Nachname des Vorstands
@@ -372,7 +377,7 @@ const NgoEditForm = () => {
                               onChange={field.onChange}
                               placeholder='Kategorien auswählen'
                               searchPlaceholder='Suchen…'
-                              className='bg-light-mint/0'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             />
                           ) : (
                             <div>Lade Kategorien...</div>
@@ -400,7 +405,11 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Kontakt E-Mail</FormLabel>
                         <FormControl>
-                          <Input type='email' {...field} />
+                          <Input
+                            type='email'
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>
                           Optional. Falls du nicht unter deiner Login-E-Mail
@@ -418,7 +427,10 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Telefonnummer</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>Optional</FormDescription>
                         <FormMessage />
@@ -439,7 +451,10 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Straße und Hausnummer</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -459,7 +474,7 @@ const NgoEditForm = () => {
                               inputMode='numeric'
                               placeholder='12345'
                               maxLength={5}
-                              className='h-11'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                               value={field.value ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
@@ -483,7 +498,10 @@ const NgoEditForm = () => {
                         <FormItem>
                           <FormLabel>Stadt</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -498,7 +516,10 @@ const NgoEditForm = () => {
                       <FormItem>
                         <FormLabel>Bundesland</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

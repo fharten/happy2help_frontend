@@ -343,7 +343,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Vorname</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -357,7 +360,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Nachname</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -376,7 +382,7 @@ const UserEditForm = () => {
                             inputMode='numeric'
                             placeholder='1900'
                             maxLength={4}
-                            className='h-11'
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             value={field.value ?? ''}
                             onChange={(e) => {
                               const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
@@ -423,7 +429,7 @@ const UserEditForm = () => {
                               onChange={field.onChange}
                               placeholder='Fähigkeiten auswählen'
                               searchPlaceholder='Suchen…'
-                              className='bg-light-mint/0'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                             />
                           ) : (
                             <div>Lade Fähigkeiten...</div>
@@ -475,7 +481,11 @@ const UserEditForm = () => {
                       <FormItem>
                         <FormLabel>Kontakt E-Mail</FormLabel>
                         <FormControl>
-                          <Input type='email' {...field} />
+                          <Input
+                            type='email'
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormDescription>
                           Optional. Falls du nicht unter deiner Login-E-Mail
@@ -521,7 +531,7 @@ const UserEditForm = () => {
                               inputMode='numeric'
                               placeholder='12345'
                               maxLength={5}
-                              className='h-11'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
                               value={field.value ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/\D/g, ''); // REMOVES NON DIGITS
@@ -545,7 +555,10 @@ const UserEditForm = () => {
                         <FormItem>
                           <FormLabel>Stadt</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              {...field}
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -560,7 +573,10 @@ const UserEditForm = () => {
                       <FormItem>
                         <FormLabel>Bundesland</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            {...field}
+                            className='bg-white/50 border border-light-mint/30 rounded-lg h-11 focus:bg-white/70 transition-all duration-200'
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
