@@ -102,7 +102,7 @@ export default function ProjectCard({ project }: ProjectProps) {
                 {/* Description */}
                 <div className='hidden md:block'>
                   <CardDescription className='text-base text-prussian/70 leading-relaxed font-medium break-words hyphens-auto overflow-hidden'>
-                    <p className='break-normal'>
+                    <p className='hyphenate'>
                       {project.description.length > 160
                         ? project.description.substring(0, 157) + '...'
                         : project.description}

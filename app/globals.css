@@ -176,4 +176,12 @@
     margin: 0 auto;
     padding: 0 1rem;
   }
+
+  .hyphenate {
+    text-align: left;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
 }
