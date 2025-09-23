@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import ButtonComponent from '@/components/ButtonComponent';
 import useSWR from 'swr';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 
 import {
@@ -574,7 +574,7 @@ const NgoEditForm = () => {
             </Form>
           </CardContent>
         </Card>
-        <Toaster position='top-center' richColors />
+        {/* <Toaster position='top-center' richColors /> */}
       </div>
     </>
   );
