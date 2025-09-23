@@ -7,14 +7,18 @@ import { Project } from '@/types/project.d';
 
 // Fetcher function
 
-const fetcher = (url: string | URL | Request) =>
-  fetch(url).then((r) => r.json());
+const fetcher = async (url: string | URL | Request) => {
+  const response = await fetch(url);
+  const json = await response.json();
+  return json.data;
+};
 
 export default function Projects() {
-  const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects`,
-    fetcher
-  );
+  const {
+    data: projects,
+    error,
+    isLoading,
+  } = useSWR(`${process.env.NEXT_PUBLIC_BASE_URL}/api/projects`, fetcher);
 
   if (isLoading)
     return (
@@ -36,8 +40,6 @@ export default function Projects() {
       </div>
     );
 
-  const projects = data?.data;
-
   return (
     <div>
       <div className='mb-8'>
@@ -45,7 +47,8 @@ export default function Projects() {
           Alle Projekte
         </h1>
         <p className='text-prussian/70 text-sm lg:text-base font-medium'>
-          Entdecke spannende Projekte und finde dein nächstes ehrenamtliches Engagement.
+          Entdecke spannende Projekte und finde dein nächstes ehrenamtliches
+          Engagement.
         </p>
       </div>
 

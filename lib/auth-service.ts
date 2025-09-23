@@ -155,18 +155,18 @@ export class AuthService {
       },
     });
 
-    // IF UNAUTHORIZED TRY TO REFREH TOKEN
+    // IF UNAUTHORIZED TRY TO REFRESH TOKEN
     if (res.status === 401) {
       try {
         const newTokens = await this.refreshTokenFunction(refreshToken);
         onTokenRefresh(newTokens);
 
-        // RETRY REQUEST
+        // RETRY REQUEST WITH NEW TOKEN
         res = await fetch(url, {
           ...options,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${newTokens.accessToken}`, // <-- Use NEW token!
             ...options.headers,
           },
         });

@@ -46,14 +46,17 @@ interface NgoProfile {
 export default function NgoInfo() {
   const { id } = useParams();
   const { user: ngoLoggedIn, isLoading: isLoadingNgo } = useAuth();
-  const fetcher = (url: string | URL | Request) =>
-    fetch(url).then((r) => r.json());
+  const fetcher = async (url: string | URL | Request) => {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json.data;
+  };
 
   const {
     data: ngoResponse,
     isLoading,
     error,
-  } = useSWR<{ data: NgoProfile }>(
+  } = useSWR<NgoProfile>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}` : null,
     fetcher,
   );
@@ -62,7 +65,7 @@ export default function NgoInfo() {
     data: projectsData,
     isLoading: isLoadingProjects,
     error: errorProjects,
-  } = useSWR<{ data: { projects: Projects } }>(
+  } = useSWR<{ projects: Projects }>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/ngos/${id}/projects` : null,
     fetcher,
   );
@@ -72,8 +75,8 @@ export default function NgoInfo() {
     isLoading ||
     isLoadingNgo ||
     isLoadingProjects ||
-    !ngoResponse?.data ||
-    !projectsData?.data
+    !ngoResponse ||
+    !projectsData
   ) {
     return (
       <div className='container-site'>
@@ -108,8 +111,8 @@ export default function NgoInfo() {
     );
   }
 
-  const ngo = ngoResponse.data;
-  const projects = projectsData.data.projects;
+  const ngo = ngoResponse;
+  const projects = projectsData.projects;
 
   return (
     <div className='container-site'>

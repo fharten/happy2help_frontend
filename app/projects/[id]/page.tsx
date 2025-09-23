@@ -17,21 +17,44 @@ import { Project } from '@/types/project.d';
 import { Skill } from '@/types/skill.d';
 import ButtonComponent from '@/components/ButtonComponent';
 import BadgeComponent from '@/components/BadgeComponent';
-import { useAuth } from '@/contexts/AuthContext';
+import { swrFetcher, useAuth } from '@/contexts/AuthContext';
 import ApplyButton from './ApplyButton';
 import { getUserEntityType } from '@/lib/user-utils';
 
 const ProjectDetailPage = () => {
   const { id } = useParams();
+  const { user: userLoggedIn, isLoading: userLoggedInLoading } = useAuth();
   const pathname = usePathname();
   const parentUrl = pathname?.split('/').slice(0, -1).join('/') || '/';
 
-  const fetcher = (url: string | URL | Request) =>
-    fetch(url).then((r) => r.json());
+  const fetcher = async (url: string | URL | Request) => {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json.data; // Extract just the data property
+  };
 
-  const { data, isLoading, isValidating, error } = useSWR<{ data: Project }>(
+  const {
+    data: project,
+    isLoading,
+    isValidating,
+    error,
+  } = useSWR<Project>(
     id ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}` : null,
     fetcher,
+  );
+
+  const {
+    data,
+    isLoading: isLoadingHasApplied,
+    error: errorHasApplied,
+  } = useSWR<{
+    hasApplied: boolean;
+    application: unknown;
+  }>(
+    !userLoggedInLoading && userLoggedIn && id
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/check/${userLoggedIn.id}/${id}`
+      : null,
+    swrFetcher,
   );
 
   // get user if logged in
@@ -39,7 +62,7 @@ const ProjectDetailPage = () => {
   let entityType = 'unknown';
   if (user) entityType = getUserEntityType(user!);
 
-  if (isLoading || isUserLoading || !data) {
+  if (isLoading || isUserLoading || !project || !data) {
     return (
       <div className='container-site'>
         <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
@@ -58,8 +81,6 @@ const ProjectDetailPage = () => {
         </div>
       </div>
     );
-
-  const project = data.data;
 
   return (
     <div className='container-site'>
@@ -157,8 +178,20 @@ const ProjectDetailPage = () => {
 
           {/* Action Button - show only if user has logged in*/}
           <div className='lg:mt-0 mt-4'>
-            {user && entityType === 'user' && (
-              <ApplyButton projectId={project.id}>Jetzt bewerben</ApplyButton>
+            {user &&
+              entityType === 'user' &&
+              !isLoadingHasApplied &&
+              !errorHasApplied &&
+              !data.hasApplied && (
+                <ApplyButton projectId={project.id}>Jetzt bewerben</ApplyButton>
+              )}
+            {!isLoadingHasApplied && data.hasApplied && (
+              <ButtonComponent
+                variant='danger'
+                className='w-full lg:w-auto hover:cursor-not-allowed'
+              >
+                Bereits beworben
+              </ButtonComponent>
             )}
           </div>
         </div>

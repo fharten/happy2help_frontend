@@ -19,7 +19,7 @@ async function createApplication(data: ApplicationData, accessToken: string) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(data),
-    }
+    },
   );
   console.log('Response from server: ', res);
 
@@ -37,7 +37,7 @@ async function createApplication(data: ApplicationData, accessToken: string) {
 
   if (res.status == 201 && res.statusText == 'Created') {
     toast.success(
-      'Du hast dich erfolgreich beworben! Der Verein wird über deine Bewerbung informiert.'
+      'Du hast dich erfolgreich beworben! Der Verein wird über deine Bewerbung informiert.',
     );
     return;
   }
@@ -69,7 +69,7 @@ export default function ApplyButton({ children, projectId }: PropsType) {
 
   return (
     <ButtonComponent
-      variant='primary'
+      variant='accent'
       size='lg'
       onClick={handleClick}
       className='w-full lg:w-auto'

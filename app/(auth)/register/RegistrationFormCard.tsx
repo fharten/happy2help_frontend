@@ -64,7 +64,9 @@ const RegistrationFormCard = ({ entity }: { entity: 'user' | 'ngo' }) => {
     <Card>
       <CardHeader>
         <CardTitle>
-          {entity === 'user' ? 'Registrierung als Nutzer' : 'Registrierung als Verein'}
+          {entity === 'user'
+            ? 'Registrierung als Nutzer'
+            : 'Registrierung als Verein'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -125,6 +127,12 @@ const RegistrationFormCard = ({ entity }: { entity: 'user' | 'ngo' }) => {
             >
               Registrieren
             </ButtonComponent>
+          </div>
+          <div className='mt-4 text-center text-sm'>
+            Du hast schon einen Account?{' '}
+            <a href='login' className='underline underline-offset-4'>
+              Login
+            </a>
           </div>
         </form>
       </CardContent>

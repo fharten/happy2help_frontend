@@ -131,6 +131,7 @@
   --color-seasalt: #f9fafb;
   --color-prussian: #1e293b;
   --color-black: #000000;
+  --color-destructive: #ef4444;
 
   /* Layout */
   --max-width: 1200px;
@@ -173,7 +174,7 @@
   /* Container */
   .container-site {
     max-width: var(--max-width);
-    margin: 0 auto;
+    margin: 2rem auto;
     padding: 0 1rem;
   }
 
