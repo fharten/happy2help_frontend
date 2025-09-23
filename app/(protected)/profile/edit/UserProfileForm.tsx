@@ -66,7 +66,7 @@ type UserDetailResponse = Omit<UserProfile, 'skills' | 'ngoMemberships'> & {
 
 function useSkills() {
   const { data, error, isLoading, mutate } = useSWR<Skill[]>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`,
   );
 
   return {
@@ -88,7 +88,7 @@ async function updateUser(id: string, user: UserProfile, accessToken: string) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(user),
-    }
+    },
   );
 
   if (!res.ok) {
@@ -158,7 +158,7 @@ const UserEditForm = () => {
 
   const { data: userDetailData, mutate } = useSWR<UserDetailResponse>(
     userId ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${userId}` : null,
-    swrFetcher
+    swrFetcher,
   );
 
   useEffect(() => {
@@ -168,14 +168,14 @@ const UserEditForm = () => {
     let skillIds: string[] = [];
     if (Array.isArray(userDetailData.skills)) {
       skillIds = userDetailData.skills.map((skill) =>
-        typeof skill === 'string' ? skill : skill.id
+        typeof skill === 'string' ? skill : skill.id,
       );
     }
 
     let membershipIds: string[] = [];
     if (Array.isArray(userDetailData.ngoMemberships)) {
       membershipIds = userDetailData.ngoMemberships.map((ngoMembership) =>
-        typeof ngoMembership === 'string' ? ngoMembership : ngoMembership.id
+        typeof ngoMembership === 'string' ? ngoMembership : ngoMembership.id,
       );
     }
 
@@ -193,7 +193,7 @@ const UserEditForm = () => {
         state: userDetailData.state ?? '',
         // isDisabled: userDetailData.isDisabled ?? false,
       },
-      { keepDirty: false, keepTouched: true }
+      { keepDirty: false, keepTouched: true },
     );
   }, [userDetailData, form]);
 
@@ -255,7 +255,7 @@ const UserEditForm = () => {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -569,12 +569,12 @@ const UserEditForm = () => {
                 </div>
 
                 {/* Kontoeinstellungen */}
-                <div className='space-y-6'>
+                {/* <div className='space-y-6'>
                   <h3 className='text-lg font-semibold text-prussian border-b border-light-mint/30 pb-2'>
                     Kontoeinstellungen
-                  </h3>
-                  {/* DISABLED */}
-                  {/* <FormField
+                  </h3> */}
+                {/* DISABLED */}
+                {/* <FormField
                   control={form.control}
                   name='isDisabled'
                   render={({ field }) => (
@@ -596,8 +596,8 @@ const UserEditForm = () => {
                       </FormControl>
                     </FormItem>
                   )}
-                /> */}
-                </div>
+                /> 
+                </div>*/}
 
                 <div className='flex gap-4'>
                   <ButtonComponent variant='primary' size='md' type='submit'>
