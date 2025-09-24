@@ -51,7 +51,7 @@ export function MultiSelect({
   const selectedSet = React.useMemo(() => new Set(value ?? []), [value]);
   const selectedOptions = React.useMemo(
     () => options.filter((o) => selectedSet.has(o.value)),
-    [options, selectedSet],
+    [options, selectedSet]
   );
 
   const toggle = (val: string) => {
@@ -90,7 +90,7 @@ export function MultiSelect({
           className={cn(
             'w-full justify-between cursor-pointer bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 transition-all duration-200',
             selectedOptions.length === 0 && 'text-muted-foreground',
-            className,
+            className
           )}
         >
           <span className='truncate'>{triggerLabel}</span>
@@ -144,8 +144,8 @@ export function MultiSelect({
                       className={cn(
                         'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border',
                         checked
-                          ? 'bg-primary text-primary-foreground'
-                          : 'opacity-50',
+                          ? 'bg-primary text-primary-foreground '
+                          : 'bg-white border-black opacity-50 text-transparent'
                       )}
                     >
                       <Check className='h-3.5 w-3.5' />
