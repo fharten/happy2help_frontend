@@ -1,5 +1,4 @@
 # Frontend
-
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white) ![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?logo=radix-ui&logoColor=white) ![Vercel](https://vercelbadge.vercel.app/api/fharten/happy2help_frontend)
 
 <div style="text-align: center;">
