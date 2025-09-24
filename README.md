@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white) ![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?logo=radix-ui&logoColor=white) ![Vercel](https://vercelbadge.vercel.app/api/fharten/happy2help_frontend)
 
-First, run the development server:
+<div style="text-align: center;">
+<img src="https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/deployed/homepage.png" width="600" alt='Happy2Help Frontpage'>
+</div>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## About
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Our app connects passionate volunteers with impactful registered associations. Discover meaningful projects, apply with a tap, and turn your time and talent into real-world change. One platform. Countless causes. A better world—together.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Core Framework
 
-## Learn More
+- **Next.js 15.5.2** - React framework with server-side rendering, file-based routing, and built-in optimizations. Chosen for its excellent developer experience, performance, and full-stack capabilities with API routes.
+- **React 19.1.0** - Latest React version with concurrent features and improved performance for building interactive user interfaces.
+- **TypeScript 5** - Static type checking for better code quality, developer experience, and reduced runtime errors.
 
-To learn more about Next.js, take a look at the following resources:
+### Styling & UI Components
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Tailwind CSS 4** - Utility-first CSS framework for rapid UI development with consistent design tokens and responsive design.
+- **Radix UI** - Headless, accessible UI components providing robust foundations for complex interactions:
+  - Form controls (Select, Checkbox, Switch, Slider)
+  - Navigation (Dropdown Menu, Tabs, Tooltip)
+  - Layout (Avatar, Separator, Popover)
+  - Data display (Toggle, Toggle Group)
+- **shadcn/ui** - Pre-built component library combining Radix UI primitives with Tailwind CSS styling
+- **Lucide React** - Beautiful, customizable SVG icons
+- **Tabler Icons** - Additional icon set for comprehensive visual elements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### State Management & Data Fetching
 
-## Deploy on Vercel
+- **SWR** - Data fetching library with caching, revalidation, and real-time features for optimal user experience
+- **React Hook Form** - Performant forms library with minimal re-renders and excellent validation support
+- **Zod** - TypeScript-first schema validation for form data and API responses
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Enhanced User Experience
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<!-- - **Next Themes** - Dark/light mode theming with system preference detection -->
+
+- **React Dropzone** - Drag & drop file upload functionality
+- **React Day Picker** - Accessible date picker component
+- **Sonner** - Toast notifications for user feedback
+- **Embla Carousel** - Lightweight carousel library
+
+### Authentication & Utilities
+
+- **jsonwebtoken** - JWT token handling for authentication
+- **js-cookie** - Cookie management utilities
+- **Luxon** - Modern date/time manipulation library
+- **date-fns** - Utility functions for date operations
+- **class-variance-authority** - Type-safe variant handling for component styling
+- **clsx & tailwind-merge** - Conditional class name utilities optimized for Tailwind CSS
+
+### Development Tools
+
+- **ESLint** - Code linting with Next.js configuration for consistent code quality
+- **Turbopack** - Fast bundler for development and production builds
