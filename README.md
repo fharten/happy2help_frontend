@@ -1,6 +1,9 @@
 # Frontend
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white) ![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?logo=radix-ui&logoColor=white) ![Vercel](https://vercelbadge.vercel.app/api/fharten/happy2help_frontend)
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white) ![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?logo=radix-ui&logoColor=white)
+<div style="text-align: center;">
+<img src="https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/deployed/homepage.png" width="600" alt='Happy2Help Frontpage'>
+</div>
 
 ## About
 
@@ -39,7 +42,6 @@ Our app connects passionate volunteers with impactful registered associations. D
 - **React Dropzone** - Drag & drop file upload functionality
 - **React Day Picker** - Accessible date picker component
 - **Sonner** - Toast notifications for user feedback
-- **Vaul** - Mobile-friendly drawer component
 - **Embla Carousel** - Lightweight carousel library
 
 ### Authentication & Utilities
