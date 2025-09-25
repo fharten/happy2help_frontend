@@ -17,6 +17,7 @@ interface ButtonComponentProps {
   disabled?: boolean;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  enableHoverEffect?: boolean;
 }
 
 // HTMLButtonElement, das HTML-ELement was weitergegeben wird
@@ -30,6 +31,7 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
       size = 'md',
       disabled = false,
       className = '',
+      enableHoverEffect = true,
       ...props
     },
     ref
@@ -79,9 +81,9 @@ const ButtonComponent = forwardRef<HTMLButtonElement, ButtonComponentProps>(
           variants[variant],
           getSize(),
           className,
-          variant === 'plain'
-            ? ''
-            : 'transition-all duration-200 hover:scale-105'
+          enableHoverEffect && variant !== 'plain'
+            ? 'transition-all duration-200 hover:scale-105'
+            : ''
         )}
         {...props}
       >

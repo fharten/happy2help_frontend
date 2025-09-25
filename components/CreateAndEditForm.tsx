@@ -75,7 +75,7 @@ type ProjectDetailResponse = Omit<Project, 'skills' | 'categories'> & {
 
 function useSkills() {
   const { data, error, isLoading, mutate } = useSWR<Skill[]>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`
   );
 
   return {
@@ -88,7 +88,7 @@ function useSkills() {
 
 function useCategories() {
   const { data, error, isLoading, mutate } = useSWR<Category[]>(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/categories`
   );
 
   return {
@@ -123,7 +123,7 @@ async function createProject(project: Project, accessToken: string) {
 async function updateProject(
   id: string,
   project: Project,
-  accessToken: string,
+  accessToken: string
 ) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${id}`,
@@ -134,7 +134,7 @@ async function updateProject(
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(project),
-    },
+    }
   );
 
   if (!res.ok) {
@@ -193,7 +193,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
     (category) => ({
       value: category.id,
       label: category.name,
-    }),
+    })
   );
 
   const form = useForm<Project, undefined, Project>({
@@ -221,7 +221,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
     isUpdate && projectId
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/projects/${projectId}`
       : null,
-    swrFetcher,
+    swrFetcher
   );
 
   useEffect(() => {
@@ -261,7 +261,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
         isActive: projectDetailData.isActive ?? true,
         ngoId: projectDetailData.ngoId ?? (ngoId || ''),
       },
-      { keepDirty: false, keepTouched: true },
+      { keepDirty: false, keepTouched: true }
     );
   }, [isUpdate, projectDetailData, form, ngoId]);
 
@@ -340,7 +340,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -567,9 +567,10 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                                   <ButtonComponent
                                     variant='secondary'
                                     size='md'
+                                    enableHoverEffect={false}
                                     className={cn(
-                                      'w-full pl-3 text-left font-normal bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 hover:scale-105 transition-all duration-200',
-                                      !selectedDate && 'text-muted-foreground',
+                                      'w-full pl-3 text-left font-normal bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 transition-all duration-200',
+                                      !selectedDate && 'text-muted-foreground'
                                     )}
                                   >
                                     {selectedDate && isValid(selectedDate) ? (
@@ -592,7 +593,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                                   selected={selectedDate}
                                   onSelect={(date) =>
                                     field.onChange(
-                                      date ? format(date, 'yyyy-MM-dd') : '',
+                                      date ? format(date, 'yyyy-MM-dd') : ''
                                     )
                                   }
                                   disabled={(date) =>
@@ -646,9 +647,10 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                                   <ButtonComponent
                                     variant='secondary'
                                     size='md'
+                                    enableHoverEffect={false}
                                     className={cn(
-                                      'w-full pl-3 text-left font-normal bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 hover:scale-105 transition-all duration-200',
-                                      !selectedDate && 'text-muted-foreground',
+                                      'w-full pl-3 text-left font-normal bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 transition-all duration-200',
+                                      !selectedDate && 'text-muted-foreground'
                                     )}
                                   >
                                     {selectedDate && isValid(selectedDate) ? (
@@ -671,7 +673,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                                   selected={selectedDate}
                                   onSelect={(date) =>
                                     field.onChange(
-                                      date ? format(date, 'yyyy-MM-dd') : '',
+                                      date ? format(date, 'yyyy-MM-dd') : ''
                                     )
                                   }
                                   disabled={(date) =>
@@ -752,7 +754,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                               onChange={field.onChange}
                               placeholder='Fähigkeiten auswählen'
                               searchPlaceholder='Suchen…'
-                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 hover:scale-105 transition-all duration-200'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70  transition-all duration-200'
                             />
                           ) : (
                             <div>Lade Fähigkeiten...</div>
@@ -777,7 +779,7 @@ export function ProjectForm({ isUpdate = false }: { isUpdate: boolean }) {
                               onChange={field.onChange}
                               placeholder='Kategorien auswählen'
                               searchPlaceholder='Suchen…'
-                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 hover:scale-105 transition-all duration-200'
+                              className='bg-white/50 border border-light-mint/30 rounded-lg h-11 hover:bg-white/70 transition-all duration-200'
                             />
                           ) : (
                             <div>Lade Kategorien...</div>
