@@ -35,7 +35,7 @@ export default function Projects() {
         </div>
         {[...Array(3)].map((_, i) => (
           <div key={i}>
-            <ProjectCardSkeleton />;
+            <ProjectCardSkeleton />
           </div>
         ))}
       </div>
