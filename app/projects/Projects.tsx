@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
 import useSWR from 'swr';
 import ProjectCard from './ProjectCard';
 import { Project } from '@/types/project.d';
+import { Skeleton } from '@/components/ui/skeleton';
+import ProjectCardSkeleton from '@/components/ProjectCardSkeleton';
 
 // Fetcher function
 
@@ -22,10 +23,21 @@ export default function Projects() {
 
   if (isLoading)
     return (
-      <div className='container-site'>
-        <div className='bg-light-mint/10 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 text-center'>
-          <div className='text-prussian font-medium'>Lade Projekte...</div>
+      <div className='w-full'>
+        <div className='mb-8'>
+          <h1 className='text-2xl lg:text-3xl font-bold text-prussian mb-3 tracking-tight'>
+            Alle Projekte
+          </h1>
+          <p className='text-prussian/70 text-sm lg:text-base font-medium'>
+            Entdecke spannende Projekte und finde dein nächstes ehrenamtliches
+            Engagement.
+          </p>
         </div>
+        {[...Array(3)].map((_, i) => (
+          <div key={i}>
+            <ProjectCardSkeleton />
+          </div>
+        ))}
       </div>
     );
 
