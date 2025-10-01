@@ -299,15 +299,19 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
           }
         }
       } catch (error: unknown) {
-        if (!isAbortError(error)) {
-          console.error(
-            'Error setting up SSE connection:',
-            getErrorMessage(error)
-          );
-          console.error('Full error object:', error);
-          setIsConnected(false);
+        if (isAbortError(error)) {
+          console.log('SSE connection aborted (expected during cleanup)');
+          return;
+        }
 
-          // Attempt to reconnect after delay
+        console.error(
+          'Error setting up SSE connection:',
+          getErrorMessage(error)
+        );
+        console.error('Full error object:', error);
+        setIsConnected(false);
+
+        if (!abortControllerRef.current?.signal.aborted) {
           setTimeout(() => {
             if (!abortControllerRef.current?.signal.aborted) {
               console.log('Attempting to reconnect SSE...');
@@ -330,7 +334,12 @@ const NotificationBell = ({ user }: NotificationBellProps) => {
       }
 
       if (readerRef.current) {
-        readerRef.current.cancel();
+        // catch stream abortion (ignore them during cleanup)
+        readerRef.current.cancel().catch((error) => {
+          if (!isAbortError(error)) {
+            console.error('Error cancelling reader:', error);
+          }
+        });
         readerRef.current = null;
       }
     };
